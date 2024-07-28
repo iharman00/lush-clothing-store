@@ -1,11 +1,10 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { signUp } from "@/actions/auth";
-import { signUpFormSchema } from "@/lib/definitions";
+import { register } from "@/actions/auth";
 
 const page = () => {
-  const [state, formAction] = useFormState(signUp, null);
+  const [state, formAction] = useFormState(register, null);
   return (
     <div className="mx-auto">
       <h1 className="text-3xl font-bold">Register Form</h1>

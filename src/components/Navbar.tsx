@@ -24,11 +24,11 @@ const Navbar = () => {
         <ul className="flex justify-self-end">
           <li>
             <Link
-              href="/sign-up"
+              href="/login"
               className={`${buttonVariants({ variant: "link" })} gap-2`}
             >
               <User />
-              Sign Up
+              Log In
             </Link>
           </li>
         </ul>
