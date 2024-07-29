@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { logout } from "@/actions/auth";
+import { logout } from "@/auth/actions";
 import { buttonVariants } from "@/components/ui/button";
 
 const page = () => {

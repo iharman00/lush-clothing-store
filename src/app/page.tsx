@@ -1,5 +1,5 @@
-import Image from "next/image";
+import { validateRequest } from "@/auth/middlewares";
 
-export default function Home() {
-  return <div>CONTENT</div>;
+export default async function Home() {
+  return <div className="mx-auto w-fit">CONTENT</div>;
 }

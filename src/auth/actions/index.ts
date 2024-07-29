@@ -1,6 +1,11 @@
 "use server";
 
-import { loginFormSchema, registerFormSchema } from "@/lib/definitions";
+import {
+  loginFormSchema,
+  loginFormType,
+  registerFormSchema,
+  registerFormType,
+} from "@/auth/definitions";
 import { Argon2id } from "oslo/password";
 import { lucia } from "@/auth";
 import { Prisma, PrismaClient } from "@prisma/client";
@@ -14,22 +19,25 @@ const argon2id = new Argon2id();
 
 interface registerActionResult {
   errors: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
+    firstName?: string[];
+    lastName?: string[];
+    email?: string[];
+    password?: string[];
+    confirmPassword?: string[];
   };
+  fields?: registerFormType;
 }
 
 export async function register(
   prevState: any,
   formData: FormData
 ): Promise<registerActionResult> {
+  let validatedData;
+
   try {
     // 1. Validate fields
     const rawFormData = Object.fromEntries(formData);
-    const validatedData = registerFormSchema.parse(rawFormData);
+    validatedData = registerFormSchema.parse(rawFormData);
 
     // 2. Hash password
     const passwordHash = await argon2id.hash(validatedData.password);
@@ -69,8 +77,9 @@ export async function register(
       if (error.code === "P2002") {
         return {
           errors: {
-            email: "A customer with this email already exists",
+            email: ["A customer with this email already exists"],
           },
+          fields: validatedData,
         };
       }
     }
@@ -84,19 +93,21 @@ export async function register(
 
 interface loginActionResult {
   errors: {
-    email?: string;
-    password?: string;
+    email?: string[];
+    password?: string[];
   };
+  fields?: loginFormType;
 }
 
 export async function login(
   prevState: any,
   formData: FormData
 ): Promise<loginActionResult> {
+  let validatedData;
   try {
     // 1. Validate fields
     const rawFormData = Object.fromEntries(formData);
-    const validatedData = loginFormSchema.parse(rawFormData);
+    validatedData = loginFormSchema.parse(rawFormData);
 
     // 2. Find User
     const user = await prisma.user.findUniqueOrThrow({
@@ -142,9 +153,10 @@ export async function login(
       if (error.code === "P2025") {
         return {
           errors: {
-            email: "Incorrect email or password",
-            password: "Incorrect email or password",
+            email: ["Incorrect email or password"],
+            password: ["Incorrect email or password"],
           },
+          fields: validatedData,
         };
       }
     }
@@ -153,9 +165,10 @@ export async function login(
     if (error instanceof Error && error.cause === "Password match failed") {
       return {
         errors: {
-          email: "Incorrect email or password",
-          password: "Incorrect email or password",
+          email: ["Incorrect email or password"],
+          password: ["Incorrect email or password"],
         },
+        fields: validatedData,
       };
     }
   }
