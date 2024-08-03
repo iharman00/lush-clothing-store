@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { register } from "@/auth/actions";
+import { register } from "@/auth/actions/register";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -18,8 +18,11 @@ import {
 import { registerFormSchema, registerFormType } from "@/auth/definitions";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const page = () => {
+  const router = useRouter();
   const [state, formAction] = useFormState(register, null);
   const form = useForm<registerFormType>({
     resolver: zodResolver(registerFormSchema),
@@ -35,15 +38,33 @@ const page = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state?.errors?.email) {
-      state.errors.email.map((err) => {
-        form.setError("email", {
-          type: "manual",
-          message: err,
-        });
+    if (state?.success === false) {
+      const timeoutId = setTimeout(() => {
+        toast.error(state.message);
       });
+
+      if (state?.errors?.email) {
+        state.errors.email.map((err) => {
+          form.setError("email", {
+            type: "manual",
+            message: err,
+          });
+        });
+      }
+      return () => clearTimeout(timeoutId);
     }
-  }, [form.setError]);
+  }, [state]);
+
+  useEffect(() => {
+    if (state?.success) {
+      const timeoutId = setTimeout(() => {
+        toast.success(state.message);
+      });
+      router.push("/");
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [state]);
 
   return (
     <div className="max-w-[30%] mx-auto">

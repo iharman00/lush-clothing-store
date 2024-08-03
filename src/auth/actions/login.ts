@@ -1,3 +1,5 @@
+"use server";
+
 import { loginFormSchema, loginFormType } from "@/auth/definitions";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Argon2id } from "oslo/password";
@@ -16,29 +18,24 @@ interface UserDTO {
   emailVerified: boolean;
 }
 
-interface SuccessResponse {
-  success: true;
+interface Response {
+  success: boolean;
   message: string;
-  user: UserDTO;
-}
-
-interface ErrorResponse {
-  success: false;
-  message: string;
-  errors: {
+  errors?: {
     email?: string[];
     password?: string[];
   };
   fields?: any;
 }
 
-export async function POST(req: Request) {
+export async function login(
+  prevState: any,
+  formData: FormData
+): Promise<Response> {
   let rawFormData;
   let validatedData: loginFormType;
 
   try {
-    const formData = await req.formData();
-
     // 1. Validate fields
     rawFormData = Object.fromEntries(formData);
     validatedData = loginFormSchema.parse(rawFormData);
@@ -74,52 +71,24 @@ export async function POST(req: Request) {
       sessionCookie.attributes
     );
 
-    // 6. Send Response with user data
-    const response: SuccessResponse = {
+    // 6. Returns success message to user
+    const response: Response = {
       success: true,
-      message: "User logged in successfully",
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        emailVerified: user.emailVerified,
-      },
+      message: "Logged in successfully",
     };
-
-    return Response.json(response);
+    return response;
   } catch (error) {
-    let response: ErrorResponse;
-
-    // If its a javascript error
-    if (error instanceof Error) {
-      // If formData cannot be read, this error is thrown by Request.formData()
-      if (
-        error.name === "TypeError" &&
-        error.message ===
-          "Request.formData: Could not parse content as FormData."
-      ) {
-        // Generating an empty form fields error object using zod
-        const validatedEmptyObject = loginFormSchema.safeParse({});
-        const missingFormErrors = validatedEmptyObject.error!;
-        response = {
-          success: false,
-          message: "Log in failed, please send required data",
-          errors: missingFormErrors.flatten().fieldErrors,
-        };
-        return Response.json(response);
-      }
-    }
+    let response: Response;
 
     // If its a zod error
     if (error instanceof ZodError) {
       response = {
         success: false,
-        message: "Log in failed, please fix form errors",
+        message: "Log in failed",
         errors: error.flatten().fieldErrors,
         fields: rawFormData,
       };
-      return Response.json(response, { status: 400 });
+      return response;
     }
 
     // If its a prisma error
@@ -135,7 +104,7 @@ export async function POST(req: Request) {
           },
           fields: rawFormData,
         };
-        return Response.json(response, { status: 401 });
+        return response;
       }
     }
 
@@ -150,7 +119,14 @@ export async function POST(req: Request) {
         },
         fields: rawFormData,
       };
-      return Response.json(response, { status: 401 });
+      return response;
     }
   }
+
+  const response: Response = {
+    success: false,
+    message: "Unexpected error occured",
+  };
+
+  return response;
 }

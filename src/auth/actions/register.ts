@@ -1,9 +1,12 @@
+"use server";
+
 import { registerFormSchema, registerFormType } from "@/auth/definitions";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Argon2id } from "oslo/password";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
+import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient();
 const argon2id = new Argon2id();
@@ -16,16 +19,10 @@ interface UserDTO {
   emailVerified: boolean;
 }
 
-interface SuccessResponse {
-  success: true;
+interface Response {
+  success: boolean;
   message: string;
-  user: UserDTO;
-}
-
-interface ErrorResponse {
-  success: false;
-  message: string;
-  errors: {
+  errors?: {
     firstName?: string[];
     lastName?: string[];
     email?: string[];
@@ -35,13 +32,14 @@ interface ErrorResponse {
   fields?: any;
 }
 
-export async function POST(req: Request) {
+export async function register(
+  prevState: any,
+  formData: FormData
+): Promise<Response> {
   let rawFormData;
   let validatedData: registerFormType;
 
   try {
-    const formData = await req.formData();
-
     // 1. Validate fields
     rawFormData = Object.fromEntries(formData);
     validatedData = registerFormSchema.parse(rawFormData);
@@ -71,52 +69,24 @@ export async function POST(req: Request) {
       sessionCookie.attributes
     );
 
-    // 6. Send Response with user data
-    const response: SuccessResponse = {
+    // 6. Returns success message to user
+    const response: Response = {
       success: true,
-      message: "User registered successfully",
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        emailVerified: user.emailVerified,
-      },
+      message: "User Registered successfully",
     };
-
-    return Response.json(response, { status: 201 });
+    return response;
   } catch (error) {
-    let response: ErrorResponse;
-
-    // If its a javascript error
-    if (error instanceof Error) {
-      // If formData cannot be read, this error is thrown by Request.formData()
-      if (
-        error.name === "TypeError" &&
-        error.message ===
-          "Request.formData: Could not parse content as FormData."
-      ) {
-        // Generating an empty form fields error object using zod
-        const validatedEmptyObject = registerFormSchema.safeParse({});
-        const missingFormErrors = validatedEmptyObject.error!;
-        response = {
-          success: false,
-          message: "Registration failed, please send required data",
-          errors: missingFormErrors.flatten().fieldErrors,
-        };
-        return Response.json(response);
-      }
-    }
+    let response: Response;
 
     // If its a zod error
     if (error instanceof ZodError) {
       response = {
         success: false,
-        message: "Registration failed, please fix form errors",
+        message: "Registration failed",
         errors: error.flatten().fieldErrors,
         fields: rawFormData,
       };
-      return Response.json(response, { status: 400 });
+      return response;
     }
 
     // If its a prisma error
@@ -131,19 +101,15 @@ export async function POST(req: Request) {
           },
           fields: rawFormData,
         };
-        return Response.json(response, { status: 409 });
+        return response;
       }
     }
-
-    return Response.json(
-      {
-        success: false,
-        message: "Registration failed, an unexpected error occured",
-        fields: rawFormData,
-      },
-      {
-        status: 400,
-      }
-    );
   }
+
+  const response: Response = {
+    success: false,
+    message: "Unexpected error occured",
+  };
+
+  return response;
 }

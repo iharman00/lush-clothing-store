@@ -1,10 +1,11 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { logout } from "@/auth/actions";
+
+import { logout } from "@/auth/actions/logout";
 import { buttonVariants } from "@/components/ui/button";
 
-const page = () => {
+const page = async () => {
   const [state, action] = useFormState(logout, null);
   return (
     <div className="mx-auto">

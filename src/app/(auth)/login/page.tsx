@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { login } from "@/auth/actions";
+import { login } from "@/auth/actions/login";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -18,9 +18,12 @@ import {
 import { loginFormSchema, loginFormType } from "@/auth/definitions";
 import { Input } from "@/components/ui/input";
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const page = () => {
-  let [state, formAction] = useFormState(login, null);
+  const router = useRouter();
+  let [state, action] = useFormState(login, null);
   const form = useForm<loginFormType>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -32,23 +35,40 @@ const page = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (state?.errors?.email) {
-      state.errors.email.map((err) => {
-        form.setError("email", {
-          type: "manual",
-          message: err,
-        });
+    if (state?.success === false) {
+      const timeoutId = setTimeout(() => {
+        toast.error(state.message);
       });
-    }
-    if (state?.errors?.password) {
-      state.errors.password.map((err) => {
-        form.setError("password", {
-          type: "manual",
-          message: err,
+      if (state?.errors?.email) {
+        state.errors.email.map((err) => {
+          form.setError("email", {
+            type: "manual",
+            message: err,
+          });
         });
-      });
+      }
+      if (state?.errors?.password) {
+        state.errors.password.map((err) => {
+          form.setError("password", {
+            type: "manual",
+            message: err,
+          });
+        });
+      }
+      return () => clearTimeout(timeoutId);
     }
-  }, [form.setError]);
+  }, [state]);
+
+  useEffect(() => {
+    if (state?.success) {
+      const timeoutId = setTimeout(() => {
+        toast.success(state.message);
+      });
+      router.push("/");
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [state]);
 
   return (
     <div className="max-w-[30%] mx-auto">
@@ -56,7 +76,7 @@ const page = () => {
       <Form {...form}>
         <form
           ref={formRef}
-          action={formAction}
+          action={action}
           onSubmit={form.handleSubmit(() => formRef.current?.submit())}
           className="flex flex-col gap-4"
         >
