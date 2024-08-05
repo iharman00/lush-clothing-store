@@ -2,19 +2,16 @@
 
 import { lucia } from "@/auth";
 import { validateRequest } from "@/auth/middlewares";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-interface Response {
-  success: false;
+type Response = {
+  success: boolean;
   message: string;
-  error: string;
-}
+  error?: string;
+};
 
-export async function logout(
-  prevState: any,
-  formData: FormData
-): Promise<Response | null> {
+export async function logout(): Promise<Response | null> {
   const { session } = await validateRequest();
   if (!session) {
     const response: Response = {
@@ -36,5 +33,11 @@ export async function logout(
     sessionCookie.attributes
   );
 
-  redirect("/");
+  const response: Response = {
+    success: true,
+    message: "Logged out successfully",
+  };
+
+  revalidatePath("/");
+  return response;
 }

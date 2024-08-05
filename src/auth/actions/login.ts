@@ -6,19 +6,20 @@ import { Argon2id } from "oslo/password";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
+import { revalidatePath } from "next/cache";
 
 const prisma = new PrismaClient();
 const argon2id = new Argon2id();
 
-interface UserDTO {
+type UserDTO = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   emailVerified: boolean;
-}
+};
 
-interface Response {
+export type Response = {
   success: boolean;
   message: string;
   errors?: {
@@ -26,12 +27,9 @@ interface Response {
     password?: string[];
   };
   fields?: any;
-}
+};
 
-export async function login(
-  prevState: any,
-  formData: FormData
-): Promise<Response> {
+export async function login(formData: FormData): Promise<Response> {
   let rawFormData;
   let validatedData: loginFormType;
 
@@ -71,11 +69,13 @@ export async function login(
       sessionCookie.attributes
     );
 
-    // 6. Returns success message to user
+    // 6. Returns success message to user and revalidate cache
     const response: Response = {
       success: true,
       message: "Logged in successfully",
     };
+
+    revalidatePath("/");
     return response;
   } catch (error) {
     let response: Response;

@@ -1,17 +1,8 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,17 +11,11 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { User, ShoppingCart, Menu } from "lucide-react";
+import { ShoppingCart, Menu, User } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
+import AccountMenu from "./AccountMenu";
+import { getUser } from "@/data/user";
 
 const navigation = [
   {
@@ -83,13 +68,8 @@ const navigation = [
   },
 ];
 
-const user = {
-  name: "Jay",
-};
-
-// const user = false;
-
-const Navbar = () => {
+const Navbar = async () => {
+  const { user } = await getUser();
   return (
     <header className="container">
       <nav className="flex justify-between py-4">
@@ -247,31 +227,10 @@ const Navbar = () => {
             <Separator orientation="vertical" />
             {/* Desktop Account menu */}
             <ul className="hidden md:flex justify-self-end">
-              {user ? (
-                <li>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      className={buttonVariants({
-                        variant: "ghost",
-                        className: "gap-2",
-                      })}
-                    >
-                      <User />
-                      {user.name}
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Orders</DropdownMenuItem>
-                      <DropdownMenuItem>Wishlist</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Log out</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </li>
-              ) : (
-                <li>
+              <li>
+                {user ? (
+                  <AccountMenu user={user} />
+                ) : (
                   <Link
                     href="/login"
                     className={`${buttonVariants({ variant: "ghost" })} gap-2`}
@@ -279,8 +238,8 @@ const Navbar = () => {
                     <User />
                     Log In
                   </Link>
-                </li>
-              )}
+                )}
+              </li>
               <li>
                 <Button variant="ghost" className="gap-2">
                   <ShoppingCart />

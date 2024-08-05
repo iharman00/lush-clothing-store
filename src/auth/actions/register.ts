@@ -11,15 +11,15 @@ import { redirect } from "next/navigation";
 const prisma = new PrismaClient();
 const argon2id = new Argon2id();
 
-interface UserDTO {
+type UserDTO = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   emailVerified: boolean;
-}
+};
 
-interface Response {
+export type Response = {
   success: boolean;
   message: string;
   errors?: {
@@ -30,12 +30,9 @@ interface Response {
     confirmPassword?: string[];
   };
   fields?: any;
-}
+};
 
-export async function register(
-  prevState: any,
-  formData: FormData
-): Promise<Response> {
+export async function register(formData: FormData): Promise<Response> {
   let rawFormData;
   let validatedData: registerFormType;
 
