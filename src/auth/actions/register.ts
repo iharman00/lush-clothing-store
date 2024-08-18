@@ -2,14 +2,13 @@
 
 import { registerFormSchema, registerFormType } from "@/auth/definitions";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Argon2id } from "oslo/password";
+import { hash } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient();
-const argon2id = new Argon2id();
 
 type UserDTO = {
   id: string;
@@ -42,7 +41,7 @@ export async function register(formData: FormData): Promise<Response> {
     validatedData = registerFormSchema.parse(rawFormData);
 
     // 2. Hash password
-    const passwordHash = await argon2id.hash(validatedData.password);
+    const passwordHash = await hash(validatedData.password);
 
     // 3. Create User
     const user = await prisma.user.create({

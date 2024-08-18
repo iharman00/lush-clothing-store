@@ -2,14 +2,13 @@
 
 import { loginFormSchema, loginFormType } from "@/auth/definitions";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { Argon2id } from "oslo/password";
+import { verify } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { revalidatePath } from "next/cache";
 
 const prisma = new PrismaClient();
-const argon2id = new Argon2id();
 
 type UserDTO = {
   id: string;
@@ -46,10 +45,7 @@ export async function login(formData: FormData): Promise<Response> {
     });
 
     // 3. Verify password
-    const validPassword = await argon2id.verify(
-      user!.password,
-      validatedData.password
-    );
+    const validPassword = await verify(user!.password, validatedData.password);
 
     if (!validPassword) {
       throw new Error("Incorrect email or password", {
