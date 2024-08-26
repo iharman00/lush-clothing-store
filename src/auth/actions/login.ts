@@ -1,14 +1,15 @@
 "use server";
 
-import { loginFormSchema, loginFormType } from "@/auth/definitions";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { loginFormSchema, loginFormType } from "@/auth/definitions/loginForm";
+import { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { verify } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-
-const prisma = new PrismaClient();
+import sendVerificationCode from "@/auth/utils/sendVerificationCode";
 
 type UserDTO = {
   id: string;
@@ -31,6 +32,7 @@ export type Response = {
 export async function login(formData: FormData): Promise<Response> {
   let rawFormData;
   let validatedData: loginFormType;
+  let user;
 
   try {
     // 1. Validate fields
@@ -38,7 +40,7 @@ export async function login(formData: FormData): Promise<Response> {
     validatedData = loginFormSchema.parse(rawFormData);
 
     // 2. Find User
-    const user = await prisma.user.findUniqueOrThrow({
+    user = await prisma.user.findUniqueOrThrow({
       where: {
         email: validatedData.email,
       },
@@ -48,7 +50,7 @@ export async function login(formData: FormData): Promise<Response> {
     const validPassword = await verify(user!.password, validatedData.password);
 
     if (!validPassword) {
-      throw new Error("Incorrect email or password", {
+      throw new Error("Log in failed", {
         cause: "Password match failed",
       });
     }
@@ -65,14 +67,13 @@ export async function login(formData: FormData): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 6. Returns success message to user and revalidate cache
-    const response: Response = {
-      success: true,
-      message: "Logged in successfully",
-    };
+    // 6. Send verification code id email is not verified
+    if (!user.emailVerified) {
+      const res = await sendVerificationCode(user);
+    }
 
-    revalidatePath("/");
-    return response;
+    // 6. Redirect user to homepage or verify-email page
+    // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
     let response: Response;
 
@@ -108,7 +109,7 @@ export async function login(formData: FormData): Promise<Response> {
     if (error instanceof Error && error.cause === "Password match failed") {
       response = {
         success: false,
-        message: "Log in failed",
+        message: error.message,
         errors: {
           email: ["Incorrect email or password"],
           password: ["Incorrect email or password"],
@@ -117,12 +118,18 @@ export async function login(formData: FormData): Promise<Response> {
       };
       return response;
     }
+
+    response = {
+      success: false,
+      message: "Unexpected error occured",
+    };
+
+    return response;
   }
 
-  const response: Response = {
-    success: false,
-    message: "Unexpected error occured",
-  };
-
-  return response;
+  revalidatePath("/");
+  if (!user.emailVerified) {
+    redirect("/verify-email");
+  }
+  redirect("/");
 }

@@ -12,10 +12,11 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Menu, User } from "lucide-react";
+import { ShoppingCart, Menu } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
 import { getUser } from "@/data/user";
+import LoginOrRegisterButton from "./LoginOrRegisterButton";
 
 const navigation = [
   {
@@ -171,13 +172,13 @@ const Navbar = async () => {
                     <NavigationMenuTrigger>
                       {navItem.title.value}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="px-8 py-9">
+                    <NavigationMenuContent className="px-7 py-8">
                       <div className="flex w-max gap-4">
                         <Image
                           src={navItem.imageUrl}
                           alt="Mens poster"
-                          width={300}
-                          height={300}
+                          width={250}
+                          height={250}
                           className="shrink-0"
                         />
                         <Separator
@@ -185,7 +186,7 @@ const Navbar = async () => {
                           className="bg-red-900 "
                         />
                         <div>
-                          <h2 className="text-3xl font-bold pl-2 mt-4">
+                          <h2 className="text-3xl font-bold ml-3 mt-4">
                             {navItem.title.value}
                           </h2>
                           <ul className="grid grid-cols-3 gap-2 mt-4 ">
@@ -228,17 +229,8 @@ const Navbar = async () => {
             {/* Desktop Account menu */}
             <ul className="hidden md:flex justify-self-end">
               <li>
-                {user ? (
-                  <AccountMenu user={user} />
-                ) : (
-                  <Link
-                    href="/login"
-                    className={`${buttonVariants({ variant: "ghost" })} gap-2`}
-                  >
-                    <User />
-                    Log In
-                  </Link>
-                )}
+                {user && <AccountMenu user={user} />}
+                {!user && <LoginOrRegisterButton />}
               </li>
               <li>
                 <Button variant="ghost" className="gap-2">

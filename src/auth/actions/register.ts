@@ -1,14 +1,18 @@
 "use server";
 
-import { registerFormSchema, registerFormType } from "@/auth/definitions";
-import { Prisma, PrismaClient } from "@prisma/client";
+import {
+  registerFormSchema,
+  registerFormType,
+} from "@/auth/definitions/registerForm";
+import { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { hash } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { redirect } from "next/navigation";
-
-const prisma = new PrismaClient();
+import { revalidatePath } from "next/cache";
+import sendVerificationCode from "../utils/sendVerificationCode";
 
 type UserDTO = {
   id: string;
@@ -34,6 +38,7 @@ export type Response = {
 export async function register(formData: FormData): Promise<Response> {
   let rawFormData;
   let validatedData: registerFormType;
+  let response: Response;
 
   try {
     // 1. Validate fields
@@ -53,27 +58,24 @@ export async function register(formData: FormData): Promise<Response> {
       },
     });
 
-    // 4. Create Session
+    // 4. Send verification code
+    const res = await sendVerificationCode(user);
+
+    // 5. Create Session
     const session = await lucia.createSession(user.id, {});
     // lucia.createSession also creates the session in the database
     const sessionCookie = lucia.createSessionCookie(session.id);
 
-    // 5. Send Session cookie
+    // 6. Send Session cookie
     cookies().set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
     );
 
-    // 6. Returns success message to user
-    const response: Response = {
-      success: true,
-      message: "User Registered successfully",
-    };
-    return response;
+    // 7. Redirect user to verify-email
+    // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    let response: Response;
-
     // If its a zod error
     if (error instanceof ZodError) {
       response = {
@@ -100,12 +102,15 @@ export async function register(formData: FormData): Promise<Response> {
         return response;
       }
     }
+
+    response = {
+      success: false,
+      message: "Unexpected error occured",
+    };
+
+    return response;
   }
 
-  const response: Response = {
-    success: false,
-    message: "Unexpected error occured",
-  };
-
-  return response;
+  revalidatePath("/");
+  redirect("/verify-email");
 }

@@ -10,11 +10,21 @@ export const lucia = new Lucia(adapter, {
       secure: process.env.NODE_ENV === "production",
     },
   },
+  getUserAttributes: (attributes) => {
+    return {
+      emailVerified: attributes.email_verified,
+      email: attributes.email,
+    };
+  },
 });
 
 // IMPORTANT!
 declare module "lucia" {
   interface Register {
     Lucia: typeof lucia;
+    DatabaseUserAttributes: {
+      email: string;
+      email_verified: boolean;
+    };
   }
 }

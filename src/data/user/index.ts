@@ -8,7 +8,7 @@ export async function getUser(): Promise<{ user: User } | { user: null }> {
   if (!validatedUser) {
     return { user: null };
   }
-  const user = await prisma.user.findUniqueOrThrow({
+  const user = await prisma.user.findUnique({
     where: {
       id: validatedUser.id,
     },

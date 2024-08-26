@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { loginFormSchema, loginFormType } from "@/auth/definitions";
+import { loginFormSchema, loginFormType } from "@/auth/definitions/loginForm";
 import { login, type Response as ActionResponse } from "@/auth/actions/login";
 
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -29,10 +28,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "./ui/use-toast";
 
 export function LoginCard() {
-  const router = useRouter();
+  const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 
   const form = useForm<loginFormType>({
@@ -55,9 +54,7 @@ export function LoginCard() {
 
   useEffect(() => {
     if (formState?.success === false) {
-      const timeoutId = setTimeout(() => {
-        toast.error(formState.message);
-      });
+      toast({ variant: "destructive", description: formState.message });
       if (formState?.errors?.email) {
         formState.errors.email.map((err) => {
           form.setError("email", {
@@ -74,22 +71,10 @@ export function LoginCard() {
           });
         });
       }
-      return () => clearTimeout(timeoutId);
-    }
-  }, [formState]);
-
-  useEffect(() => {
-    if (formState?.success) {
-      router.push("/");
-      router.refresh();
-      const timeoutId = setTimeout(() => {
-        toast.success(formState.message);
-      });
-      return () => clearTimeout(timeoutId);
     }
   }, [formState]);
   return (
-    <Card className="mt-10 mx-auto sm:w-[400px]">
+    <Card className="flex flex-col mx-auto mt-10 sm:w-[400px] px-2 py-6 ">
       <CardHeader>
         <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
         <CardDescription className="mx-auto">

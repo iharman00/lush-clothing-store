@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { registerFormSchema, registerFormType } from "@/auth/definitions";
+import {
+  registerFormSchema,
+  registerFormType,
+} from "@/auth/definitions/registerForm";
 import {
   register,
   type Response as ActionResponse,
@@ -32,10 +34,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 
 export function RegisterCard() {
-  const router = useRouter();
+  const { toast } = useToast();
   const [state, setState] = useState<ActionResponse | null>(null);
   const form = useForm<registerFormType>({
     resolver: zodResolver(registerFormSchema),
@@ -59,10 +61,7 @@ export function RegisterCard() {
 
   useEffect(() => {
     if (state?.success === false) {
-      const timeoutId = setTimeout(() => {
-        toast.error(state.message);
-      });
-
+      toast({ variant: "destructive", description: state.message });
       if (state?.errors?.email) {
         state.errors.email.map((err) => {
           form.setError("email", {
@@ -71,18 +70,6 @@ export function RegisterCard() {
           });
         });
       }
-      return () => clearTimeout(timeoutId);
-    }
-  }, [state]);
-
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/");
-      router.refresh();
-      const timeoutId = setTimeout(() => {
-        toast.success(state.message);
-      });
-      return () => clearTimeout(timeoutId);
     }
   }, [state]);
 

@@ -10,14 +10,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { buttonVariants } from "./ui/button";
 import { logout } from "@/auth/actions/logout";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import type { User as UserType } from "@prisma/client";
 import { User } from "lucide-react";
 
-const AccountMenu = async ({ user }: { user: UserType }) => {
+const AccountMenu = ({ user }: { user: UserType }) => {
   const router = useRouter();
+  const { toast } = useToast();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -42,9 +42,15 @@ const AccountMenu = async ({ user }: { user: UserType }) => {
             if (res?.success) {
               router.push("/");
               router.refresh();
-              toast.success(res.message);
+              toast({
+                description: res.message,
+              });
+              return;
             }
-            toast.error(res?.message);
+            toast({
+              variant: "destructive",
+              description: res?.message,
+            });
           }}
         >
           Log out
