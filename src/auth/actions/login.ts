@@ -47,8 +47,7 @@ export async function login(formData: FormData): Promise<Response> {
     });
 
     // 3. Verify password
-    const validPassword = await verify(user!.password, validatedData.password);
-
+    const validPassword = await verify(user.password, validatedData.password);
     if (!validPassword) {
       throw new Error("Log in failed", {
         cause: "Password match failed",
@@ -96,8 +95,7 @@ export async function login(formData: FormData): Promise<Response> {
           success: false,
           message: "Log in failed",
           errors: {
-            email: ["Incorrect email or password"],
-            password: ["Incorrect email or password"],
+            email: ["A user with this email does'nt exist"],
           },
           fields: rawFormData,
         };
@@ -115,6 +113,15 @@ export async function login(formData: FormData): Promise<Response> {
           password: ["Incorrect email or password"],
         },
         fields: rawFormData,
+      };
+      return response;
+    }
+
+    // Custom error - thrown when password fails verification
+    if (error instanceof Error && error.cause === "Account exists with OAuth") {
+      response = {
+        success: false,
+        message: error.message,
       };
       return response;
     }
