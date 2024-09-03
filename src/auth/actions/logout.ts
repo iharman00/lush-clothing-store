@@ -8,16 +8,14 @@ import { cookies } from "next/headers";
 type Response = {
   success: boolean;
   message: string;
-  error?: string;
 };
 
-export async function logout(): Promise<Response | null> {
+export default async function logout(): Promise<Response | null> {
   const { session } = await validateRequest();
   if (!session) {
     const response: Response = {
       success: false,
-      message: "Could not log out, user not signed in",
-      error: "Not logged in",
+      message: "Could not log out",
     };
     return response;
   }

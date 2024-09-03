@@ -9,10 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { buttonVariants } from "./ui/button";
-import { logout } from "@/auth/actions/logout";
+import logout from "@/auth/actions/logout";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import type { User as UserType } from "@prisma/client";
+import { type UserDTO as UserType } from "@/data_access/user/userDTO";
 import { User } from "lucide-react";
 
 const AccountMenu = ({ user }: { user: UserType }) => {

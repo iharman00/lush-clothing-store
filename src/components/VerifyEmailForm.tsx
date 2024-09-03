@@ -4,19 +4,25 @@ import { useEffect, useState } from "react";
 
 import {
   verifyEmailFormSchema,
-  verifyEmailFormType,
+  VerifyEmailFormType,
 } from "@/auth/definitions/verifyEmail";
-import {
-  verifyEmail,
+import verifyEmail, {
   type Response as ActionResponse,
 } from "@/auth/actions/verifyEmail";
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import sendVerificationCode from "@/auth/utils/sendVerificationCode";
+import { Button } from "@/components/ui/button";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  FormCard,
+  FormContent,
+  FormDescription,
+  FormFooter,
+  FormHeader,
+  FormTitle,
+} from "@/components/ui/FormCard";
 import {
   Form,
   FormControl,
@@ -26,25 +32,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { UserDTO } from "@/data_access/user/userDTO";
+import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 
-const VerifyEmailCard = ({ user }: any) => {
+const VerifyEmailForm = ({ user }: { user: UserDTO }) => {
   const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 
-  const form = useForm<verifyEmailFormType>({
+  const form = useForm<VerifyEmailFormType>({
     resolver: zodResolver(verifyEmailFormSchema),
     defaultValues: {
       pin: "",
@@ -52,7 +53,7 @@ const VerifyEmailCard = ({ user }: any) => {
     },
   });
 
-  const submit: SubmitHandler<verifyEmailFormType> = async (data) => {
+  const submit: SubmitHandler<VerifyEmailFormType> = async (data) => {
     const formData = new FormData();
     Object.entries(data).map(([key, val]) => {
       formData.append(key, val);
@@ -76,29 +77,28 @@ const VerifyEmailCard = ({ user }: any) => {
   }, [formState]);
 
   return (
-    <Card className="flex flex-col mt-20 mx-auto w-max px-8 py-6">
-      <CardHeader className="text-center gap-2">
-        <CardTitle>Please check your email</CardTitle>
-        <CardDescription>
-          We've sent a code to
-          {` ${user.email ? user.email : "your email"}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <FormCard>
+      <FormHeader>
+        <FormTitle title="Please check your email">
+          Please check your email
+        </FormTitle>
+        <FormDescription>
+          We've sent a code to {` ${user.email ? user.email : "your email"}`}
+        </FormDescription>
+      </FormHeader>
+
+      <FormContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(submit)}
-            className="flex flex-col items-center gap-4 my-2"
-          >
+          <form onSubmit={form.handleSubmit(submit)} className="grid gap-4">
             <FormField
               control={form.control}
               name="pin"
               render={({ field }) => (
-                <FormItem className="text-center">
-                  <FormLabel>Verification Code</FormLabel>
+                <FormItem className="flex flex-col items-center">
+                  <FormLabel>One Time Password</FormLabel>
                   <FormControl autoFocus>
                     <InputOTP maxLength={6} {...field}>
-                      <InputOTPGroup className="mx-auto">
+                      <InputOTPGroup>
                         <InputOTPSlot index={0} />
                         <InputOTPSlot index={1} />
                         <InputOTPSlot index={2} />
@@ -112,39 +112,40 @@ const VerifyEmailCard = ({ user }: any) => {
                 </FormItem>
               )}
             />
-
-            <Button className="w-full" disabled={form.formState.isSubmitting}>
-              Verify
+            <Button disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Verify"
+              )}
             </Button>
           </form>
         </Form>
-      </CardContent>
-      <CardFooter>
-        <p
-          className={`${buttonVariants({
-            variant: "link",
-          })} mx-auto cursor-pointer`}
+      </FormContent>
+      <FormFooter>
+        <Button
+          variant="link"
+          className="cursor-pointer"
           onClick={async () => {
-            const res = await sendVerificationCode(user);
-            if (res.data?.id) {
+            const res = await sendOTPEmail();
+            if (res.success) {
               toast({
-                description: "Verification code sent",
+                description: res.message,
               });
-              form.reset();
               return;
             }
-            if (res.error) {
+            if (!res.success) {
               toast({
-                description: "Failed to send verification code",
+                description: res.message,
               });
             }
           }}
         >
-          Didn't receive the code? Resend
-        </p>
-      </CardFooter>
-    </Card>
+          Didn't receive the email? Resend
+        </Button>
+      </FormFooter>
+    </FormCard>
   );
 };
 
-export default VerifyEmailCard;
+export default VerifyEmailForm;

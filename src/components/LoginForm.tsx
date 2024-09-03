@@ -2,21 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-import { loginFormSchema, loginFormType } from "@/auth/definitions/loginForm";
-import { login, type Response as ActionResponse } from "@/auth/actions/login";
+import { loginFormSchema, LoginFormType } from "@/auth/definitions/loginForm";
+import login, { type Response as ActionResponse } from "@/auth/actions/login";
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  FormCard,
+  FormContent,
+  FormFooter,
+  FormHeader,
+  FormTitle,
+} from "@/components/ui/FormCard";
 import {
   Form,
   FormControl,
@@ -27,15 +26,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { useToast } from "./ui/use-toast";
-import Image from "next/image";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
-export function LoginCard() {
+export function LoginForm() {
   const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 
-  const form = useForm<loginFormType>({
+  const form = useForm<LoginFormType>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: "",
@@ -44,7 +42,7 @@ export function LoginCard() {
     },
   });
 
-  const submit: SubmitHandler<loginFormType> = async (data) => {
+  const submit: SubmitHandler<LoginFormType> = async (data) => {
     const formData = new FormData();
     Object.entries(data).map(([key, val]) => {
       formData.append(key, val);
@@ -74,28 +72,15 @@ export function LoginCard() {
       }
     }
   }, [formState]);
+
   return (
-    <Card className="flex flex-col mx-auto mt-10 sm:w-[400px] px-2 py-6 ">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-        <CardDescription className="mx-auto">
-          <Link
-            href="/register"
-            className={buttonVariants({
-              variant: "link",
-            })}
-          >
-            Don&apos;t have an account? Register now
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid mt-2">
+    <FormCard>
+      <FormHeader>
+        <FormTitle>Login</FormTitle>
+      </FormHeader>
+      <FormContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(submit)}
-            className="flex flex-col gap-4"
-          >
+          <form onSubmit={form.handleSubmit(submit)} className="grid gap-4">
             <FormField
               control={form.control}
               name="email"
@@ -135,13 +120,28 @@ export function LoginCard() {
               )}
             />
             <Button className="mt-2" disabled={form.formState.isSubmitting}>
-              Log In
+              {form.formState.isSubmitting ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Log In"
+              )}
             </Button>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </FormContent>
+      <FormFooter>
+        <Link
+          href="/register"
+          className={buttonVariants({
+            variant: "link",
+          })}
+        >
+          Don't have an account? Register
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </FormFooter>
+    </FormCard>
   );
 }
 
-export default LoginCard;
+export default LoginForm;

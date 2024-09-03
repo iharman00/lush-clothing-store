@@ -1,6 +1,6 @@
 "use server";
 
-import { loginFormSchema, loginFormType } from "@/auth/definitions/loginForm";
+import { loginFormSchema, LoginFormType } from "@/auth/definitions/loginForm";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { verify } from "argon2";
@@ -9,29 +9,23 @@ import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import sendVerificationCode from "@/auth/utils/sendVerificationCode";
+import { PasswordMismatchError } from "@/auth/definitions/customErrors";
+import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 
-type UserDTO = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  emailVerified: boolean;
+type LoginFormArrayType = {
+  [Key in keyof LoginFormType]?: LoginFormType[Key][];
 };
 
 export type Response = {
   success: boolean;
   message: string;
-  errors?: {
-    email?: string[];
-    password?: string[];
-  };
-  fields?: any;
+  errors?: LoginFormArrayType;
+  fields?: Partial<LoginFormType>;
 };
 
-export async function login(formData: FormData): Promise<Response> {
+export default async function login(formData: FormData): Promise<Response> {
   let rawFormData;
-  let validatedData: loginFormType;
+  let validatedData: LoginFormType;
   let user;
 
   try {
@@ -49,9 +43,7 @@ export async function login(formData: FormData): Promise<Response> {
     // 3. Verify password
     const validPassword = await verify(user.password, validatedData.password);
     if (!validPassword) {
-      throw new Error("Log in failed", {
-        cause: "Password match failed",
-      });
+      throw new PasswordMismatchError("Incorrect password");
     }
 
     // 4. Create Session
@@ -66,9 +58,9 @@ export async function login(formData: FormData): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 6. Send verification code id email is not verified
+    // 6. Send verification code if email is not verified
     if (!user.emailVerified) {
-      const res = await sendVerificationCode(user);
+      const res = await sendOTPEmail();
     }
 
     // 6. Redirect user to homepage or verify-email page
@@ -95,7 +87,8 @@ export async function login(formData: FormData): Promise<Response> {
           success: false,
           message: "Log in failed",
           errors: {
-            email: ["A user with this email does'nt exist"],
+            email: ["Incorrect email or password"],
+            password: ["Incorrect email or password"],
           },
           fields: rawFormData,
         };
@@ -103,11 +96,11 @@ export async function login(formData: FormData): Promise<Response> {
       }
     }
 
-    // Custom error - thrown when password fails verification
-    if (error instanceof Error && error.cause === "Password match failed") {
+    // Custom error instance - thrown when password fails verification
+    if (error instanceof PasswordMismatchError) {
       response = {
         success: false,
-        message: error.message,
+        message: "Log in failed",
         errors: {
           email: ["Incorrect email or password"],
           password: ["Incorrect email or password"],
@@ -117,18 +110,9 @@ export async function login(formData: FormData): Promise<Response> {
       return response;
     }
 
-    // Custom error - thrown when password fails verification
-    if (error instanceof Error && error.cause === "Account exists with OAuth") {
-      response = {
-        success: false,
-        message: error.message,
-      };
-      return response;
-    }
-
     response = {
       success: false,
-      message: "Unexpected error occured",
+      message: "An unexpected error occured",
     };
 
     return response;

@@ -1,4 +1,4 @@
-import { getUser } from "@/data/user";
+import { getCurrentUser } from "@/data_access/user";
 import { redirect } from "next/navigation";
 import { CircleCheck } from "lucide-react";
 
@@ -13,7 +13,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 const page = async () => {
-  const { user } = await getUser();
+  const { user } = await getCurrentUser();
   if (!user || user?.emailVerified === false) {
     redirect("/");
   }

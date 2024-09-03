@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 
 import {
   registerFormSchema,
-  registerFormType,
+  RegisterFormType,
 } from "@/auth/definitions/registerForm";
-import {
-  register,
+import register, {
   type Response as ActionResponse,
 } from "@/auth/actions/register";
 
@@ -15,17 +14,18 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Link from "next/link";
+
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  FormCard,
+  FormContent,
+  FormFooter,
+  FormHeader,
+  FormTitle,
+} from "@/components/ui/FormCard";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -33,14 +33,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import Image from "next/image";
 
-export function RegisterCard() {
+export function RegisterForm() {
   const { toast } = useToast();
   const [state, setState] = useState<ActionResponse | null>(null);
-  const form = useForm<registerFormType>({
+  const form = useForm<RegisterFormType>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
       firstName: "",
@@ -51,7 +50,7 @@ export function RegisterCard() {
       ...(state?.fields ?? {}),
     },
   });
-  const submit: SubmitHandler<registerFormType> = async (data) => {
+  const submit: SubmitHandler<RegisterFormType> = async (data) => {
     const formData = new FormData();
     Object.entries(data).map(([key, val]) => {
       formData.append(key, val);
@@ -75,65 +74,53 @@ export function RegisterCard() {
   }, [state]);
 
   return (
-    <Card className="mt-10 mx-auto sm:w-[400px]">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Register Now</CardTitle>
-        <CardDescription className="mx-auto">
-          <Link
-            href="/login"
-            className={buttonVariants({
-              variant: "link",
-            })}
-          >
-            Already have an account? Log In
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid mt-2">
+    <FormCard>
+      <FormHeader>
+        <FormTitle>Register</FormTitle>
+      </FormHeader>
+      <FormContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(submit)}
-            className="flex flex-col gap-4"
-          >
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      required
-                      placeholder="John"
-                      autoComplete="given-name"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      required
-                      placeholder="Doe"
-                      autoComplete="family-name"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(submit)} className="grid gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        required
+                        placeholder="John"
+                        autoComplete="given-name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        required
+                        placeholder="Doe"
+                        autoComplete="family-name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="email"
@@ -163,11 +150,24 @@ export function RegisterCard() {
                     <Input
                       type="password"
                       required
-                      placeholder="Your strong password"
+                      placeholder="New password"
                       autoComplete="new-password"
                       {...field}
                     />
                   </FormControl>
+                  {form.getFieldState("password").isTouched &&
+                    // !form.getFieldState("password").isDirty &&
+                    form.getValues("password").length < 8 && (
+                      <FormDescription>
+                        Password must contain:
+                        <ul className="mt-1 ml-6 list-disc flex flex-col gap-1">
+                          <li>8-64 characters</li>
+                          <li>At least one uppercase letter</li>
+                          <li>At least one lowercase letter</li>
+                          <li>At least one number</li>
+                        </ul>
+                      </FormDescription>
+                    )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -182,7 +182,7 @@ export function RegisterCard() {
                     <Input
                       type="password"
                       required
-                      placeholder="Your strong password"
+                      placeholder="Re-enter password"
                       autoComplete="new-password"
                       {...field}
                     />
@@ -191,12 +191,29 @@ export function RegisterCard() {
                 </FormItem>
               )}
             />
-            <Button disabled={form.formState.isSubmitting}>Submit</Button>
+            <Button disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Register"
+              )}
+            </Button>
           </form>
         </Form>
-      </CardContent>
-    </Card>
+      </FormContent>
+      <FormFooter>
+        <Link
+          href="/login"
+          className={buttonVariants({
+            variant: "link",
+          })}
+        >
+          Already have an account? Log In
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </FormFooter>
+    </FormCard>
   );
 }
 
-export default RegisterCard;
+export default RegisterForm;

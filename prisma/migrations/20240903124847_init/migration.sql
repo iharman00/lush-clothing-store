@@ -40,6 +40,9 @@ CREATE UNIQUE INDEX "users_stripe_customer_id_key" ON "users"("stripe_customer_i
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "sessions_userId_key" ON "sessions"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "email_verification_codes_userId_key" ON "email_verification_codes"("userId");
 
 -- AddForeignKey

@@ -2,7 +2,7 @@
 
 import {
   registerFormSchema,
-  registerFormType,
+  RegisterFormType,
 } from "@/auth/definitions/registerForm";
 import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
@@ -12,32 +12,22 @@ import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import sendVerificationCode from "../utils/sendVerificationCode";
+import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 
-type UserDTO = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  emailVerified: boolean;
+type RegisterFormArrayType = {
+  [Key in keyof RegisterFormType]?: RegisterFormType[Key][];
 };
 
 export type Response = {
   success: boolean;
   message: string;
-  errors?: {
-    firstName?: string[];
-    lastName?: string[];
-    email?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-  };
-  fields?: any;
+  errors?: RegisterFormArrayType;
+  fields?: Partial<RegisterFormType>;
 };
 
-export async function register(formData: FormData): Promise<Response> {
+export default async function register(formData: FormData): Promise<Response> {
   let rawFormData;
-  let validatedData: registerFormType;
+  let validatedData: RegisterFormType;
   let response: Response;
 
   try {
@@ -58,20 +48,20 @@ export async function register(formData: FormData): Promise<Response> {
       },
     });
 
-    // 4. Send verification code
-    const res = await sendVerificationCode(user);
-
-    // 5. Create Session
+    // 4. Create Session
     const session = await lucia.createSession(user.id, {});
     // lucia.createSession also creates the session in the database
     const sessionCookie = lucia.createSessionCookie(session.id);
 
-    // 6. Send Session cookie
+    // 5. Send Session cookie
     cookies().set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes
     );
+
+    // 6. Send verification code
+    const res = await sendOTPEmail();
 
     // 7. Redirect user to verify-email
     // This needs to be done outside try catch block because of the way redirect works
@@ -105,7 +95,7 @@ export async function register(formData: FormData): Promise<Response> {
 
     response = {
       success: false,
-      message: "Unexpected error occured",
+      message: "An unexpected error occured",
     };
 
     return response;

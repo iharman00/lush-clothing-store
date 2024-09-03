@@ -7,41 +7,45 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   verifyEmailFormSchema,
-  verifyEmailFormType,
-} from "../definitions/verifyEmail";
+  VerifyEmailFormType,
+} from "@/auth/definitions/verifyEmail";
 import { verifyVerificationCode } from "@/auth/utils/verifyVerificationCode";
 import prisma from "@/lib/prisma";
 import { ZodError } from "zod";
+import {
+  InvalidOTPError,
+  InvalidUserSessionError,
+} from "@/auth/definitions/customErrors";
+
+type VerifyEmailFormArrayType = {
+  [Key in keyof VerifyEmailFormType]?: VerifyEmailFormType[Key][];
+};
 
 export type Response = {
   success: boolean;
   message: string;
-  errors?: {
-    pin?: string[];
-  };
-  fields?: any;
+  errors?: VerifyEmailFormArrayType;
+  fields?: Partial<VerifyEmailFormType>;
 };
 
-export async function verifyEmail(formData: FormData): Promise<Response> {
+export default async function verifyEmail(
+  formData: FormData
+): Promise<Response> {
   let rawFormData;
-  let validatedData: verifyEmailFormType;
+  let validatedData: VerifyEmailFormType;
 
   try {
     // 1. Check if user exists
     let { user, session } = await validateRequest();
-    if (!user)
-      throw new Error("User is not logged In", {
-        cause: "Auth failed",
-      });
+    if (!user) throw new InvalidUserSessionError("User is not logged in");
 
     // 2. Validate fields
     rawFormData = Object.fromEntries(formData);
     validatedData = verifyEmailFormSchema.parse(rawFormData);
 
     // 3. Validate pin
-    const validCode = await verifyVerificationCode(user, validatedData.pin);
-    if (!validCode)
-      throw new Error("Invalid verification code", { cause: "Invalid code" });
+    // Throws InvalidOTPError if verification fails
+    await verifyVerificationCode(user, validatedData.pin);
 
     // 4. Create new session if code is valid
     await lucia.invalidateUserSessions(user.id);
@@ -85,7 +89,7 @@ export async function verifyEmail(formData: FormData): Promise<Response> {
     }
 
     // Custom error - thrown when user is not logged in
-    if (error instanceof Error && error.cause === "Auth failed") {
+    if (error instanceof InvalidUserSessionError) {
       response = {
         success: false,
         message: error.message,
@@ -95,12 +99,12 @@ export async function verifyEmail(formData: FormData): Promise<Response> {
     }
 
     // Custom error - thrown when code is invalid
-    if (error instanceof Error && error.cause === "Invalid code") {
+    if (error instanceof InvalidOTPError) {
       response = {
         success: false,
-        message: error.message,
+        message: "Invalid OTP",
         errors: {
-          pin: ["Invalid code"],
+          pin: ["Invalid OTP"],
         },
         fields: rawFormData,
       };
@@ -109,7 +113,7 @@ export async function verifyEmail(formData: FormData): Promise<Response> {
 
     response = {
       success: false,
-      message: "Unexpected error occured",
+      message: "An unexpected error occured",
     };
 
     return response;

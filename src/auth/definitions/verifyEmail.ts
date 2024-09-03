@@ -6,4 +6,4 @@ export const verifyEmailFormSchema = z.object({
     .length(6, { message: "Verification Code must be 6 characters long" }),
 });
 
-export type verifyEmailFormType = z.infer<typeof verifyEmailFormSchema>;
+export type VerifyEmailFormType = z.infer<typeof verifyEmailFormSchema>;

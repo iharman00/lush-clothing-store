@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Menu } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
-import { getUser } from "@/data/user";
+import { getCurrentUser } from "@/data_access/user";
 import LoginOrRegisterButton from "./LoginOrRegisterButton";
 
 const navigation = [
@@ -70,7 +70,7 @@ const navigation = [
 ];
 
 const Navbar = async () => {
-  const { user } = await getUser();
+  const { user } = await getCurrentUser();
   return (
     <header className="container">
       <nav className="flex justify-between py-4">
