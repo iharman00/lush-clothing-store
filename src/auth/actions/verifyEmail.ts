@@ -10,12 +10,12 @@ import {
   VerifyEmailFormType,
 } from "@/auth/definitions/verifyEmail";
 import { verifyVerificationCode } from "@/auth/utils/verifyVerificationCode";
-import prisma from "@/lib/prisma";
 import { ZodError } from "zod";
 import {
   InvalidOTPError,
   InvalidUserSessionError,
 } from "@/auth/definitions/customErrors";
+import { setUserEmailVerified } from "@/data_access/user";
 
 type VerifyEmailFormArrayType = {
   [Key in keyof VerifyEmailFormType]?: VerifyEmailFormType[Key][];
@@ -51,27 +51,22 @@ export default async function verifyEmail(
     await lucia.invalidateUserSessions(user.id);
 
     // 5. Update user's emailVerified to true
-    await prisma.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        emailVerified: true,
-      },
-    });
+    // If user's email is'nt already verified
+    if (!user.emailVerified) {
+      await setUserEmailVerified(user.id, true);
 
-    // 6. Create Session
-    session = await lucia.createSession(user.id, {});
-    // lucia.createSession also creates the session in the database
-    const sessionCookie = lucia.createSessionCookie(session.id);
+      // 6. Create Session
+      session = await lucia.createSession(user.id, {});
+      // lucia.createSession also creates the session in the database
+      const sessionCookie = lucia.createSessionCookie(session.id);
 
-    // 7. Send Session cookie
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
-
+      // 7. Send Session cookie
+      cookies().set(
+        sessionCookie.name,
+        sessionCookie.value,
+        sessionCookie.attributes
+      );
+    }
     // 8. Redirect user to success page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
@@ -98,7 +93,7 @@ export default async function verifyEmail(
       return response;
     }
 
-    // Custom error - thrown when code is invalid
+    // Custom error - thrown when OTP is invalid
     if (error instanceof InvalidOTPError) {
       response = {
         success: false,

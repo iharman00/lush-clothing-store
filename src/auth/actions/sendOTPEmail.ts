@@ -1,8 +1,8 @@
 "use server";
 
 import { getCurrentUser } from "@/data_access/user";
-import sendVerificationCode from "../utils/sendVerificationCode";
-import { InvalidUserSessionError } from "../definitions/customErrors";
+import sendVerificationCode from "@/auth/utils/sendVerificationCode";
+import { InvalidUserSessionError } from "@/auth/definitions/customErrors";
 
 export type Response = {
   success: boolean;

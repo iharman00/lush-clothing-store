@@ -5,7 +5,6 @@ import {
   RegisterFormType,
 } from "@/auth/definitions/registerForm";
 import { Prisma } from "@prisma/client";
-import prisma from "@/lib/prisma";
 import { hash } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
@@ -13,6 +12,7 @@ import { ZodError } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
+import { createUser } from "@/data_access/user";
 
 type RegisterFormArrayType = {
   [Key in keyof RegisterFormType]?: RegisterFormType[Key][];
@@ -39,13 +39,11 @@ export default async function register(formData: FormData): Promise<Response> {
     const passwordHash = await hash(validatedData.password);
 
     // 3. Create User
-    const user = await prisma.user.create({
-      data: {
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-        email: validatedData.email,
-        password: passwordHash,
-      },
+    const user = await createUser({
+      firstName: validatedData.firstName,
+      lastName: validatedData.lastName,
+      email: validatedData.email,
+      passwordHash,
     });
 
     // 4. Create Session
@@ -60,12 +58,13 @@ export default async function register(formData: FormData): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 6. Send verification code
-    const res = await sendOTPEmail();
+    // 6. Send verification code to the currently logged in user
+    await sendOTPEmail();
 
     // 7. Redirect user to verify-email
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
+    console.log(error);
     // If its a zod error
     if (error instanceof ZodError) {
       response = {
@@ -92,7 +91,6 @@ export default async function register(formData: FormData): Promise<Response> {
         return response;
       }
     }
-
     response = {
       success: false,
       message: "An unexpected error occured",

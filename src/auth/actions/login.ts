@@ -2,7 +2,6 @@
 
 import { loginFormSchema, LoginFormType } from "@/auth/definitions/loginForm";
 import { Prisma } from "@prisma/client";
-import prisma from "@/lib/prisma";
 import { verify } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
@@ -11,6 +10,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { PasswordMismatchError } from "@/auth/definitions/customErrors";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
+import { getUserByEmail } from "@/data_access/user";
 
 type LoginFormArrayType = {
   [Key in keyof LoginFormType]?: LoginFormType[Key][];
@@ -34,11 +34,7 @@ export default async function login(formData: FormData): Promise<Response> {
     validatedData = loginFormSchema.parse(rawFormData);
 
     // 2. Find User
-    user = await prisma.user.findUniqueOrThrow({
-      where: {
-        email: validatedData.email,
-      },
-    });
+    user = await getUserByEmail(validatedData.email);
 
     // 3. Verify password
     const validPassword = await verify(user.password, validatedData.password);
@@ -58,9 +54,9 @@ export default async function login(formData: FormData): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 6. Send verification code if email is not verified
+    // 6. Send verification code to the currently logged in user if email is not verified
     if (!user.emailVerified) {
-      const res = await sendOTPEmail();
+      await sendOTPEmail();
     }
 
     // 6. Redirect user to homepage or verify-email page
