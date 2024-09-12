@@ -12,10 +12,10 @@ import { buttonVariants } from "./ui/button";
 import logout from "@/auth/actions/logout";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { type UserDTO as UserType } from "@/data_access/user/userDTO";
+import { UserDTO } from "@/data_access/user/userDTO";
 import { User } from "lucide-react";
 
-const AccountMenu = ({ user }: { user: UserType }) => {
+const AccountMenu = ({ user }: { user: Omit<UserDTO, "password"> }) => {
   const router = useRouter();
   const { toast } = useToast();
   return (

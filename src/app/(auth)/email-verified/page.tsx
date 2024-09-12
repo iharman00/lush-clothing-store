@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/data_access/user";
+import { getCurrentClientSideUser } from "@/data_access/user";
 import { redirect } from "next/navigation";
 import { CircleCheck } from "lucide-react";
 
@@ -13,8 +13,13 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 const page = async () => {
-  const { user } = await getCurrentUser();
-  if (!user || user?.emailVerified === false) {
+  let user;
+  try {
+    user = await getCurrentClientSideUser();
+    if (!user.emailVerified) redirect("/");
+  } catch (error) {
+    // If there's an error, the user is not logged in
+    // We redirect
     redirect("/");
   }
   return (
@@ -25,8 +30,8 @@ const page = async () => {
           <CardTitle>Email Verified</CardTitle>
           <CardDescription>
             Congratulations{" "}
-            <span className="capitalize">{user?.firstName}</span>, you have
-            succesfully verified your email!
+            <span className="capitalize">{user?.firstName}</span>, your email
+            has been successfully verified!
           </CardDescription>
         </div>
       </CardHeader>

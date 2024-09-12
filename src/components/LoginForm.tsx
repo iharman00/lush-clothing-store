@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { loginFormSchema, LoginFormType } from "@/auth/definitions/loginForm";
+import { loginFormSchema, LoginFormType } from "@/auth/schemas/loginFormSchema";
 import login, { type Response as ActionResponse } from "@/auth/actions/login";
 
 import { SubmitHandler, useForm } from "react-hook-form";

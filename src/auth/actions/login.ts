@@ -1,6 +1,6 @@
 "use server";
 
-import { loginFormSchema, LoginFormType } from "@/auth/definitions/loginForm";
+import { loginFormSchema, LoginFormType } from "@/auth/schemas/loginFormSchema";
 import { Prisma } from "@prisma/client";
 import { verify } from "argon2";
 import { lucia } from "@/auth";
@@ -8,7 +8,10 @@ import { cookies } from "next/headers";
 import { ZodError } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { PasswordMismatchError } from "@/auth/definitions/customErrors";
+import {
+  InvalidDataError,
+  PasswordMismatchError,
+} from "@/auth/schemas/customErrors";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { getUserByEmail } from "@/data_access/user";
 
@@ -23,18 +26,23 @@ export type Response = {
   fields?: Partial<LoginFormType>;
 };
 
-export default async function login(formData: FormData): Promise<Response> {
+export default async function login(data: unknown): Promise<Response> {
   let rawFormData;
-  let validatedData: LoginFormType;
   let user;
+  let response: Response;
 
   try {
-    // 1. Validate fields
-    rawFormData = Object.fromEntries(formData);
-    validatedData = loginFormSchema.parse(rawFormData);
+    // 1. Check, extract and validate data
+    if (!(data instanceof FormData))
+      throw new InvalidDataError(
+        "Invalid data, Please send the following fields: email, password as a FormData object."
+      );
+
+    rawFormData = Object.fromEntries(data);
+    const validatedData = loginFormSchema.parse(rawFormData);
 
     // 2. Find User
-    user = await getUserByEmail(validatedData.email);
+    user = await getUserByEmail({ email: validatedData.email });
 
     // 3. Verify password
     const validPassword = await verify(user.password, validatedData.password);
@@ -62,7 +70,14 @@ export default async function login(formData: FormData): Promise<Response> {
     // 6. Redirect user to homepage or verify-email page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    let response: Response;
+    // Custom error - thrown when we unexpected data is received
+    if (error instanceof InvalidDataError) {
+      response = {
+        success: false,
+        message: error.message,
+      };
+      return response;
+    }
 
     // If its a zod error
     if (error instanceof ZodError) {
@@ -92,7 +107,7 @@ export default async function login(formData: FormData): Promise<Response> {
       }
     }
 
-    // Custom error instance - thrown when password fails verification
+    // Custom error - thrown when password fails verification
     if (error instanceof PasswordMismatchError) {
       response = {
         success: false,

@@ -8,13 +8,14 @@ import { redirect } from "next/navigation";
 import {
   verifyEmailFormSchema,
   VerifyEmailFormType,
-} from "@/auth/definitions/verifyEmail";
+} from "@/auth/schemas/verifyEmailFormSchema";
 import { verifyVerificationCode } from "@/auth/utils/verifyVerificationCode";
 import { ZodError } from "zod";
 import {
+  InvalidDataError,
   InvalidOTPError,
   InvalidUserSessionError,
-} from "@/auth/definitions/customErrors";
+} from "@/auth/schemas/customErrors";
 import { setUserEmailVerified } from "@/data_access/user";
 
 type VerifyEmailFormArrayType = {
@@ -28,19 +29,23 @@ export type Response = {
   fields?: Partial<VerifyEmailFormType>;
 };
 
-export default async function verifyEmail(
-  formData: FormData
-): Promise<Response> {
+export default async function verifyEmail(data: unknown): Promise<Response> {
   let rawFormData;
   let validatedData: VerifyEmailFormType;
+  let response: Response;
 
   try {
     // 1. Check if user exists
     let { user, session } = await validateRequest();
     if (!user) throw new InvalidUserSessionError("User is not logged in");
 
-    // 2. Validate fields
-    rawFormData = Object.fromEntries(formData);
+    // 2. Check, extract and validate data
+    if (!(data instanceof FormData))
+      throw new InvalidDataError(
+        "Invalid data, Please send the following field: PIN (One time password) as a FormData object."
+      );
+
+    rawFormData = Object.fromEntries(data);
     validatedData = verifyEmailFormSchema.parse(rawFormData);
 
     // 3. Validate pin
@@ -53,7 +58,7 @@ export default async function verifyEmail(
     // 5. Update user's emailVerified to true
     // If user's email is'nt already verified
     if (!user.emailVerified) {
-      await setUserEmailVerified(user.id, true);
+      await setUserEmailVerified({ id: user.id, emailVerified: true });
 
       // 6. Create Session
       session = await lucia.createSession(user.id, {});
@@ -70,7 +75,14 @@ export default async function verifyEmail(
     // 8. Redirect user to success page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    let response: Response;
+    // Custom error - thrown when we unexpected data is received
+    if (error instanceof InvalidDataError) {
+      response = {
+        success: false,
+        message: error.message,
+      };
+      return response;
+    }
 
     // If its a zod error
     if (error instanceof ZodError) {

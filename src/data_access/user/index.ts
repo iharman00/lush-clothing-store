@@ -1,107 +1,84 @@
 import "server-only";
 
-import { z } from "zod";
 import { validateRequest } from "@/auth/middlewares";
 import prisma from "@/lib/prisma";
-import filterUser, { type UserDTO } from "@/data_access/user/userDTO";
+import { filterUser } from "@/data_access/user/userDTO";
+import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
+import { User } from "@prisma/client";
 
-const createUserSchema = z.object({
-  firstName: z
-    .string()
-    .trim()
-    .min(1, { message: "First name is required" })
-    .max(35, { message: "First name can be at most 35 characters" })
-    .toLowerCase(),
-  lastName: z
-    .string()
-    .trim()
-    .min(1, { message: "Last name is required" })
-    .max(35, { message: "Last name can be at most 35 characters" })
-    .toLowerCase(),
-  email: z
-    .string()
-    .trim()
-    .min(1, { message: "Email is required" })
-    .email({ message: "Invalid email" })
-    .toLowerCase(),
-  passwordHash: z.string(),
-});
-
-type CreateUserType = z.infer<typeof createUserSchema>;
+// User data-access function rules
+// - purpose of these functions is to control what data is transfered to the rest of the app
+// - data access functions are only allowed to run on the server
+// - if you need access on the client side pass it down as props from a server component
+// - functions either return the filtered User Object (UserDto) or throw an error
 
 export async function createUser({
   firstName,
   lastName,
   email,
-  passwordHash,
-}: CreateUserType) {
-  // Throws a zod error if validation fails
-  createUserSchema.parse({
-    firstName,
-    lastName,
-    email,
-    passwordHash,
-  });
-
-  // Create user using validated data
-  return await prisma.user.create({
+  password: passwordHash,
+}: Pick<User, "firstName" | "lastName" | "email" | "password">) {
+  const user = await prisma.user.create({
     data: {
-      firstName,
-      lastName,
-      email,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
       password: passwordHash,
     },
   });
+
+  return filterUser(user);
 }
 
-export async function getCurrentUser(): Promise<
-  { user: UserDTO } | { user: null }
-> {
-  const { user: validatedUser } = await validateRequest();
+// Return currently logged in userDTO
+export async function getCurrentUser() {
+  const { user: validatedUser, session } = await validateRequest();
 
-  if (!validatedUser) {
-    return { user: null };
+  // Throw custom error when user or session not available
+  if (!validatedUser || !session) {
+    throw new InvalidUserSessionError("User not logged in");
   }
 
-  try {
-    const user = await prisma.user.findUniqueOrThrow({
-      where: {
-        id: validatedUser.id,
-      },
-    });
-    return { user: filterUser(user) };
-  } catch (e) {
-    return { user: null };
-  }
-}
-
-const getUserByEmailSchema = z
-  .string()
-  .trim()
-  .min(1, { message: "Email is required" })
-  .email({ message: "Invalid email" })
-  .toLowerCase();
-
-type UserEmailType = z.infer<typeof getUserByEmailSchema>;
-
-export async function getUserByEmail(email: UserEmailType) {
-  // Throws a zod error if validation fails
-  const validatedEmail = getUserByEmailSchema.parse(email);
-
-  return prisma.user.findUniqueOrThrow({
+  const user = await prisma.user.findUniqueOrThrow({
     where: {
-      email: validatedEmail,
+      id: validatedUser.id,
     },
   });
+
+  return filterUser(user);
 }
 
-export async function setUserEmailVerified(userId: string, value: boolean) {
-  return prisma.user.update({
+// provides data for frontend consumption, therefore striping out password
+export async function getCurrentClientSideUser() {
+  const user = await getCurrentUser();
+
+  const { password, ...userWithoutPassword } = user;
+
+  return userWithoutPassword;
+}
+
+export async function getUserByEmail({ email }: Pick<User, "email">) {
+  const user = await prisma.user.findUniqueOrThrow({
     where: {
-      id: userId,
+      email,
+    },
+  });
+
+  return filterUser(user);
+}
+
+export async function setUserEmailVerified({
+  id,
+  emailVerified,
+}: Pick<User, "id" | "emailVerified">) {
+  const user = await prisma.user.update({
+    where: {
+      id,
     },
     data: {
-      emailVerified: value,
+      emailVerified,
     },
   });
+
+  return filterUser(user);
 }

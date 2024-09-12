@@ -1,10 +1,8 @@
 import "server-only";
 
-import { PrismaClient } from "@prisma/client";
 import { TimeSpan, createDate } from "oslo";
 import { generateRandomString, alphabet } from "oslo/crypto";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function generateEmailVerificationCode(
   userId: string,

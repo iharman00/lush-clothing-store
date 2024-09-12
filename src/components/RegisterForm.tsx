@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   registerFormSchema,
   RegisterFormType,
-} from "@/auth/definitions/registerForm";
+} from "@/auth/schemas/registerFormSchema";
 import register, {
   type Response as ActionResponse,
 } from "@/auth/actions/register";

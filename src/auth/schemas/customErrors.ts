@@ -12,6 +12,13 @@ export class InvalidUserSessionError extends Error {
   }
 }
 
+export class InvalidDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidDataError";
+  }
+}
+
 export class InvalidOTPError extends Error {
   constructor(message: string) {
     super(message);

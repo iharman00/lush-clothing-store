@@ -1,10 +1,15 @@
 import VerifyEmailForm from "@/components/VerifyEmailForm";
-import { getCurrentUser } from "@/data_access/user";
+import { getCurrentClientSideUser } from "@/data_access/user";
 import { redirect } from "next/navigation";
 
 const page = async () => {
-  const { user } = await getCurrentUser();
-  if (!user || user?.emailVerified === true) {
+  let user;
+  try {
+    user = await getCurrentClientSideUser();
+    if (user.emailVerified) redirect("/");
+  } catch (error) {
+    // If there's an error, the user is not logged in
+    // We redirect
     redirect("/");
   }
   return (

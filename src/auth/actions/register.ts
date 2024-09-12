@@ -3,9 +3,8 @@
 import {
   registerFormSchema,
   RegisterFormType,
-} from "@/auth/definitions/registerForm";
+} from "@/auth/schemas/registerFormSchema";
 import { Prisma } from "@prisma/client";
-import { hash } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
@@ -13,6 +12,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { createUser } from "@/data_access/user";
+import { InvalidDataError } from "../schemas/customErrors";
+import { hash } from "argon2";
 
 type RegisterFormArrayType = {
   [Key in keyof RegisterFormType]?: RegisterFormType[Key][];
@@ -25,15 +26,19 @@ export type Response = {
   fields?: Partial<RegisterFormType>;
 };
 
-export default async function register(formData: FormData): Promise<Response> {
+export default async function register(data: unknown): Promise<Response> {
   let rawFormData;
-  let validatedData: RegisterFormType;
   let response: Response;
 
   try {
-    // 1. Validate fields
-    rawFormData = Object.fromEntries(formData);
-    validatedData = registerFormSchema.parse(rawFormData);
+    // 1. Check, extract and validate data
+    if (!(data instanceof FormData))
+      throw new InvalidDataError(
+        "Invalid data, Please send the following fields: firstName, lastName, email, password as a FormData object."
+      );
+
+    rawFormData = Object.fromEntries(data);
+    const validatedData = registerFormSchema.parse(rawFormData);
 
     // 2. Hash password
     const passwordHash = await hash(validatedData.password);
@@ -43,7 +48,7 @@ export default async function register(formData: FormData): Promise<Response> {
       firstName: validatedData.firstName,
       lastName: validatedData.lastName,
       email: validatedData.email,
-      passwordHash,
+      password: passwordHash,
     });
 
     // 4. Create Session
@@ -64,7 +69,15 @@ export default async function register(formData: FormData): Promise<Response> {
     // 7. Redirect user to verify-email
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    console.log(error);
+    // Custom error - thrown when we unexpected data is received
+    if (error instanceof InvalidDataError) {
+      response = {
+        success: false,
+        message: error.message,
+      };
+      return response;
+    }
+
     // If its a zod error
     if (error instanceof ZodError) {
       response = {
@@ -91,6 +104,7 @@ export default async function register(formData: FormData): Promise<Response> {
         return response;
       }
     }
+
     response = {
       success: false,
       message: "An unexpected error occured",

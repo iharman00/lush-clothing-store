@@ -2,7 +2,7 @@
 
 import { getCurrentUser } from "@/data_access/user";
 import sendVerificationCode from "@/auth/utils/sendVerificationCode";
-import { InvalidUserSessionError } from "@/auth/definitions/customErrors";
+import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
 
 export type Response = {
   success: boolean;
@@ -13,16 +13,15 @@ export default async function sendOTPEmail(): Promise<Response> {
   let response: Response;
   try {
     // 1. Validate Request and find the user
-    const { user: validatedUser } = await getCurrentUser();
-    if (!validatedUser)
-      throw new InvalidUserSessionError("User is not logged in");
+    // This throws InvalidUserSessionError if user doesn't exist
+    const currentUser = await getCurrentUser();
 
     // 2. Send Verification code
-    const res = await sendVerificationCode(validatedUser);
+    await sendVerificationCode(currentUser);
 
     response = {
       success: true,
-      message: `Successfully sent OTP to ${validatedUser.email}`,
+      message: `Successfully sent OTP to ${currentUser.email}`,
     };
 
     return response;

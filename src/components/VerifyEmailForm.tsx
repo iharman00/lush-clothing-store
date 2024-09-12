@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   verifyEmailFormSchema,
   VerifyEmailFormType,
-} from "@/auth/definitions/verifyEmail";
+} from "@/auth/schemas/verifyEmailFormSchema";
 import verifyEmail, {
   type Response as ActionResponse,
 } from "@/auth/actions/verifyEmail";
@@ -41,7 +41,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserDTO } from "@/data_access/user/userDTO";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 
-const VerifyEmailForm = ({ user }: { user: UserDTO }) => {
+const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
   const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 

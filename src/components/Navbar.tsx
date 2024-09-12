@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Menu } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
-import { getCurrentUser } from "@/data_access/user";
+import { getCurrentClientSideUser } from "@/data_access/user";
 import LoginOrRegisterButton from "./LoginOrRegisterButton";
 
 const navigation = [
@@ -70,7 +70,13 @@ const navigation = [
 ];
 
 const Navbar = async () => {
-  const { user } = await getCurrentUser();
+  let user;
+  try {
+    user = await getCurrentClientSideUser();
+  } catch (error) {
+    // If there's an error, the user is not logged in
+    // We do nothing
+  }
   return (
     <header className="container">
       <nav className="flex justify-between py-4">
@@ -229,7 +235,17 @@ const Navbar = async () => {
             {/* Desktop Account menu */}
             <ul className="hidden md:flex justify-self-end">
               <li>
-                {user && <AccountMenu user={user} />}
+                {user && (
+                  <AccountMenu
+                    user={{
+                      id: user.id,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      email: user.email,
+                      emailVerified: user.emailVerified,
+                    }}
+                  />
+                )}
                 {!user && <LoginOrRegisterButton />}
               </li>
               <li>
