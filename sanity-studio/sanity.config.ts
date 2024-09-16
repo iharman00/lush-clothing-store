@@ -10,19 +10,7 @@ export default defineConfig({
   projectId: '6d6zqsxz',
   dataset: 'test',
 
-  plugins: [
-    structureTool({
-      structure: (S) =>
-        S.list()
-          .title('Base')
-          .items([
-            ...S.documentTypeListItems().filter(
-              (ListItem) => ListItem.getId() !== 'productSizeWithStock',
-            ),
-          ]),
-    }),
-    visionTool(),
-  ],
+  plugins: [structureTool(), visionTool()],
 
   schema: {
     types: schemaTypes,

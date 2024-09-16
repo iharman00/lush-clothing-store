@@ -1,5 +1,4 @@
 import {defineField, defineType} from 'sanity'
-import filterDocumentsByReferenceDocument from '../lib/filter'
 
 export const subCategories = defineType({
   name: 'subCategories',
@@ -9,7 +8,11 @@ export const subCategories = defineType({
       name: 'category',
       type: 'reference',
       to: [{type: 'categories'}],
-      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'subCategory',
+      type: 'reference',
+      to: [{type: 'subCategories'}],
     }),
     defineField({
       name: 'name',
@@ -17,36 +20,27 @@ export const subCategories = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'products',
-      type: 'array',
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'products'}],
-          options: {
-            filter: ({document}) => {
-              // only show products that are children of this subCategory
-              // i.e., refer to this subCategory
-              return filterDocumentsByReferenceDocument({
-                document,
-                referenceDocumentName: 'subCategory',
-              })
-            },
-          },
-        },
-      ],
-      validation: (Rule) => Rule.unique(),
+      name: 'slug',
+      type: 'slug',
+      options: {
+        source: 'name',
+        isUnique: () => true, // it actually makes it so that slug does'nt have to be unique
+        slugify: (input) => input.toLowerCase().replace(/\s+/g, '-').slice(0, 96),
+      },
+      validation: (Rule) => Rule.required(),
     }),
   ],
   preview: {
     select: {
       subCategory: 'name',
       parentCategory: 'category.name',
+      parentSubCategory: 'subCategory.name',
     },
     prepare(selection) {
-      const {subCategory, parentCategory} = selection
+      const {subCategory, parentCategory, parentSubCategory} = selection
       return {
-        title: `${parentCategory} - ${subCategory}`,
+        title: `${subCategory}`,
+        subtitle: parentCategory ? `${parentCategory}` : `${parentSubCategory}`,
       }
     },
   },

@@ -7,9 +7,9 @@ import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
 import { User } from "@prisma/client";
 
 // User data-access function rules
-// - purpose of these functions is to control what data is transfered to the rest of the app
-// - data access functions are only allowed to run on the server
-// - if you need access on the client side pass it down as props from a server component
+// - purpose of these functions are to control DB data access and mutations
+// - these functions are only allowed to run on the server
+// - if you need access to data on the client, pass it down as props from the server
 // - functions either return the filtered User Object (UserDto) or throw an error
 
 export async function createUser({

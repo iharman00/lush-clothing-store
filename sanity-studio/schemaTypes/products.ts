@@ -1,12 +1,11 @@
 import {defineField, defineType} from 'sanity'
-import filterDocumentsByReferenceDocument from '../lib/filter'
 
 export const products = defineType({
   name: 'products',
   type: 'document',
   fields: [
     defineField({
-      name: 'subCategory',
+      name: 'clothingType',
       type: 'reference',
       to: [{type: 'subCategories'}],
       validation: (Rule) => Rule.required(),
@@ -14,6 +13,16 @@ export const products = defineType({
     defineField({
       name: 'name',
       type: 'string',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'slug',
+      type: 'slug',
+      options: {
+        source: 'name',
+        isUnique: () => true, // it actually makes it so that slug does'nt have to be unique
+        slugify: (input) => input.toLowerCase().replace(/\s+/g, '-').slice(0, 96),
+      },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -39,16 +48,77 @@ export const products = defineType({
       type: 'array',
       of: [
         {
-          type: 'reference',
-          to: [{type: 'productVariants'}],
-          options: {
-            filter: ({document}) => {
-              // only show productVariants that are children of this product
-              // i.e., refer to this product
-              return filterDocumentsByReferenceDocument({
-                document,
-                referenceDocumentName: 'product',
-              })
+          type: 'object',
+          fields: [
+            defineField({
+              name: 'color',
+              type: 'reference',
+              to: [{type: 'productColors'}],
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'images',
+              type: 'array',
+              of: [
+                {
+                  type: 'image',
+                  fields: [
+                    {
+                      name: 'alt',
+                      title: 'Alternative Text',
+                      type: 'string',
+                    },
+                  ],
+                },
+              ],
+              validation: (Rule) => Rule.required().min(1).unique(),
+            }),
+            defineField({
+              name: 'sizeAndStock',
+              type: 'array',
+              of: [
+                {
+                  type: 'object',
+                  fields: [
+                    {
+                      name: 'size',
+                      type: 'reference',
+                      to: [{type: 'productSizes'}],
+                      validation: (Rule) => Rule.required(),
+                    },
+                    {
+                      name: 'stock',
+                      type: 'number',
+                      validation: (Rule) => Rule.required().min(0),
+                    },
+                  ],
+                  preview: {
+                    select: {
+                      size: 'size.name',
+                      stock: 'stock',
+                    },
+                    prepare(selection) {
+                      const {size, stock} = selection
+                      return {
+                        title: `Size: ${size}`,
+                        subtitle: `Stock: ${stock}`,
+                      }
+                    },
+                  },
+                },
+              ],
+              validation: (Rule) => Rule.required().min(1).unique(),
+            }),
+          ],
+          preview: {
+            select: {
+              color: 'color.name',
+            },
+            prepare(selection) {
+              const {color} = selection
+              return {
+                title: `${color}`,
+              }
             },
           },
         },
@@ -59,13 +129,13 @@ export const products = defineType({
   preview: {
     select: {
       parentCategory: 'subCategory.category.name',
-      parentSubCategory: 'subCategory.name',
       name: 'name',
     },
     prepare(selection) {
-      const {parentCategory, parentSubCategory, name} = selection
+      const {parentCategory, name} = selection
       return {
-        title: `${parentCategory} - ${parentSubCategory} - ${name}`,
+        title: `${name}`,
+        subtitle: `${parentCategory}`,
       }
     },
   },
