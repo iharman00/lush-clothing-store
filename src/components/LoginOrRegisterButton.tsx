@@ -5,7 +5,11 @@ import { buttonVariants } from "./ui/button";
 import Link from "next/link";
 import { User } from "lucide-react";
 
-const LoginOrRegisterButton = () => {
+const LoginOrRegisterButton = ({
+  textVisibily = true,
+}: {
+  textVisibily?: boolean;
+}) => {
   const pathname = usePathname();
   return (
     <Link
@@ -15,7 +19,7 @@ const LoginOrRegisterButton = () => {
       })} gap-2`}
     >
       <User />
-      {pathname === "/login" ? "Register" : "Log In"}
+      {textVisibily && (pathname === "/login" ? "Register" : "Log In")}
     </Link>
   );
 };

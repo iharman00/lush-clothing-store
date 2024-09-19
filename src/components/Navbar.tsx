@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -38,83 +44,94 @@ const Navbar = async () => {
     <header className="container">
       <nav className="flex justify-between py-4">
         {/* Mobile */}
-        <div className="md:hidden w-full flex justify-between">
+        <div className="lg:hidden w-full flex justify-between">
           <div className="flex items-center gap-4">
+            {/* Mobile Mega Menu/Accordion */}
             <Sheet>
-              <SheetTrigger className="justify-self-start md:hidden">
+              <SheetTrigger>
                 <Menu />
               </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="flex flex-col gap-2 items-start"
-              >
-                <Button variant="ghost">Men</Button>
-                <Button variant="ghost">Women</Button>
-                <Button variant="ghost">Kids</Button>
+              <SheetContent side="left" className="sm:max-w-[60vw]">
+                <Accordion type="single" collapsible className="w-full mt-10">
+                  {navData.map((category) => (
+                    <AccordionItem
+                      key={category._id}
+                      value={category._id}
+                      className="border-b-0"
+                    >
+                      <AccordionTrigger className="text-xl uppercase font-bold">
+                        {category.name}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <Accordion
+                          type="single"
+                          collapsible
+                          className="mt-[-0.5rem] ml-4"
+                        >
+                          {category.subCategories.map((subCategory) => (
+                            <AccordionItem
+                              key={subCategory._id}
+                              value={subCategory._id}
+                              className="border-b-0"
+                            >
+                              <AccordionTrigger className="uppercase">
+                                {subCategory.name}
+                              </AccordionTrigger>
+                              <AccordionContent className="flex flex-col gap-4 ml-4">
+                                {subCategory.productTypes.map((productType) => (
+                                  <Link
+                                    key={productType._id}
+                                    href={`${category.slug?.current}/${productType.slug?.current}`}
+                                  >
+                                    {productType.name}
+                                  </Link>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </SheetContent>
             </Sheet>
+            {/* Brand logo */}
             <Link href="/">
               <Image
                 src="/lush_logo.svg"
                 alt="lush logo"
                 width={50}
                 height={50}
+                className="mr-4"
               />
             </Link>
           </div>
-          <div className="flex">
-            <MobileSearchInput
-              type="search"
-              placeholder="Search"
-              className="mr-2"
-            />
-            <Button variant="ghost">
-              <ShoppingCart />
-            </Button>
-          </div>
-          {/* Mobile Account menu */}
-          {/* <ul className="flex">
-            {user ? (
-              <li>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    className={buttonVariants({
-                      variant: "ghost",
-                      className: "gap-2",
-                    })}
-                  >
-                    <User />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Orders</DropdownMenuItem>
-                    <DropdownMenuItem>Wishlist</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Log out</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </li>
-            ) : (
-              <li>
-                <Link
-                  href="/login"
-                  className={buttonVariants({ variant: "ghost" })}
-                >
-                  <User />
-                  Log In
-                </Link>
-              </li>
-            )}
+          <ul className="flex">
+            {/* Mobile Search input*/}
             <li>
-              
+              <MobileSearchInput
+                type="search"
+                placeholder="Search"
+                className="mr-2"
+              />
             </li>
-          </ul> */}
+            {/* Mobile Account menu */}
+            <li>
+              {user && <AccountMenu user={user} userNameVisibility={false} />}
+              {!user && <LoginOrRegisterButton textVisibily={false} />}
+            </li>
+            {/* Shopping Cart */}
+            <li>
+              <Button variant="ghost" className="gap-2">
+                <ShoppingCart />
+              </Button>
+            </li>
+          </ul>
         </div>
 
         {/* Desktop */}
-        <div className="hidden w-full md:flex justify-between">
+        <div className="hidden w-full lg:flex justify-between">
           {/* Desktop Navigation menu */}
           <div className="flex items-center gap-2">
             {/* Brand logo */}
@@ -128,6 +145,7 @@ const Navbar = async () => {
               />
             </Link>
             <Separator orientation="vertical"></Separator>
+            {/* Desktop Mega Menu */}
             <NavigationMenu className="justify-self-start">
               <NavigationMenuList>
                 {navData.map((category) => (
@@ -137,6 +155,7 @@ const Navbar = async () => {
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <div className="w-max px-14 py-12 flex gap-16">
+                        {/* Category Image */}
                         {category.image && category.image.alt && (
                           <Image
                             src={urlFor(category.image?.asset).url()}
@@ -145,6 +164,7 @@ const Navbar = async () => {
                             height={250}
                           />
                         )}
+                        {/* Product links */}
                         <div className="flex flex-col gap-6">
                           <p className="text-3xl font-bold">{category.name}</p>
                           <div className="flex gap-20">
@@ -153,9 +173,11 @@ const Navbar = async () => {
                                 key={subCategory._id}
                                 className="flex flex-col flex-wrap"
                               >
+                                {/* Sub Category */}
                                 <p className="uppercase font-bold text-sm">
                                   {subCategory.name}
                                 </p>
+                                {/* Products */}
                                 <ul className="flex flex-col">
                                   {subCategory.productTypes.map(
                                     (productType) => (
@@ -188,21 +210,22 @@ const Navbar = async () => {
               </NavigationMenuList>
             </NavigationMenu>
           </div>
-
           <div className="flex gap-2">
+            {/* Desktop Search Input */}
             <DesktopSearchInput
               type="search"
               placeholder="Search"
               className="mr-2"
             />
             <Separator orientation="vertical" />
-            {/* Desktop Account menu */}
-            <ul className="hidden md:flex justify-self-end">
+            <ul className="flex justify-self-end">
               <li>
+                {/* Desktop Account menu */}
                 {user && <AccountMenu user={user} />}
                 {!user && <LoginOrRegisterButton />}
               </li>
               <li>
+                {/* Shopping Cart */}
                 <Button variant="ghost" className="gap-2">
                   <ShoppingCart />
                   Cart

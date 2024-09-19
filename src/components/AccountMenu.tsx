@@ -15,7 +15,13 @@ import { useRouter } from "next/navigation";
 import { UserDTO } from "@/data_access/user/userDTO";
 import { User } from "lucide-react";
 
-const AccountMenu = ({ user }: { user: Omit<UserDTO, "password"> }) => {
+const AccountMenu = ({
+  user,
+  userNameVisibility = true,
+}: {
+  user: Omit<UserDTO, "password">;
+  userNameVisibility?: boolean;
+}) => {
   const router = useRouter();
   const { toast } = useToast();
   return (
@@ -27,7 +33,7 @@ const AccountMenu = ({ user }: { user: Omit<UserDTO, "password"> }) => {
         })}
       >
         <User />
-        {user.firstName}
+        {userNameVisibility && user.firstName}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
