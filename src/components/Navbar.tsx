@@ -10,6 +10,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Menu } from "lucide-react";
@@ -17,57 +18,10 @@ import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
 import { getCurrentClientSideUser } from "@/data_access/user";
 import LoginOrRegisterButton from "./LoginOrRegisterButton";
-
-const navigation = [
-  {
-    title: { id: 1, value: "Men" },
-    content: [
-      { id: 1, value: "Hoodies" },
-      { id: 2, value: "Top" },
-      { id: 3, value: "Pants" },
-      { id: 4, value: "Jeans" },
-      { id: 5, value: "Polos" },
-      { id: 6, value: "Sweaters" },
-      { id: 7, value: "Jackets" },
-      { id: 8, value: "Shorts" },
-      { id: 9, value: "Swimwears" },
-      { id: 10, value: "Underwears" },
-    ],
-    imageUrl: "/nav-men-poster.webp",
-  },
-  {
-    title: { id: 2, value: "Women" },
-    content: [
-      { id: 1, value: "Hoodies" },
-      { id: 2, value: "Top" },
-      { id: 3, value: "Pants" },
-      { id: 4, value: "Jeans" },
-      { id: 5, value: "Polos" },
-      { id: 6, value: "Sweaters" },
-      { id: 7, value: "Jackets" },
-      { id: 8, value: "Shorts" },
-      { id: 9, value: "Swimwears" },
-      { id: 10, value: "Underwears" },
-    ],
-    imageUrl: "/nav-women-poster.webp",
-  },
-  {
-    title: { id: 3, value: "Kids" },
-    content: [
-      { id: 1, value: "Hoodies" },
-      { id: 2, value: "Top" },
-      { id: 3, value: "Pants" },
-      { id: 4, value: "Jeans" },
-      { id: 5, value: "Polos" },
-      { id: 6, value: "Sweaters" },
-      { id: 7, value: "Jackets" },
-      { id: 8, value: "Shorts" },
-      { id: 9, value: "Swimwears" },
-      { id: 10, value: "Underwears" },
-    ],
-    imageUrl: "/nav-kids-poster.webp",
-  },
-];
+import { sanityClient } from "@/sanity/lib/client";
+import { NAVIGATION_DATA_QUERY } from "@/sanity/lib/queries";
+import { urlFor } from "@/sanity/lib/image";
+import { cn } from "@/lib/utils";
 
 const Navbar = async () => {
   let user;
@@ -77,6 +31,9 @@ const Navbar = async () => {
     // If there's an error, the user is not logged in
     // We do nothing
   }
+
+  const navData = await sanityClient.fetch(NAVIGATION_DATA_QUERY);
+
   return (
     <header className="container">
       <nav className="flex justify-between py-4">
@@ -173,49 +130,56 @@ const Navbar = async () => {
             <Separator orientation="vertical"></Separator>
             <NavigationMenu className="justify-self-start">
               <NavigationMenuList>
-                {navigation.map((navItem) => (
-                  <NavigationMenuItem key={navItem.title.id}>
+                {navData.map((category) => (
+                  <NavigationMenuItem key={category._id}>
                     <NavigationMenuTrigger>
-                      {navItem.title.value}
+                      {category.name}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="px-7 py-8">
-                      <div className="flex w-max gap-4">
-                        <Image
-                          src={navItem.imageUrl}
-                          alt="Mens poster"
-                          width={250}
-                          height={250}
-                          className="shrink-0"
-                        />
-                        <Separator
-                          orientation="vertical"
-                          className="bg-red-900 "
-                        />
-                        <div>
-                          <h2 className="text-3xl font-bold ml-3 mt-4">
-                            {navItem.title.value}
-                          </h2>
-                          <ul className="grid grid-cols-3 gap-2 mt-4 ">
-                            {navItem.content.map((navContent) => (
-                              <li key={navContent.id}>
-                                <NavigationMenuLink
-                                  className={`${buttonVariants({
-                                    variant: "ghost",
-                                  })}`}
-                                >
-                                  <Link
-                                    href={
-                                      navItem.title.value.toLowerCase() +
-                                      "/" +
-                                      navContent.value.toLowerCase()
-                                    }
-                                  >
-                                    {navContent.value}
-                                  </Link>
-                                </NavigationMenuLink>
-                              </li>
+                    <NavigationMenuContent>
+                      <div className="w-max px-14 py-12 flex gap-16">
+                        {category.image && category.image.alt && (
+                          <Image
+                            src={urlFor(category.image?.asset).url()}
+                            alt={category.image?.alt}
+                            width={250}
+                            height={250}
+                          />
+                        )}
+                        <div className="flex flex-col gap-6">
+                          <p className="text-3xl font-bold">{category.name}</p>
+                          <div className="flex gap-20">
+                            {category.subCategories.map((subCategory) => (
+                              <div
+                                key={subCategory._id}
+                                className="flex flex-col flex-wrap"
+                              >
+                                <p className="uppercase font-bold text-sm">
+                                  {subCategory.name}
+                                </p>
+                                <ul className="flex flex-col">
+                                  {subCategory.productTypes.map(
+                                    (productType) => (
+                                      <li
+                                        key={productType.name}
+                                        className={cn(
+                                          buttonVariants({
+                                            variant: "link",
+                                          }),
+                                          "text-xs font-light p-0 cursor-pointer justify-start mb-[-1rem]"
+                                        )}
+                                      >
+                                        <NavigationMenuLink
+                                          href={`${category.slug?.current}/${productType.slug?.current}`}
+                                        >
+                                          {productType.name}
+                                        </NavigationMenuLink>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         </div>
                       </div>
                     </NavigationMenuContent>
@@ -235,17 +199,7 @@ const Navbar = async () => {
             {/* Desktop Account menu */}
             <ul className="hidden md:flex justify-self-end">
               <li>
-                {user && (
-                  <AccountMenu
-                    user={{
-                      id: user.id,
-                      firstName: user.firstName,
-                      lastName: user.lastName,
-                      email: user.email,
-                      emailVerified: user.emailVerified,
-                    }}
-                  />
-                )}
+                {user && <AccountMenu user={user} />}
                 {!user && <LoginOrRegisterButton />}
               </li>
               <li>
