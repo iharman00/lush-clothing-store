@@ -9,7 +9,7 @@ const page = async () => {
   }
   return (
     <div className="container flex items-center justify-center my-10">
-      <RegisterForm />;
+      <RegisterForm />
     </div>
   );
 };

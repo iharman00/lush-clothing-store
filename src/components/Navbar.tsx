@@ -16,7 +16,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Menu } from "lucide-react";
@@ -24,10 +23,10 @@ import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
 import { getCurrentClientSideUser } from "@/data_access/user";
 import LoginOrRegisterButton from "./LoginOrRegisterButton";
-import { sanityClient } from "@/sanity/lib/client";
-import { NAVIGATION_DATA_QUERY } from "@/sanity/lib/queries";
 import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
+import { sanityClient } from "@/sanity/lib/client";
+import { NAVIGATION_DATA_QUERY } from "@/sanity/queries";
 
 const Navbar = async () => {
   let user;
@@ -146,7 +145,7 @@ const Navbar = async () => {
             </Link>
             <Separator orientation="vertical"></Separator>
             {/* Desktop Mega Menu */}
-            <NavigationMenu className="justify-self-start">
+            <NavigationMenu>
               <NavigationMenuList>
                 {navData.map((category) => (
                   <NavigationMenuItem key={category._id}>
@@ -154,7 +153,7 @@ const Navbar = async () => {
                       {category.name}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="w-max px-14 py-12 flex gap-16">
+                      <div className="min-w-[50rem] w-max max-w-[80rem] px-12 py-10 flex gap-16">
                         {/* Category Image */}
                         {category.image && category.image.alt && (
                           <Image
@@ -162,23 +161,24 @@ const Navbar = async () => {
                             alt={category.image?.alt}
                             width={250}
                             height={250}
+                            className="max-h-[22rem]"
                           />
                         )}
                         {/* Product links */}
                         <div className="flex flex-col gap-6">
                           <p className="text-3xl font-bold">{category.name}</p>
-                          <div className="flex gap-20">
+                          <div className="flex flex-wrap h-full gap-20">
                             {category.subCategories.map((subCategory) => (
                               <div
                                 key={subCategory._id}
-                                className="flex flex-col flex-wrap"
+                                className="flex flex-col flex-wrap gap-2"
                               >
                                 {/* Sub Category */}
-                                <p className="uppercase font-bold text-sm">
+                                <p className="uppercase font-bold">
                                   {subCategory.name}
                                 </p>
                                 {/* Products */}
-                                <ul className="flex flex-col">
+                                <ul className="flex flex-col gap-2">
                                   {subCategory.productTypes.map(
                                     (productType) => (
                                       <li
@@ -187,7 +187,7 @@ const Navbar = async () => {
                                           buttonVariants({
                                             variant: "link",
                                           }),
-                                          "text-xs font-light p-0 cursor-pointer justify-start mb-[-1rem]"
+                                          "font-light p-0 cursor-pointer justify-start mb-[-1rem]"
                                         )}
                                       >
                                         <NavigationMenuLink

@@ -151,6 +151,22 @@ export type Products = {
     }>;
     _key: string;
   }>;
+  fit?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "productFits";
+  };
+};
+
+export type ProductFits = {
+  _id: string;
+  _type: "productFits";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  slug?: Slug;
 };
 
 export type ProductSizes = {
@@ -170,6 +186,7 @@ export type ProductColors = {
   _updatedAt: string;
   _rev: string;
   name?: string;
+  color?: Color;
   slug?: Slug;
 };
 
@@ -290,11 +307,44 @@ export type Slug = {
   source?: string;
 };
 
-export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Products | ProductSizes | ProductColors | ProductTypes | SubCategories | Categories | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | Slug;
+export type Color = {
+  _type: "color";
+  hex?: string;
+  alpha?: number;
+  hsl?: HslaColor;
+  hsv?: HsvaColor;
+  rgb?: RgbaColor;
+};
+
+export type RgbaColor = {
+  _type: "rgbaColor";
+  r?: number;
+  g?: number;
+  b?: number;
+  a?: number;
+};
+
+export type HsvaColor = {
+  _type: "hsvaColor";
+  h?: number;
+  s?: number;
+  v?: number;
+  a?: number;
+};
+
+export type HslaColor = {
+  _type: "hslaColor";
+  h?: number;
+  s?: number;
+  l?: number;
+  a?: number;
+};
+
+export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Products | ProductFits | ProductSizes | ProductColors | ProductTypes | SubCategories | Categories | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | Slug | Color | RgbaColor | HsvaColor | HslaColor;
 export declare const internalGroqTypeReferenceTo: unique symbol;
-// Source: ./src/sanity/lib/queries.ts
+// Source: ./src/sanity/queries/index.ts
 // Variable: NAVIGATION_DATA_QUERY
-// Query: *[_type == "categories" && defined(slug.current)]{    _id, name, slug, image,    "subCategories": *[_type == "subCategories" && references(^._id)]{      _id, name, slug,       "productTypes": *[_type == "productTypes" && references(^._id)]{        _id, name, slug,      }    }  }
+// Query: *[_type == "categories" && defined(slug.current)]{    _id, name, slug, image,    "subCategories": *[_type == "subCategories" && references(^._id)]{      _id, name, slug,       "productTypes": *[_type == "productTypes" && references(^._id)]{        _id, name, slug,       }    }  }
 export type NAVIGATION_DATA_QUERYResult = Array<{
   _id: string;
   name: string | null;
@@ -327,6 +377,6 @@ export type NAVIGATION_DATA_QUERYResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"categories\" && defined(slug.current)]{\n    _id, name, slug, image,\n    \"subCategories\": *[_type == \"subCategories\" && references(^._id)]{\n      _id, name, slug, \n      \"productTypes\": *[_type == \"productTypes\" && references(^._id)]{\n        _id, name, slug,\n      }\n    }\n  }\n  ": NAVIGATION_DATA_QUERYResult;
+    "*[_type == \"categories\" && defined(slug.current)]{\n    _id, name, slug, image,\n    \"subCategories\": *[_type == \"subCategories\" && references(^._id)]{\n      _id, name, slug, \n      \"productTypes\": *[_type == \"productTypes\" && references(^._id)]{\n        _id, name, slug, \n      }\n    }\n  }\n": NAVIGATION_DATA_QUERYResult;
   }
 }

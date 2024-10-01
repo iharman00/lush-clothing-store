@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typegen": "sanity schema extract --path=src/sanity/extract.json && sanity typegen generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -22,6 +23,7 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
+    "@sanity/color-input": "^4.0.1",
     "@sanity/image-url": "^1.0.2",
     "@sanity/vision": "^3.57.3",
     "argon2": "^0.40.3",

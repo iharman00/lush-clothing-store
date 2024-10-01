@@ -129,6 +129,11 @@ export const products = defineType({
       ],
       validation: (Rule) => Rule.unique(),
     }),
+    defineField({
+      name: "fit",
+      type: "reference",
+      to: [{ type: "productFits" }],
+    }),
   ],
   preview: {
     select: {
