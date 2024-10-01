@@ -6,8 +6,8 @@ export const NAVIGATION_DATA_QUERY =
     "subCategories": *[_type == "subCategories" && references(^._id)]{
       _id, name, slug, 
       "productTypes": *[_type == "productTypes" && references(^._id)]{
-        _id, name, slug,
+        _id, name, slug, 
       }
     }
   }
-  `);
+`);
