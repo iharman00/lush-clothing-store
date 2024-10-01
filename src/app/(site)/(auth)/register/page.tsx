@@ -7,11 +7,7 @@ const page = async () => {
   if (user) {
     redirect("/");
   }
-  return (
-    <div className="container flex items-center justify-center my-10">
-      <RegisterForm />
-    </div>
-  );
+  return <RegisterForm />;
 };
 
 export default page;

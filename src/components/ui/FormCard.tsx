@@ -15,7 +15,7 @@ const FormCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ ...props }, ref) => (
-  <Card ref={ref} {...props} className="mx-auto w-full max-w-sm"></Card>
+  <Card ref={ref} {...props} className="w-full max-w-sm"></Card>
 ));
 FormCard.displayName = "FormCard";
 

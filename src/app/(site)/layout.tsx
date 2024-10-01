@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -9,8 +10,11 @@ export default function siteLayout({
   return (
     <>
       <Navbar />
-      {children}
-      <Toaster />
+      <main>
+        {children}
+        <Toaster />
+      </main>
+      <Footer />
     </>
   );
 }
