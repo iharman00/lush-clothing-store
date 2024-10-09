@@ -57,21 +57,21 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
 
     // 5. Update user's emailVerified to true
     // If user's email is'nt already verified
-    if (!user.emailVerified) {
+    if (!user.emailVerified)
       await setUserEmailVerified({ id: user.id, emailVerified: true });
 
-      // 6. Create Session
-      session = await lucia.createSession(user.id, {});
-      // lucia.createSession also creates the session in the database
-      const sessionCookie = lucia.createSessionCookie(session.id);
+    // 6. Create Session
+    session = await lucia.createSession(user.id, {});
+    // lucia.createSession also creates the session in the database
+    const sessionCookie = lucia.createSessionCookie(session.id);
 
-      // 7. Send Session cookie
-      cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-      );
-    }
+    // 7. Send Session cookie
+    cookies().set(
+      sessionCookie.name,
+      sessionCookie.value,
+      sessionCookie.attributes
+    );
+
     // 8. Redirect user to success page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {

@@ -8,14 +8,6 @@ import login, { type Response as ActionResponse } from "@/auth/actions/login";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Link from "next/link";
-import {
-  FormCard,
-  FormContent,
-  FormFooter,
-  FormHeader,
-  FormTitle,
-} from "@/components/ui/FormCard";
 import {
   Form,
   FormControl,
@@ -25,8 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export function LoginForm() {
@@ -74,73 +66,62 @@ export function LoginForm() {
   }, [formState]);
 
   return (
-    <FormCard>
-      <FormHeader>
-        <FormTitle>Login</FormTitle>
-      </FormHeader>
-      <FormContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="grid gap-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      required
-                      placeholder="you@mail.com"
-                      autoComplete="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      required
-                      placeholder="Your password"
-                      autoComplete="current-password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button className="mt-2" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Log In"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </FormContent>
-      <FormFooter>
-        <Link
-          href="/register"
-          className={buttonVariants({
-            variant: "link",
-          })}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(submit)}
+        className="flex flex-col gap-6"
+      >
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl autoFocus>
+                <Input
+                  type="email"
+                  required
+                  placeholder="you@mail.com"
+                  autoComplete="email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  required
+                  placeholder="Your password"
+                  autoComplete="current-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button
+          className="mt-2"
+          disabled={form.formState.isSubmitting}
+          size="lg"
         >
-          Don't have an account? Register
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </FormFooter>
-    </FormCard>
+          {form.formState.isSubmitting ? (
+            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Log In"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
 

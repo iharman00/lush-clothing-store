@@ -16,14 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 
 import {
-  FormCard,
-  FormContent,
-  FormDescription,
-  FormFooter,
-  FormHeader,
-  FormTitle,
-} from "@/components/ui/FormCard";
-import {
   Form,
   FormControl,
   FormField,
@@ -77,55 +69,43 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
   }, [formState]);
 
   return (
-    <FormCard>
-      <FormHeader>
-        <FormTitle title="Please check your email">
-          Please check your email
-        </FormTitle>
-        <FormDescription>
-          We've sent a code to {` ${user.email ? user.email : "your email"}`}
-        </FormDescription>
-      </FormHeader>
-
-      <FormContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(submit)} className="grid gap-4">
-            <FormField
-              control={form.control}
-              name="pin"
-              render={({ field }) => (
-                <FormItem className="flex flex-col items-center">
-                  <FormLabel>One Time Password</FormLabel>
-                  <FormControl autoFocus>
-                    <InputOTP maxLength={6} {...field}>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Verify"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </FormContent>
-      <FormFooter>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(submit)}
+        className="flex flex-col gap-4"
+      >
+        <FormField
+          control={form.control}
+          name="pin"
+          render={({ field }) => (
+            <FormItem className="flex flex-col items-center">
+              <FormLabel>One Time Password</FormLabel>
+              <FormControl autoFocus>
+                <InputOTP maxLength={6} {...field}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button className="mt-2" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? (
+            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Verify"
+          )}
+        </Button>
         <Button
           variant="link"
-          className="cursor-pointer"
+          className="mt-2"
           onClick={async () => {
             const res = await sendOTPEmail();
             if (res.success) {
@@ -143,8 +123,8 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
         >
           Didn't receive the email? Resend
         </Button>
-      </FormFooter>
-    </FormCard>
+      </form>
+    </Form>
   );
 };
 

@@ -62,10 +62,8 @@ export default async function login(data: unknown): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 6. Send verification code to the currently logged in user if email is not verified
-    if (!user.emailVerified) {
-      await sendOTPEmail();
-    }
+    // 6. Send verification code to the user is email is not verified
+    if (!user.emailVerified) await sendOTPEmail();
 
     // 6. Redirect user to homepage or verify-email page
     // This needs to be done outside try catch block because of the way redirect works
@@ -130,8 +128,6 @@ export default async function login(data: unknown): Promise<Response> {
   }
 
   revalidatePath("/");
-  if (!user.emailVerified) {
-    redirect("/verify-email");
-  }
+  if (!user.emailVerified) redirect("/verify-email");
   redirect("/");
 }

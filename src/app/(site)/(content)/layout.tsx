@@ -2,7 +2,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 
-export default function siteLayout({
+export default async function ContentLayout({
   children,
 }: {
   children: React.ReactNode;

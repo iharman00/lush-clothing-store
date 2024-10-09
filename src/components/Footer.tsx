@@ -15,8 +15,8 @@ const Footer = async () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:justify-items-center ">
           {/* Company Information */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-xl font-semibold">About Us</h3>
-            <p className="text-muted-foreground">
+            <h3 className="text-lg font-semibold">About Us</h3>
+            <p className="text-muted-foreground text-sm">
               We offer premium quality clothing with the latest trends. Shop
               with us for the best in fashion.
             </p>
@@ -39,8 +39,8 @@ const Footer = async () => {
 
           {/* Shop Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Shop</h3>
-            <ul className="text-muted-foreground flex flex-col gap-3">
+            <h3 className="text-lg font-semibold mb-4">Shop</h3>
+            <ul className="text-muted-foreground flex flex-col gap-2">
               {navData.map((navCategory) => (
                 <li key={navCategory._id}>
                   {navCategory.slug?.current && (
@@ -48,7 +48,7 @@ const Footer = async () => {
                       href={navCategory.slug?.current}
                       className={cn(
                         buttonVariants({ variant: "link" }),
-                        "text-muted-foreground text-base p-0 h-auto"
+                        "text-muted-foreground text-sm p-0 h-auto"
                       )}
                     >
                       {navCategory.name}
@@ -61,8 +61,8 @@ const Footer = async () => {
 
           {/* Customer Service Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Customer Service</h3>
-            <ul className="text-muted-foreground flex flex-col gap-3">
+            <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
+            <ul className="text-muted-foreground flex flex-col gap-2">
               {[
                 { name: "Shipping Info", slug: "shipping" },
                 { name: "Returns and Refunds", slug: "returns-and-refunds" },
@@ -74,7 +74,7 @@ const Footer = async () => {
                     href={`help/${info.slug}`}
                     className={cn(
                       buttonVariants({ variant: "link" }),
-                      "text-muted-foreground text-base p-0 h-auto"
+                      "text-muted-foreground text-sm p-0 h-auto"
                     )}
                   >
                     {info.name}
@@ -86,7 +86,7 @@ const Footer = async () => {
 
           {/* Social Media Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Follow Us</h3>
+            <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
               <Link
                 href="https://facebook.com"
@@ -111,7 +111,7 @@ const Footer = async () => {
         </div>
         <Separator className="bg-muted-foreground" />
         {/* Footer Bottom */}
-        <p className="text-muted-foreground text-center">
+        <p className="text-muted-foreground text-center text-sm">
           &copy; {new Date().getFullYear()} Lush. All rights reserved.
         </p>
       </div>
