@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} min-h-screen flex flex-col gap-10 justify-between`}
+        className={`${inter.className} min-h-screen flex flex-col justify-between`}
       >
         {children}
       </body>

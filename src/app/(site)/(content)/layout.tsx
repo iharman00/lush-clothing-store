@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/toaster";
 
 export default async function ContentLayout({
@@ -9,7 +9,7 @@ export default async function ContentLayout({
 }) {
   return (
     <>
-      <Navbar />
+      <Header />
       <main>
         {children}
         <Toaster />
