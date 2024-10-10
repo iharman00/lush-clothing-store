@@ -13,7 +13,7 @@ import { verifyVerificationCode } from "@/auth/utils/verifyVerificationCode";
 import { ZodError } from "zod";
 import {
   InvalidDataError,
-  InvalidOTPError,
+  OTPVerificationError,
   InvalidUserSessionError,
 } from "@/auth/schemas/customErrors";
 import { setUserEmailVerified } from "@/data_access/user";
@@ -75,7 +75,7 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
     // 8. Redirect user to success page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    // Custom error - thrown when we unexpected data is received
+    // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
       response = {
         success: false,
@@ -106,7 +106,7 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
     }
 
     // Custom error - thrown when OTP is invalid
-    if (error instanceof InvalidOTPError) {
+    if (error instanceof OTPVerificationError) {
       response = {
         success: false,
         message: "Invalid OTP",

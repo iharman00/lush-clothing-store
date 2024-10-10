@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { MoveLeft, MoveRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function AuthLayout({
@@ -22,16 +24,29 @@ export default function AuthLayout({
           className="absolute inset-0 object-cover object-top w-full h-full"
         />
       </div>
-      <div className="flex flex-col justify-center items-center lg:col-span-6 h-full relative">
-        <div className="absolute top-0 px-8 py-6 flex justify-between items-center w-full h-fit">
-          {/* Back button */}
-          <Button
-            variant="ghost"
-            className="rounded-full w-14 h-14"
-            onClick={() => router.back()}
-          >
-            <MoveLeft />
-          </Button>
+      <div className="lg:col-span-6 grid grid-rows-[auto_1fr] place-items-center h-full">
+        <div className="px-8 py-6 flex justify-between items-center w-full h-fit">
+          <div className="flex items-center gap-2">
+            {/* Back button */}
+            <Button
+              variant="ghost"
+              className="rounded-full w-14 h-14"
+              onClick={() => router.back()}
+            >
+              <MoveLeft />
+            </Button>
+            <Separator orientation="vertical" className="mr-2 h-12" />
+            {/* Brand logo */}
+            <Link href="/">
+              <Image
+                src="/lush_logo.svg"
+                alt="lush logo"
+                width={50}
+                height={50}
+                className="mr-4"
+              />
+            </Link>
+          </div>
           {/* Exit button */}
           <Button
             variant="link"

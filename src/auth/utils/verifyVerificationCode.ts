@@ -3,7 +3,7 @@ import "server-only";
 import prisma from "@/lib/prisma";
 import { type User } from "lucia";
 import { isWithinExpirationDate } from "oslo";
-import { InvalidOTPError } from "@/auth/schemas/customErrors";
+import { OTPVerificationError } from "@/auth/schemas/customErrors";
 
 export async function verifyVerificationCode(
   user: User,
@@ -15,7 +15,7 @@ export async function verifyVerificationCode(
     },
   });
   if (!databaseCode || databaseCode.code !== verificationCode) {
-    throw new InvalidOTPError("Invalid OTP");
+    throw new OTPVerificationError("Invalid OTP");
   }
   await prisma.emailVerificationCode.delete({
     where: {
@@ -25,10 +25,10 @@ export async function verifyVerificationCode(
   });
 
   if (!isWithinExpirationDate(databaseCode.expiresAt)) {
-    throw new InvalidOTPError("Invalid OTP");
+    throw new OTPVerificationError("Invalid OTP");
   }
   if (databaseCode.email !== user.email) {
-    throw new InvalidOTPError("Invalid OTP");
+    throw new OTPVerificationError("Invalid OTP");
   }
   return true;
 }

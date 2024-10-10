@@ -19,9 +19,16 @@ export class InvalidDataError extends Error {
   }
 }
 
-export class InvalidOTPError extends Error {
+export class OTPVerificationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "InvalidOTPError";
+    this.name = "OTPVerificationError";
+  }
+}
+
+export class InvalidOTPRequestError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidOTPRequestError";
   }
 }

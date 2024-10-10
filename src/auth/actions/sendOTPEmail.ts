@@ -2,7 +2,10 @@
 
 import { getCurrentUser } from "@/data_access/user";
 import sendVerificationCode from "@/auth/utils/sendVerificationCode";
-import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
+import {
+  InvalidOTPRequestError,
+  InvalidUserSessionError,
+} from "@/auth/schemas/customErrors";
 
 export type Response = {
   success: boolean;
@@ -17,7 +20,9 @@ export default async function sendOTPEmail(): Promise<Response> {
     const currentUser = await getCurrentUser();
 
     // 2. Send Verification code
-    await sendVerificationCode(currentUser);
+    if (currentUser.emailVerified)
+      throw new InvalidOTPRequestError("User's email is already verified.");
+    if (!currentUser.emailVerified) await sendVerificationCode(currentUser);
 
     response = {
       success: true,
@@ -28,6 +33,15 @@ export default async function sendOTPEmail(): Promise<Response> {
   } catch (error) {
     // Custom error instance - thrown when user is not signed in
     if (error instanceof InvalidUserSessionError) {
+      response = {
+        success: false,
+        message: error.message,
+      };
+      return response;
+    }
+
+    // Custom error instance - thrown when user's email is already verified
+    if (error instanceof InvalidOTPRequestError) {
       response = {
         success: false,
         message: error.message,

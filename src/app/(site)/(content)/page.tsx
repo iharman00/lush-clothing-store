@@ -38,7 +38,7 @@ export default async function Home() {
                   "text-primary-foreground text-lg font-normal"
                 )}
               >
-                Discover {category}
+                Shop {category}
               </Link>
             ))}
           </div>

@@ -17,24 +17,36 @@ const page = async () => {
   let user;
   try {
     user = await getCurrentClientSideUser();
-    if (!user.emailVerified) redirect("/");
   } catch (error) {
     // If there's an error, the user is not logged in
     // We redirect
-    redirect("/");
   }
+  if (user && !user?.emailVerified) redirect("/verify-email");
   return (
     <div className="w-full max-w-96 flex flex-col gap-12">
       <div className="text-center flex flex-col items-center gap-4">
-        <h1 className="text-3xl font-bold">Wohoo!</h1>
+        <h1 className="text-3xl font-bold">
+          {!user && "Verification Status"}
+          {user && user.emailVerified && "Wohoo!"}
+        </h1>
         <p className="text-base text-muted-foreground">
-          Registration complete! Get ready to have the best shopping experience
-          of your life.
+          {!user &&
+            "Oops!, You need to be logged in to check verification status"}
+          {user &&
+            user.emailVerified &&
+            "Registration complete! Get ready to have the best shopping experience of your life."}
         </p>
       </div>
-      <Link href="/" className={cn(buttonVariants(), "font-normal")}>
-        Let the Shopping begin!
-      </Link>
+      {!user && (
+        <Link href="/login" className={buttonVariants()}>
+          Log In
+        </Link>
+      )}
+      {user && user.emailVerified && (
+        <Link href="/" className={cn(buttonVariants(), "font-normal")}>
+          Let the Shopping begin!
+        </Link>
+      )}
     </div>
   );
 };
