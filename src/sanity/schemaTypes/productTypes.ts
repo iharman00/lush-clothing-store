@@ -26,6 +26,22 @@ export const productTypes = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: "image",
+      type: "image",
+      options: {
+        hotspot: true,
+      },
+      fields: [
+        {
+          name: "alt",
+          title: "Alternative Text",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        },
+      ],
+      validation: (Rule) => Rule.required().assetRequired(),
+    }),
   ],
   preview: {
     select: {

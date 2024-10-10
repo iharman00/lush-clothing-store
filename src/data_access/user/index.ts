@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { filterUser } from "@/data_access/user/userDTO";
 import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
 import { User } from "@prisma/client";
+import { cache } from "react";
 
 // User data-access function rules
 // - purpose of these functions are to control DB data access and mutations
@@ -12,26 +13,28 @@ import { User } from "@prisma/client";
 // - if you need access to data on the client, pass it down as props from the server
 // - functions either return the filtered User Object (UserDto) or throw an error
 
-export async function createUser({
-  firstName,
-  lastName,
-  email,
-  password: passwordHash,
-}: Pick<User, "firstName" | "lastName" | "email" | "password">) {
-  const user = await prisma.user.create({
-    data: {
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: passwordHash,
-    },
-  });
+export const createUser = cache(
+  async ({
+    firstName,
+    lastName,
+    email,
+    password: passwordHash,
+  }: Pick<User, "firstName" | "lastName" | "email" | "password">) => {
+    const user = await prisma.user.create({
+      data: {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: passwordHash,
+      },
+    });
 
-  return filterUser(user);
-}
+    return filterUser(user);
+  }
+);
 
 // Return currently logged in userDTO
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const { user: validatedUser, session } = await validateRequest();
 
   // Throw custom error when user or session not available
@@ -46,18 +49,18 @@ export async function getCurrentUser() {
   });
 
   return filterUser(user);
-}
+});
 
 // provides data for frontend consumption, therefore striping out password
-export async function getCurrentClientSideUser() {
+export const getCurrentClientSideUser = cache(async () => {
   const user = await getCurrentUser();
 
   const { password, ...userWithoutPassword } = user;
 
   return userWithoutPassword;
-}
+});
 
-export async function getUserByEmail({ email }: Pick<User, "email">) {
+export const getUserByEmail = cache(async ({ email }: Pick<User, "email">) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       email,
@@ -65,20 +68,19 @@ export async function getUserByEmail({ email }: Pick<User, "email">) {
   });
 
   return filterUser(user);
-}
+});
 
-export async function setUserEmailVerified({
-  id,
-  emailVerified,
-}: Pick<User, "id" | "emailVerified">) {
-  const user = await prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      emailVerified,
-    },
-  });
+export const setUserEmailVerified = cache(
+  async ({ id, emailVerified }: Pick<User, "id" | "emailVerified">) => {
+    const user = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        emailVerified,
+      },
+    });
 
-  return filterUser(user);
-}
+    return filterUser(user);
+  }
+);

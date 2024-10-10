@@ -29,16 +29,19 @@ export default async function Home() {
             Elevate your style.
           </h1>
           <div className="flex justify-around">
-            {["Men", "Women"].map((category, index) => (
+            {[
+              { title: "Men", slug: "men" },
+              { title: "Women", slug: "women" },
+            ].map((category, index) => (
               <Link
                 key={index}
-                href={`/${category}`}
+                href={`/${category.slug}`}
                 className={cn(
                   buttonVariants({ variant: "link" }),
                   "text-primary-foreground text-lg font-normal"
                 )}
               >
-                Shop {category}
+                Shop {category.title}
               </Link>
             ))}
           </div>

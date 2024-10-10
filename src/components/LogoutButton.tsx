@@ -1,20 +1,25 @@
 "use client";
 
 import logout from "@/auth/actions/logout";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { VariantProps } from "class-variance-authority";
 
-const LogoutButton = async () => {
-  const router = useRouter();
+export interface LogoutButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const LogoutButton = (props: LogoutButtonProps) => {
   const { toast } = useToast();
 
   return (
     <Button
+      {...props}
       onClick={async () => {
         const res = await logout();
         if (res?.success) {
-          router.refresh();
           toast({
             description: res.message,
           });

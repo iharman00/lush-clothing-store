@@ -22,7 +22,6 @@ const page = async () => {
         </h1>
         <p className="text-base text-muted-foreground">
           {!user && "You need to be logged in to request an OTP"}
-          {user && user.emailVerified && "You cannot request additional OTPs"}
           {user && !user.emailVerified && `We've sent a code to ${user.email}`}
         </p>
       </div>

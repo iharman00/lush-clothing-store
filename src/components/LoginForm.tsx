@@ -69,7 +69,7 @@ export function LoginForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(submit)}
-        className="flex flex-col gap-6"
+        className="flex flex-col gap-6 w-full"
       >
         <FormField
           control={form.control}
@@ -110,7 +110,7 @@ export function LoginForm() {
           )}
         />
         <Button
-          className="mt-2"
+          className="mt-2 w-full"
           disabled={form.formState.isSubmitting}
           size="lg"
         >

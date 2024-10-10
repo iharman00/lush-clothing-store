@@ -28,7 +28,7 @@ const page = async () => {
       {user ? (
         <div className="grid grid-cols-2 gap-4">
           <LogoutButton />
-          <Link href="/" className={buttonVariants({ variant: "secondary" })}>
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
             Go to Home
           </Link>
         </div>

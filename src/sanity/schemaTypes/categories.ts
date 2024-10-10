@@ -22,6 +22,9 @@ export const categories = defineType({
     defineField({
       name: "image",
       type: "image",
+      options: {
+        hotspot: true,
+      },
       fields: [
         {
           name: "alt",

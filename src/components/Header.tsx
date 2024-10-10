@@ -150,7 +150,7 @@ const Header = async () => {
                 <NavigationMenuItem key={category._id}>
                   <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <div className="min-w-[50rem] w-max max-w-[80rem] px-12 py-10 flex gap-16">
+                    <div className="min-w-[50rem] w-max max-w-[80rem] px-10 py-8 flex gap-16">
                       {/* Category Image */}
                       {category.image && category.image.alt && (
                         <Image
