@@ -40,7 +40,7 @@ export const products = defineType({
     }),
     defineField({
       name: "price",
-      title: "Price in cents",
+      title: "Price in US Dollars",
       type: "number",
       validation: (Rule) => Rule.required(),
     }),
@@ -130,7 +130,7 @@ export const products = defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.unique(),
+      validation: (Rule) => Rule.unique().required().min(1),
     }),
     defineField({
       name: "fit",

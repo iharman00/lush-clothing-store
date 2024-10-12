@@ -1,5 +1,7 @@
-import { fetchCategoryPageData } from "@/sanity/queries";
-import { Categories, ProductTypes, SubCategories } from "@/sanity/types";
+import {
+  fetchCategories,
+  fetchSubCategoriesAndProductTypes,
+} from "@/sanity/queries";
 import Link from "next/link";
 import CategoriesCard from "@/components/CategoriesCard";
 import {
@@ -11,24 +13,15 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-
-type fetchCategoryPageDataType = {
-  _id: Categories["_id"];
-  name: Categories["name"];
-  slug: Categories["slug"];
-  image: Categories["image"];
-  subCategories: {
-    _id: SubCategories["_id"];
-    name: SubCategories["name"];
-    slug: SubCategories["slug"];
-    productTypes: Pick<ProductTypes, "_id" | "name" | "slug" | "image">[];
-  }[];
-}[];
+import { urlFor } from "@/sanity/lib/image";
 
 const Page = async ({ params }: { params: { category: string } }) => {
-  const [category]: fetchCategoryPageDataType = await fetchCategoryPageData(
-    params.category.toLowerCase()
-  );
+  const [category] = await fetchCategories({
+    categorySlug: params.category.toLowerCase(),
+  });
+  const subCategories = await fetchSubCategoriesAndProductTypes({
+    parentCategorySlug: params.category.toLowerCase(),
+  });
 
   if (!category)
     return (
@@ -45,38 +38,60 @@ const Page = async ({ params }: { params: { category: string } }) => {
 
   return (
     <>
-      <section className="container mt-10 mb-20">
-        <h1 className="text-4xl font-bold">{category?.name}</h1>
-        <div className="flex flex-col gap-16 mt-10">
-          {category.subCategories.map((subCategory) => (
-            <div key={subCategory._id}>
-              <h2 className="text-2xl font-bold">{subCategory.name}</h2>
-              <Carousel opts={{ dragFree: true }} className="relative mt-6">
-                <CarouselContent>
-                  {subCategory.productTypes.map((productType) => (
-                    <CarouselItem
-                      key={productType._id}
-                      className="pl-4 basis-1/8"
-                    >
-                      <Link
-                        href={`/${category.slug?.current}/${subCategory.slug?.current}/${productType.slug?.current}`}
-                      >
-                        <CategoriesCard
-                          title={productType.name}
-                          image={productType.image}
-                        />
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="absolute -top-10 right-14">
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </div>
-              </Carousel>
-            </div>
-          ))}
-        </div>
+      <section className="container my-5 lg:my-20">
+        <h1 className="text-4xl font-bold">{category.name}</h1>
+        {subCategories.length > 0 ? (
+          <div className="flex flex-col gap-16 mt-10">
+            {subCategories.map((subCategory) => (
+              <div key={subCategory._id}>
+                <h2 className="text-2xl font-bold">{subCategory.name}</h2>
+                {subCategory.productTypes.length > 0 ? (
+                  <Carousel opts={{ dragFree: true }} className="relative mt-6">
+                    <CarouselContent>
+                      {subCategory.productTypes.map((productType) => (
+                        <CarouselItem
+                          key={productType._id}
+                          className="pl-4 basis-1/8"
+                        >
+                          <Link
+                            href={`/${category.slug?.current}/${productType.slug?.current}`}
+                          >
+                            {productType.name &&
+                              productType.image &&
+                              productType.image.alt && (
+                                <CategoriesCard
+                                  title={productType.name}
+                                  image={{
+                                    url: urlFor(productType.image).url(),
+                                    alt: productType.image?.alt,
+                                  }}
+                                />
+                              )}
+                          </Link>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="absolute -top-10 right-14">
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </div>
+                  </Carousel>
+                ) : (
+                  <p className="mt-4">No products to show.</p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8">
+            <p className="mt-2 text-sm md:text-base">
+              Sorry, there is nothing to show here.
+            </p>
+            <Link href="/" className={cn(buttonVariants(), "mt-4")}>
+              Go Back Home
+            </Link>
+          </div>
+        )}
       </section>
     </>
   );

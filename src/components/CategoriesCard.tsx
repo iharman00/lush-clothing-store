@@ -1,38 +1,23 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  internalGroqTypeReferenceTo,
-  SanityImageCrop,
-  SanityImageHotspot,
-} from "@/sanity/types";
-import { urlFor } from "@/sanity/lib/image";
-type CategoriesCardType = {
-  title?: string;
-  image:
-    | {
-        asset: {
-          _ref: string;
-          _type: "reference";
-          _weak?: boolean;
-          [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-        };
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        alt?: string;
-        _type: "image";
-      }
-    | undefined;
-};
+
+interface CategoriesCardType {
+  title: string;
+  image?: {
+    url: string;
+    alt: string;
+  };
+}
 
 const CategoriesCard = ({ title, image }: CategoriesCardType) => {
   return (
     <Card className="relative w-52 h-72 lg:w-72 lg:h-96 flex flex-col justify-end items-start overflow-clip group">
-      {image && image.alt && (
+      {image && (
         <Image
-          src={urlFor(image).url()}
+          src={image.url}
           alt={image.alt}
-          width={240}
-          height={288}
+          width={1000}
+          height={1000}
           className="absolute w-full h-full object-cover object-top lg:group-hover:scale-110 transition-transform duration-300 ease-out"
         />
       )}

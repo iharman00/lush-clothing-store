@@ -18,15 +18,14 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Menu } from "lucide-react";
+import { ShoppingCart, Menu, User } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
-import LoginOrRegisterButton from "./LoginOrRegisterButton";
 import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
 import { getCurrentClientSideUser } from "@/data_access/user";
-import { sanityClient } from "@/sanity/lib/client";
-import { NAVIGATION_DATA_QUERY } from "@/sanity/queries";
+import { fetchNavigationData } from "@/sanity/queries";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Header = async () => {
   let user;
@@ -37,8 +36,7 @@ const Header = async () => {
     // We do nothing
   }
 
-  const navData = await sanityClient.fetch(NAVIGATION_DATA_QUERY);
-
+  const navData = await fetchNavigationData();
   return (
     <nav className="container flex justify-between py-4 ">
       {/* Mobile */}
@@ -117,7 +115,19 @@ const Header = async () => {
           {/* Mobile Account menu */}
           <li>
             {user && <AccountMenu user={user} userNameVisibility={false} />}
-            {!user && <LoginOrRegisterButton textVisibily={false} />}
+            {!user && (
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({
+                    variant: "ghost",
+                  }),
+                  "gap-2"
+                )}
+              >
+                Log In
+              </Link>
+            )}
           </li>
           {/* Shopping Cart */}
           <li>
@@ -149,54 +159,59 @@ const Header = async () => {
               {navData.map((category) => (
                 <NavigationMenuItem key={category._id}>
                   <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="min-w-[50rem] w-max max-w-[80rem] px-10 py-8 flex gap-16">
+                  <NavigationMenuContent className="bg-background">
+                    <div className="w-[60rem] px-10 py-8 grid grid-cols-3 gap-16">
                       {/* Category Image */}
                       {category.image && category.image.alt && (
                         <Image
                           src={urlFor(category.image?.asset).url()}
                           alt={category.image?.alt}
-                          width={250}
-                          height={250}
-                          className="max-h-[22rem]"
+                          width={1000}
+                          height={1000}
+                          className="w-full h-full"
                         />
                       )}
-                      {/* Product links */}
-                      <div className="flex flex-col gap-6">
+                      <div className="flex flex-col gap-6 col-span-2">
                         <p className="text-3xl font-bold">{category.name}</p>
-                        <div className="flex flex-wrap h-full gap-20">
-                          {category.subCategories.map((subCategory) => (
-                            <div
-                              key={subCategory._id}
-                              className="flex flex-col flex-wrap gap-2"
-                            >
-                              {/* Sub Category */}
-                              <p className="uppercase font-bold">
-                                {subCategory.name}
-                              </p>
-                              {/* Products */}
-                              <ul className="flex flex-col gap-2">
-                                {subCategory.productTypes.map((productType) => (
-                                  <li
-                                    key={productType.name}
-                                    className={cn(
-                                      buttonVariants({
-                                        variant: "link",
-                                      }),
-                                      "font-light p-0 cursor-pointer justify-start mb-[-1rem]"
-                                    )}
-                                  >
-                                    <NavigationMenuLink
-                                      href={`${category.slug?.current}/${productType.slug?.current}`}
-                                    >
-                                      {productType.name}
-                                    </NavigationMenuLink>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
+                        <ScrollArea className="h-full">
+                          <div className="flex h-full gap-20">
+                            {category.subCategories.map((subCategory) => (
+                              <div
+                                key={subCategory._id}
+                                className="flex flex-col flex-wrap gap-2"
+                              >
+                                {/* Sub Category */}
+                                <p className="uppercase font-bold">
+                                  {subCategory.name}
+                                </p>
+                                {/* Products */}
+
+                                <ul className="flex flex-col gap-2">
+                                  {subCategory.productTypes.map(
+                                    (productType) => (
+                                      <li
+                                        key={productType.name}
+                                        className={cn(
+                                          buttonVariants({
+                                            variant: "link",
+                                          }),
+                                          "font-light p-0 cursor-pointer justify-start mb-[-1rem]"
+                                        )}
+                                      >
+                                        <NavigationMenuLink
+                                          href={`${category.slug?.current}/${productType.slug?.current}`}
+                                        >
+                                          {productType.name}
+                                        </NavigationMenuLink>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                          <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
                       </div>
                     </div>
                   </NavigationMenuContent>
@@ -217,7 +232,20 @@ const Header = async () => {
             <li>
               {/* Desktop Account menu */}
               {user && <AccountMenu user={user} />}
-              {!user && <LoginOrRegisterButton />}
+              {!user && (
+                <Link
+                  href="/login"
+                  className={cn(
+                    buttonVariants({
+                      variant: "ghost",
+                    }),
+                    "gap-2"
+                  )}
+                >
+                  <User />
+                  Log In
+                </Link>
+              )}
             </li>
             <li>
               {/* Shopping Cart */}

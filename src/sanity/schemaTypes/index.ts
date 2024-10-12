@@ -1,10 +1,10 @@
 import { categories } from "./categories";
-import { subCategories } from "./subCategories";
+import { productColors } from "./productColors";
+import { productFits } from "./productFits";
+import { productSizes } from "./productSizes";
 import { productTypes } from "./productTypes";
 import { products } from "./products";
-import { productColors } from "./productColors";
-import { productSizes } from "./productSizes";
-import { productFits } from "./productFits";
+import { subCategories } from "./subCategories";
 
 const schemas = [
   categories,

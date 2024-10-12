@@ -356,7 +356,7 @@ export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ./src/sanity/queries/index.ts
 // Variable: NAVIGATION_DATA_QUERY
-// Query: *[_type == "categories" && defined(slug.current)]{    _id, name, slug, image,    "subCategories": *[_type == "subCategories" && references(^._id)]{      _id, name, slug,       "productTypes": *[_type == "productTypes" && references(^._id)]{        _id, name, slug,       }    }  }
+// Query: *[_type == "categories" && defined(slug.current)]{      _id, name, slug, image,      "subCategories": *[_type == "subCategories" && references(^._id)]{        _id, name, slug,         "productTypes": *[_type == "productTypes" && references(^._id)]{          _id, name, slug,     }  }}
 export type NAVIGATION_DATA_QUERYResult = Array<{
   _id: string;
   name: string | null;
@@ -389,6 +389,6 @@ export type NAVIGATION_DATA_QUERYResult = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    "*[_type == \"categories\" && defined(slug.current)]{\n    _id, name, slug, image,\n    \"subCategories\": *[_type == \"subCategories\" && references(^._id)]{\n      _id, name, slug, \n      \"productTypes\": *[_type == \"productTypes\" && references(^._id)]{\n        _id, name, slug, \n      }\n    }\n  }\n": NAVIGATION_DATA_QUERYResult;
+    "*[_type == \"categories\" && defined(slug.current)]{\n      _id, name, slug, image,\n      \"subCategories\": *[_type == \"subCategories\" && references(^._id)]{\n        _id, name, slug, \n        \"productTypes\": *[_type == \"productTypes\" && references(^._id)]{\n          _id, name, slug, \n    }\n  }\n}\n  ": NAVIGATION_DATA_QUERYResult;
   }
 }
