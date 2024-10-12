@@ -1,29 +1,110 @@
+"use client";
+
 import ProductCard, { ProductCardProps } from "@/components/ProductCard";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/lib/image";
 import {
   fetchCategories,
+  fetchCategoriesType,
   fetchProducts,
+  fetchProductsType,
   fetchProductTypes,
+  fetchProductTypesType,
 } from "@/sanity/queries";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { InView } from "react-intersection-observer";
 
-const page = async ({
+const page = ({
   params,
 }: {
   params: { category: string; productType: string };
 }) => {
-  const [category] = await fetchCategories({
-    categorySlug: params.category,
-  });
-  const [productType] = await fetchProductTypes({
-    productTypeSlug: params.productType,
-  });
-  const products = await fetchProducts({
-    parentCategorySlug: params.category.toLowerCase(),
-    parentProductTypeSlug: params.productType.toLowerCase(),
-  });
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
+  const [category, setCategory] = useState<
+    fetchCategoriesType[number] | undefined
+  >();
+  const [productType, setproductType] = useState<
+    fetchProductTypesType[number] | undefined
+  >();
+  const [products, setProducts] = useState<fetchProductsType>([]);
+  const [loadingMoreProducts, setLoadingMoreProducts] =
+    useState<boolean>(false);
+  const [lastProduct, setLastProduct] = useState<fetchProductsType[number]>();
+
+  const router = useRouter();
+
+  const fetchData = useCallback(async () => {
+    setPageLoading(true);
+    const [category] = await fetchCategories({ categorySlug: params.category });
+    const [productType] = await fetchProductTypes({
+      productTypeSlug: params.productType,
+    });
+    const products = await fetchProducts({
+      parentCategorySlug: params.category.toLowerCase(),
+      parentProductTypeSlug: params.productType.toLowerCase(),
+      number_of_products_to_fetch: 16,
+    });
+
+    setCategory(category);
+    setproductType(productType);
+    setProducts(products);
+
+    // We use last product to fetch more products with the groq filter
+    // It sort of works as a bookmark
+    // Read more here https://www.sanity.io/docs/paginating-with-groq#99e2366d34f5
+    setLastProduct(products[products.length - 1]);
+
+    setPageLoading(false);
+  }, [params.category, params.productType]);
+
+  const loadMoreProducts = useCallback(async () => {
+    if (!lastProduct || loadingMoreProducts) return; // Prevent loading if already loading
+
+    setLoadingMoreProducts(true);
+    const newProducts = await fetchProducts({
+      parentCategorySlug: params.category.toLowerCase(),
+      parentProductTypeSlug: params.productType.toLowerCase(),
+      number_of_products_to_fetch: 24,
+      id_of_last_product_fetched: lastProduct._id,
+    });
+
+    setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+    setLastProduct(newProducts[newProducts.length - 1]); // Update the last product
+    setLoadingMoreProducts(false); // Set loading state to false after fetching
+
+    // Very important to include lastProduct in dependency array
+    // If last product does'nt change that means we have fetched all the products and it won't trigger any more calls to loadMoreProducts
+  }, [params.category, params.productType, lastProduct]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (pageLoading) {
+    return (
+      <section className="container my-5 lg:my-14 px-0">
+        <Skeleton className="w-28 h-10 rounded-md mx-[1rem] md:mx-[2rem]" />
+        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-[repeat(auto-fill,1fr)] gap-x-2 gap-y-8 md:gap-y-16 mt-14">
+          {Array.from({ length: 10 }).map((_, index) => {
+            return (
+              <div key={index} className="flex flex-col gap-3 h-[39rem]">
+                <Skeleton className="w-full h-full rounded-md" />
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="w-7/12 h-5 rounded-md" />
+                  <Skeleton className="w-4/12 h-5 rounded-md" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
 
   if (!category || !productType)
     return (
@@ -39,111 +120,75 @@ const page = async ({
     );
 
   return (
-    <section className="container my-5 lg:my-20 px-0">
-      <h1 className="text-4xl font-bold px-[1rem] md:px-[2rem]">{`${category.name}'s ${productType.name}`}</h1>
-      <div className="mt-10">
-        {products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-[repeat(auto-fill,1fr)] gap-x-2 gap-y-8 md:gap-y-16 mt-10">
-            {products.length > 0 ? (
-              products.map((product) => {
-                if (
-                  product.colorVariants[0].sizeAndStock[0].stock &&
-                  product.colorVariants[0].sizeAndStock[0].stock > 0 &&
-                  product.colorVariants[0].images &&
-                  product.colorVariants[0].images[0].alt &&
-                  product.name &&
-                  product.price
-                ) {
-                  let productImages: ProductCardProps["images"] = [];
-                  product.colorVariants.map((cv) => {
-                    if (cv.images)
-                      cv.images.map((image) => {
-                        if (image.alt) {
-                          productImages.push({
-                            _id: image._key,
-                            url: urlFor(image).url(),
-                            alt: image.alt,
-                          });
-                        }
-                      });
-                  });
-                  return (
-                    <>
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                      <ProductCard
-                        key={product._id}
-                        _id={product._id}
-                        name={product.name}
-                        price={product.price}
-                        images={productImages}
-                        url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
-                      />
-                    </>
-                  );
-                }
-              })
-            ) : (
-              <p className="mt-4">No products to show.</p>
-            )}
-          </div>
-        ) : (
-          <div className="mt-8">
-            <p className="mt-2 text-sm md:text-base">
-              Sorry, there are no products to show here.
-            </p>
-            <Link href="/" className={cn(buttonVariants(), "mt-4")}>
-              Go Back
-            </Link>
-          </div>
-        )}
-      </div>
+    <section className="container my-5 lg:my-14 px-0">
+      <h1 className="text-4xl font-semibold px-[1rem] md:px-[2rem]">{`${category.name}'s ${productType.name}`}</h1>
+      {products.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-[repeat(auto-fill,1fr)] gap-x-2 gap-y-8 md:gap-y-16 mt-14">
+          {products.length > 0 ? (
+            products.map((product) => {
+              // Have to perform these checks because of types generated by sanity
+              if (
+                product.colorVariants[0].sizeAndStock[0].stock &&
+                product.colorVariants[0].sizeAndStock[0].stock > 0 &&
+                product.colorVariants[0].images &&
+                product.colorVariants[0].images[0].alt &&
+                product.name &&
+                product.price
+              ) {
+                let productImages: ProductCardProps["images"] = [];
+                product.colorVariants.map((cv) => {
+                  if (cv.images)
+                    cv.images.map((image) => {
+                      if (image.alt) {
+                        productImages.push({
+                          _id: image._key,
+                          url: urlFor(image).url(),
+                          alt: image.alt,
+                        });
+                      }
+                    });
+                });
+                return (
+                  <ProductCard
+                    key={product._id}
+                    _id={product._id}
+                    name={product.name}
+                    price={product.price}
+                    images={productImages}
+                    url={`/${category.slug?.current}/${productType.slug?.current}/${product.slug?.current}`}
+                  />
+                );
+              }
+            })
+          ) : (
+            <p className="mt-4">No products to show.</p>
+          )}
+        </div>
+      ) : (
+        <div className="mt-18 px-[1rem] md:px-[2rem]">
+          <p className="mt-2 text-sm md:text-base">
+            Sorry, no products to show here.
+          </p>
+          <Button
+            onClick={() => router.back()}
+            className={cn(buttonVariants(), "mt-4")}
+          >
+            Go Back
+          </Button>
+        </div>
+      )}
+      {/* Loader for loading more products */}
+      <InView
+        onChange={(inView) => {
+          if (inView) loadMoreProducts();
+        }}
+      >
+        <div className="flex justify-center my-14">
+          {loadingMoreProducts && (
+            <Loader2 className="h-14 w-14 animate-spin" />
+          )}
+        </div>
+      </InView>
     </section>
   );
 };

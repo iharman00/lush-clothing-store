@@ -24,7 +24,9 @@ export const fetchNavigationData = async () => {
   return sanityFetch({ query: NAVIGATION_DATA_QUERY });
 };
 
-type fetchCategoriesType = Array<Pick<Categories, "_id" | "name" | "slug">>;
+export type fetchCategoriesType = Array<
+  Pick<Categories, "_id" | "name" | "slug">
+>;
 
 export const fetchCategories = async ({
   categorySlug,
@@ -39,7 +41,9 @@ export const fetchCategories = async ({
 `,
   });
 
-type fetchProductTypesType = Array<Pick<Categories, "_id" | "name" | "slug">>;
+export type fetchProductTypesType = Array<
+  Pick<Categories, "_id" | "name" | "slug">
+>;
 
 export const fetchProductTypes = async ({
   productTypeSlug,
@@ -54,7 +58,7 @@ export const fetchProductTypes = async ({
 `,
   });
 
-type fetchProductsType = Array<
+export type fetchProductsType = Array<
   Pick<Products, "_id" | "name" | "slug" | "price"> & {
     colorVariants: Array<{
       images: NonNullable<Products["colorVariants"]>[number]["images"];
@@ -72,27 +76,36 @@ type fetchProductsType = Array<
 export const fetchProducts = async ({
   parentCategorySlug,
   parentProductTypeSlug,
+  number_of_products_to_fetch = 10,
+  id_of_last_product_fetched,
 }: {
   parentCategorySlug: string;
   parentProductTypeSlug: string;
-}): Promise<fetchProductsType> =>
-  sanityFetch({
+  number_of_products_to_fetch?: number;
+  id_of_last_product_fetched?: string;
+}): Promise<fetchProductsType> => {
+  console.log("I ran bro");
+  return sanityFetch({
     query: `
-*[_type == "products" && 
+*[_type == "products" ${id_of_last_product_fetched ? `&& _id > "${id_of_last_product_fetched}"` : ""} &&
   references(*[_type == "productTypes" && slug.current == "${parentProductTypeSlug}" && 
     references(*[_type == "subCategories" && defined(slug.current) && 
-      references(*[_type == "categories" && slug.current == "${parentCategorySlug}"]._id)]._id)]._id)]{
-        _id, name, slug, price, 
-        colorVariants[]{
-          color->{_id, name, slug},
-          images,
-          sizeAndStock[]{stock}},
-        fit->{_id, name, slug,}
+      references(*[_type == "categories" && slug.current == "${parentCategorySlug}"]._id)]._id)]._id)] 
+  | order(_id) [0...${number_of_products_to_fetch}] {
+    _id, name, slug, price, 
+    colorVariants[]{
+      color->{_id, name, slug},
+      images,
+      sizeAndStock[]{stock}
+    },
+    fit->{_id, name, slug}
   }
+
 `,
   });
+};
 
-type fetchSubCategoriesAndProductTypesType = Array<
+export type fetchSubCategoriesAndProductTypesType = Array<
   Pick<SubCategories, "_id" | "name" | "slug"> & {
     productTypes: Array<Pick<ProductTypes, "_id" | "name" | "slug" | "image">>;
   }

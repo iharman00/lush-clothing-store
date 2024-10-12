@@ -25,7 +25,7 @@ const ProductCard = ({ _id, name, price, images, url }: ProductCardProps) => {
   return (
     <div className="flex flex-col gap-3 h-max">
       <div>
-        <Carousel opts={{ dragFree: true }} className="relative group">
+        <Carousel className="relative group">
           <Link key={_id} href={url}>
             <CarouselContent>
               {images.map((image) => (
