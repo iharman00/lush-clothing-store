@@ -56,17 +56,13 @@ const Page = async ({ params }: { params: { category: string } }) => {
                           <Link
                             href={`/${category.slug?.current}/${productType.slug?.current}`}
                           >
-                            {productType.name &&
-                              productType.image &&
-                              productType.image.alt && (
-                                <CategoriesCard
-                                  title={productType.name}
-                                  image={{
-                                    url: urlFor(productType.image).url(),
-                                    alt: productType.image?.alt,
-                                  }}
-                                />
-                              )}
+                            <CategoriesCard
+                              title={productType.name}
+                              image={{
+                                url: urlFor(productType.image).url(),
+                                alt: productType.image.alt,
+                              }}
+                            />
                           </Link>
                         </CarouselItem>
                       ))}
@@ -77,7 +73,9 @@ const Page = async ({ params }: { params: { category: string } }) => {
                     </div>
                   </Carousel>
                 ) : (
-                  <p className="mt-4">No products to show.</p>
+                  <p className="mt-4">
+                    We are working on adding more products!
+                  </p>
                 )}
               </div>
             ))}
@@ -85,7 +83,7 @@ const Page = async ({ params }: { params: { category: string } }) => {
         ) : (
           <div className="mt-8">
             <p className="mt-2 text-sm md:text-base">
-              Sorry, there is nothing to show here.
+              We are working on adding more products!
             </p>
             <Link href="/" className={cn(buttonVariants(), "mt-4")}>
               Go Back Home

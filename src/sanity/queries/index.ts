@@ -58,20 +58,33 @@ export const fetchProductTypes = async ({
 `,
   });
 
-export type fetchProductsType = Array<
-  Pick<Products, "_id" | "name" | "slug" | "price"> & {
-    colorVariants: Array<{
-      images: NonNullable<Products["colorVariants"]>[number]["images"];
-      color: Pick<ProductColors, "_id" | "name" | "slug">;
-      sizeAndStock: Array<{
-        stock: NonNullable<
-          NonNullable<Products["colorVariants"]>[number]["sizeAndStock"]
-        >[number]["stock"];
-      }>;
-    }>;
-    fit: Pick<ProductFits, "_id" | "name" | "slug">;
-  }
+type NonNullableProductImages = NonNullable<
+  NonNullable<Products["colorVariants"]>[number]["images"]
 >;
+
+export type fetchProductsType = Array<{
+  _id: NonNullable<Products["_id"]>;
+  name: NonNullable<Products["name"]>;
+  price: NonNullable<Products["price"]>;
+  slug: NonNullable<Products["slug"]>;
+  colorVariants: Array<{
+    images: {
+      _key: NonNullable<NonNullableProductImages[number]["_key"]>;
+      _type: NonNullable<NonNullableProductImages[number]["_type"]>;
+      alt: NonNullable<NonNullableProductImages[number]["alt"]>;
+      asset: NonNullable<NonNullableProductImages[number]["asset"]>;
+      crop: NonNullable<NonNullableProductImages[number]["crop"]>;
+      hotspot: NonNullable<NonNullableProductImages[number]["hotspot"]>;
+    }[];
+    color: Pick<ProductColors, "_id" | "name" | "slug">;
+    sizeAndStock: Array<{
+      stock: NonNullable<
+        NonNullable<Products["colorVariants"]>[number]["sizeAndStock"]
+      >[number]["stock"];
+    }>;
+  }>;
+  fit: Pick<ProductFits, "_id" | "name" | "slug">;
+}>;
 
 export const fetchProducts = async ({
   parentCategorySlug,
@@ -83,9 +96,8 @@ export const fetchProducts = async ({
   parentProductTypeSlug: string;
   number_of_products_to_fetch?: number;
   id_of_last_product_fetched?: string;
-}): Promise<fetchProductsType> => {
-  console.log("I ran bro");
-  return sanityFetch({
+}): Promise<fetchProductsType> =>
+  sanityFetch({
     query: `
 *[_type == "products" ${id_of_last_product_fetched ? `&& _id > "${id_of_last_product_fetched}"` : ""} &&
   references(*[_type == "productTypes" && slug.current == "${parentProductTypeSlug}" && 
@@ -103,11 +115,21 @@ export const fetchProducts = async ({
 
 `,
   });
-};
 
 export type fetchSubCategoriesAndProductTypesType = Array<
   Pick<SubCategories, "_id" | "name" | "slug"> & {
-    productTypes: Array<Pick<ProductTypes, "_id" | "name" | "slug" | "image">>;
+    productTypes: Array<{
+      _id: NonNullable<ProductTypes["_id"]>;
+      name: NonNullable<ProductTypes["name"]>;
+      slug: NonNullable<ProductTypes["slug"]>;
+      image: {
+        _type: NonNullable<NonNullable<ProductTypes["image"]>["_type"]>;
+        alt: NonNullable<NonNullable<ProductTypes["image"]>["alt"]>;
+        asset: NonNullable<NonNullable<ProductTypes["image"]>["asset"]>;
+        crop: NonNullable<NonNullable<ProductTypes["image"]>["crop"]>;
+        hotspot: NonNullable<NonNullable<ProductTypes["image"]>["hotspot"]>;
+      };
+    }>;
   }
 >;
 

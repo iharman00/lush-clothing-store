@@ -23,52 +23,28 @@ export type ProductCardProps = {
 
 const ProductCard = ({ _id, name, price, images, url }: ProductCardProps) => {
   return (
-    <div className="flex flex-col gap-3 h-max">
-      <div>
-        <Carousel className="relative group">
-          <Link key={_id} href={url}>
-            <CarouselContent>
-              {images.map((image) => (
-                <CarouselItem key={image._id}>
-                  <Image
-                    src={image.url}
-                    alt={image.alt}
-                    width={1000}
-                    height={1000}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </CarouselItem>
-              ))}
-              {images.map((image) => (
-                <CarouselItem key={image._id}>
-                  <Image
-                    src={image.url}
-                    alt={image.alt}
-                    width={1000}
-                    height={1000}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </CarouselItem>
-              ))}
-              {images.map((image) => (
-                <CarouselItem key={image._id}>
-                  <Image
-                    src={image.url}
-                    alt={image.alt}
-                    width={1000}
-                    height={1000}
-                    className="w-full h-full object-cover object-top"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Link>
-          <div className="hidden md:group-hover:flex absolute w-full h-full top-0 justify-between items-center p-4">
-            <CarouselPrevious className="static" />
-            <CarouselNext className="static" />
-          </div>
-        </Carousel>
-      </div>
+    <div className="flex flex-col gap-3 aspect-[3/4]">
+      <Carousel className="group h-full">
+        <Link key={_id} href={url} className="h-full flex *:w-full">
+          <CarouselContent className="h-full">
+            {images.map((image) => (
+              <CarouselItem key={image._id} className="h-full">
+                <Image
+                  src={image.url}
+                  alt={image.alt}
+                  width={1000}
+                  height={1000}
+                  className="w-full h-full object-cover"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Link>
+        <div className="hidden md:group-hover:flex absolute w-full h-full top-0 justify-between items-center p-4">
+          <CarouselPrevious className="static" />
+          <CarouselNext className="static" />
+        </div>
+      </Carousel>
       <div className="flex flex-col gap-2 px-2 text-sm">
         <p>{name}</p>
         <p className="text-muted-foreground">{formatPrice(price)}</p>
