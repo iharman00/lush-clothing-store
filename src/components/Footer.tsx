@@ -3,7 +3,7 @@ import { Instagram } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
-import { fetchNavigationData } from "@/sanity/queries";
+import { fetchNavigationData } from "@/sanity/staticQueries";
 
 const Footer = async () => {
   const navData = await fetchNavigationData();

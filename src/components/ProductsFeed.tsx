@@ -1,14 +1,15 @@
 "use client";
 
-import { fetchProducts, fetchProductsType } from "@/sanity/queries";
+import fetchProducts, {
+  fetchProductsReturnType,
+} from "@/sanity/dynamicQueries/fetchProducts";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { InView } from "react-intersection-observer";
 import ProductCard, { ProductCardProps } from "@/components/ProductCard";
 import { urlFor } from "@/sanity/lib/image";
 import ProductCardSkeleton from "./ProductCardSkeleton";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 
 interface ProductsFeedProps {
   parentCategorySlug: string;
@@ -19,19 +20,27 @@ const ProductsFeed = ({
   parentCategorySlug,
   parentProductTypeSlug,
 }: ProductsFeedProps) => {
-  const [products, setProducts] = useState<fetchProductsType>([]);
+  const [products, setProducts] = useState<fetchProductsReturnType>([]);
   const [loadingInitialProducts, setLoadingInitialProducts] = useState(true);
   const [loadingMoreProducts, setLoadingMoreProducts] = useState(false);
 
-  const router = useRouter();
+  const [colorSlug] = useQueryState("color");
+  const [fitSlug] = useQueryState("fit");
+  const [sizeSlug] = useQueryState("size");
+  const [priceFilter] = useQueryState("price");
 
-  // Fetch initial products
   useEffect(() => {
     const getProducts = async () => {
       setLoadingInitialProducts(true);
       const products = await fetchProducts({
         parentCategorySlug: parentCategorySlug,
         parentProductTypeSlug: parentProductTypeSlug,
+        filters: {
+          colorSlug,
+          fitSlug,
+          sizeSlug,
+          priceFilter,
+        },
         number_of_products_to_fetch: 8,
       });
       setProducts(products);
@@ -39,7 +48,14 @@ const ProductsFeed = ({
     };
 
     getProducts();
-  }, [parentCategorySlug, parentProductTypeSlug]);
+  }, [
+    parentCategorySlug,
+    parentProductTypeSlug,
+    colorSlug,
+    fitSlug,
+    sizeSlug,
+    priceFilter,
+  ]);
 
   // Load more products on scroll
   const loadMoreProducts = useCallback(async () => {
@@ -51,6 +67,12 @@ const ProductsFeed = ({
     const newProducts = await fetchProducts({
       parentCategorySlug: parentCategorySlug,
       parentProductTypeSlug: parentProductTypeSlug,
+      filters: {
+        colorSlug,
+        fitSlug,
+        sizeSlug,
+        priceFilter,
+      },
       number_of_products_to_fetch: 24,
       id_of_last_product_fetched: lastProduct._id,
     });
@@ -61,6 +83,10 @@ const ProductsFeed = ({
     loadingMoreProducts,
     parentCategorySlug,
     parentProductTypeSlug,
+    colorSlug,
+    fitSlug,
+    sizeSlug,
+    priceFilter,
   ]);
 
   // Show skeletons while the initial products are loading
@@ -77,29 +103,39 @@ const ProductsFeed = ({
   if (products.length > 0)
     return (
       <>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-8 md:gap-y-16 mt-14 mb-20">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-8 md:gap-y-16 mt-10 mb-20">
           {products.map((product) => {
-            let productImages: ProductCardProps["images"] = [];
+            if (
+              product.colorVariants[0].sizeAndStock[0].stock &&
+              product.colorVariants[0].sizeAndStock[0].stock > 0 &&
+              product.colorVariants[0].images &&
+              product.colorVariants[0].images[0].alt &&
+              product.name &&
+              product.price
+            ) {
+              let productImages: ProductCardProps["images"] = [];
 
-            // Get the images of the first coloVariant
-            product.colorVariants[0].images.map((image) =>
-              productImages.push({
-                _id: image._key,
-                url: urlFor(image).url(),
-                alt: image.alt,
-              })
-            );
+              // Get the images of the first coloVariant
+              product.colorVariants[0].images.map((image) => {
+                if (image.alt)
+                  productImages.push({
+                    _id: image._key,
+                    url: urlFor(image).url(),
+                    alt: image.alt,
+                  });
+              });
 
-            return (
-              <ProductCard
-                key={product._id}
-                _id={product._id}
-                name={product.name}
-                price={product.price}
-                images={productImages}
-                url={`/${parentCategorySlug}/${parentProductTypeSlug}/${product.slug?.current}`}
-              />
-            );
+              return (
+                <ProductCard
+                  key={product._id}
+                  _id={product._id}
+                  name={product.name}
+                  price={product.price}
+                  images={productImages}
+                  url={`/${parentCategorySlug}/${parentProductTypeSlug}/${product.slug?.current}`}
+                />
+              );
+            }
           })}
         </div>
         <InView
@@ -119,13 +155,10 @@ const ProductsFeed = ({
   // If there are no products to show
   if (products.length === 0)
     return (
-      <div className="mt-18 px-[1rem] md:px-[2rem]">
+      <div className="mt-6 px-[1rem] md:px-[2rem]">
         <p className="mt-2 text-sm md:text-base">
-          Stay tuned, {parentProductTypeSlug} are coming soon!
+          There are no products to show for the selected category!
         </p>
-        <Button onClick={() => router.back()} className="mt-4">
-          Go back
-        </Button>
       </div>
     );
 };

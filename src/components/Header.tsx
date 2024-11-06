@@ -24,7 +24,7 @@ import AccountMenu from "./AccountMenu";
 import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
 import { getCurrentClientSideUser } from "@/data_access/user";
-import { fetchNavigationData } from "@/sanity/queries";
+import { fetchNavigationData } from "@/sanity/staticQueries";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const Header = async () => {

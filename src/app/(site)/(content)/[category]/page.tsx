@@ -1,7 +1,4 @@
-import {
-  fetchCategories,
-  fetchSubCategoriesAndProductTypes,
-} from "@/sanity/queries";
+import fetchCategoryData from "@/sanity/dynamicQueries/fetchCategoryData";
 import Link from "next/link";
 import CategoriesCard from "@/components/CategoriesCard";
 import {
@@ -14,9 +11,10 @@ import {
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { urlFor } from "@/sanity/lib/image";
+import fetchSubCategoriesAndProductTypes from "@/sanity/dynamicQueries/fetchSubcategoriesAndProductTypes";
 
 const Page = async ({ params }: { params: { category: string } }) => {
-  const [category] = await fetchCategories({
+  const [category] = await fetchCategoryData({
     categorySlug: params.category.toLowerCase(),
   });
   const subCategories = await fetchSubCategoriesAndProductTypes({
@@ -56,13 +54,17 @@ const Page = async ({ params }: { params: { category: string } }) => {
                           <Link
                             href={`/${category.slug?.current}/${productType.slug?.current}`}
                           >
-                            <CategoriesCard
-                              title={productType.name}
-                              image={{
-                                url: urlFor(productType.image).url(),
-                                alt: productType.image.alt,
-                              }}
-                            />
+                            {productType.name &&
+                              productType.image &&
+                              productType.image.alt && (
+                                <CategoriesCard
+                                  title={productType.name}
+                                  image={{
+                                    url: urlFor(productType.image).url(),
+                                    alt: productType.image?.alt,
+                                  }}
+                                />
+                              )}
                           </Link>
                         </CarouselItem>
                       ))}
