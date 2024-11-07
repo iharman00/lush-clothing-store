@@ -46,7 +46,7 @@ const page = async ({
   ]);
 
   return (
-    <section className="container my-5 lg:my-14 px-0">
+    <section className="container my-5 mb-10 lg:my-14 px-0">
       <h1 className="text-4xl font-semibold px-[1rem] md:px-[2rem]">{`${category.name}'s ${productType.name}`}</h1>
       <ProductsFilter
         filtersData={{

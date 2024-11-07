@@ -54,10 +54,10 @@ export default async function fetchProducts({
 }: fetchProductsProps): Promise<fetchProductsReturnType> {
   // Construct filter conditions
   const colorFilter = filters.colorSlug
-    ? `&& colorVariants[]color->slug.current == "${filters.colorSlug}"`
+    ? `&& "${filters.colorSlug}" in colorVariants[].color->slug.current`
     : "";
   const sizeFilter = filters.sizeSlug
-    ? `&& colorVariants[].sizeAndStock[].size->slug.current == "${filters.sizeSlug}"`
+    ? `&& "${filters.sizeSlug}" in colorVariants[].sizeAndStock[].size->slug.current`
     : "";
   const fitFilter = filters.fitSlug
     ? `&& fit->slug.current == "${filters.fitSlug}"`
@@ -86,6 +86,7 @@ export default async function fetchProducts({
   }
 `;
 
+  console.log(query);
   return sanityFetch({
     query,
   });

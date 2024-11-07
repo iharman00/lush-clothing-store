@@ -10,7 +10,7 @@ export default async function ContentLayout({
   return (
     <>
       <Header />
-      <main>
+      <main className="flex-grow">
         {children}
         <Toaster />
       </main>

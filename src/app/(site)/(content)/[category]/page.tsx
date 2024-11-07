@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { urlFor } from "@/sanity/lib/image";
-import fetchSubCategoriesAndProductTypes from "@/sanity/dynamicQueries/fetchSubcategoriesAndProductTypes";
+import fetchSubCategoriesAndProductTypes from "@/sanity/dynamicQueries/fetchSubCategoriesAndProductTypes";
 
 const Page = async ({ params }: { params: { category: string } }) => {
   const [category] = await fetchCategoryData({
@@ -75,8 +75,8 @@ const Page = async ({ params }: { params: { category: string } }) => {
                     </div>
                   </Carousel>
                 ) : (
-                  <p className="mt-4">
-                    We are working on adding more products!
+                  <p className="mt-4 font-bold text-muted-foreground">
+                    Sorry, We couldn't find any results :&#40;
                   </p>
                 )}
               </div>
@@ -84,8 +84,8 @@ const Page = async ({ params }: { params: { category: string } }) => {
           </div>
         ) : (
           <div className="mt-8">
-            <p className="mt-2 text-sm md:text-base">
-              We are working on adding more products!
+            <p className="mt-2 text-sm md:text-base font-bold text-muted-foreground">
+              Sorry, We couldn't find any results :&#40;
             </p>
             <Link href="/" className={cn(buttonVariants(), "mt-4")}>
               Go Back Home

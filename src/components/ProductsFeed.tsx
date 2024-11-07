@@ -155,9 +155,9 @@ const ProductsFeed = ({
   // If there are no products to show
   if (products.length === 0)
     return (
-      <div className="mt-6 px-[1rem] md:px-[2rem]">
-        <p className="mt-2 text-sm md:text-base">
-          There are no products to show for the selected category!
+      <div className="mt-8 px-[1rem] md:px-[2rem]">
+        <p className="mt-2 text-xl font-bold text-muted-foreground">
+          Sorry, We couldn't find any results :&#40;
         </p>
       </div>
     );

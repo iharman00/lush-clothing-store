@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { priceFiltersQueryMap } from "@/sanity/dynamicQueries/fetchProducts";
@@ -67,7 +68,11 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
       price: priceFilter,
     };
     Object.entries(filters).forEach(([key, value]) => {
-      if (value) form.setValue(key as keyof filtersFormType, value);
+      if (value) {
+        form.setValue(key as keyof filtersFormType, value, {
+          shouldTouch: true,
+        });
+      }
     });
   }, [colorSlug, sizeSlug, fitSlug, priceFilter, form]);
 
@@ -77,8 +82,10 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
     setSizeSlug(data.size || null);
     setFitSlug(data.fit || null);
     setPriceFilter(data.price || null);
+    form.reset(data);
   };
 
+  // Somewhat reusable Filter Select component
   const FilterSelect = ({
     name,
     placeholder,
@@ -124,72 +131,89 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
 
   return (
     <div className="mt-8 px-[1rem] md:px-[2rem]">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex space-x-4 mb-6"
-        >
-          <FilterSelect
-            name="color"
-            placeholder="Color"
-            options={filtersData.colors}
-          />
-          <FilterSelect
-            name="size"
-            placeholder="Size"
-            options={filtersData.sizes}
-          />
-          <FilterSelect
-            name="fit"
-            placeholder="Fit"
-            options={filtersData.fits}
-          />
+      <ScrollArea>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex space-x-4 mb-6"
+          >
+            {/* Color Filter */}
+            <FilterSelect
+              name="color"
+              placeholder="Color"
+              options={filtersData.colors}
+            />
 
-          {/* Price Range Filter */}
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Price Range" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {priceOptions.map((priceOption) => (
-                      <SelectItem
-                        key={priceOption._id}
-                        value={priceOption.slug}
-                      >
-                        {priceOption.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
+            {/* Size Filter */}
+            <FilterSelect
+              name="size"
+              placeholder="Size"
+              options={filtersData.sizes}
+            />
+
+            {/* Fit Filter */}
+            <FilterSelect
+              name="fit"
+              placeholder="Fit"
+              options={filtersData.fits}
+            />
+
+            {/* Price Range Filter */}
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Price Range" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {priceOptions.map((priceOption) => (
+                        <SelectItem
+                          key={priceOption._id}
+                          value={priceOption.slug}
+                        >
+                          {priceOption.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            {/* Form Submit and Clear Controls */}
+            {form.formState.isDirty && <Button type="submit">Apply</Button>}
+            {(form.getValues("color") !== "" ||
+              form.getValues("fit") !== "" ||
+              form.getValues("price") !== "" ||
+              form.getValues("size") !== "") && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  form.reset({
+                    color: "",
+                    size: "",
+                    fit: "",
+                    price: "",
+                  });
+                  setColorSlug(null);
+                  setSizeSlug(null);
+                  setFitSlug(null);
+                  setPriceFilter(null);
+                }}
+              >
+                Clear
+              </Button>
             )}
-          />
-
-          {form.formState.isDirty && <Button type="submit">Apply</Button>}
-          {form.formState.isDirty && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                form.reset();
-                setColorSlug(null);
-                setSizeSlug(null);
-                setFitSlug(null);
-                setPriceFilter(null);
-              }}
-            >
-              Clear
-            </Button>
-          )}
-        </form>
-      </Form>
+          </form>
+        </Form>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 };
