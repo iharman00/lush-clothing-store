@@ -1,43 +1,31 @@
 "use client";
 
-import { Color, Slug } from "@/sanity/types";
 import { useQueryState } from "nuqs";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form, FormField, FormItem } from "@/components/ui/form";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { priceFiltersQueryMap } from "@/sanity/dynamicQueries/fetchProducts";
+import FilterSelect from "./FilterSelect";
+import { Color } from "@/sanity/types";
 
-type FilterOption =
-  | {
-      _id: string;
-      name: string | null;
-      slug: Slug | null;
-    }
-  | {
-      _id: string;
-      name: string | null;
-      slug: Slug | null;
-      color: Color | null;
-    };
+export type FilterOption = {
+  _id: string;
+  name: string;
+  slug: string;
+  color?: Color;
+};
 
 interface ProductsFilterProps {
   filtersData: {
-    colors: FilterOption[];
-    sizes: FilterOption[];
-    fits: FilterOption[];
+    colorOptions: FilterOption[];
+    sizeOptions: FilterOption[];
+    fitOptions: FilterOption[];
+    priceOptions: FilterOption[];
   };
 }
 
-type filtersFormType = {
+export type FormSchema = {
   color: string;
   size: string;
   fit: string;
@@ -45,12 +33,13 @@ type filtersFormType = {
 };
 
 const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
+  const { colorOptions, fitOptions, priceOptions, sizeOptions } = filtersData;
   const [colorSlug, setColorSlug] = useQueryState("color");
   const [sizeSlug, setSizeSlug] = useQueryState("size");
   const [fitSlug, setFitSlug] = useQueryState("fit");
   const [priceFilter, setPriceFilter] = useQueryState("price");
 
-  const form = useForm<filtersFormType>({
+  const form = useForm<FormSchema>({
     defaultValues: {
       color: "",
       size: "",
@@ -59,7 +48,30 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
     },
   });
 
-  // Synchronize form values with URL query state on load
+  // Handle form submission to update URL parameters
+  const onSubmit = (data: FormSchema) => {
+    setColorSlug(data.color || null);
+    setSizeSlug(data.size || null);
+    setFitSlug(data.fit || null);
+    setPriceFilter(data.price || null);
+    form.reset(data);
+  };
+
+  // Checks if any filter has an option selected
+  const isAnyFilterActive = Object.values(form.getValues()).some(
+    (value) => value
+  );
+
+  // Clears form values and resets query parameters
+  const clearFilters = () => {
+    form.reset({ color: "", size: "", fit: "", price: "" });
+    setColorSlug(null);
+    setSizeSlug(null);
+    setFitSlug(null);
+    setPriceFilter(null);
+  };
+
+  // Synchronize form values with URL query params on load
   useEffect(() => {
     const filters = {
       color: colorSlug,
@@ -69,65 +81,12 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
     };
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
-        form.setValue(key as keyof filtersFormType, value, {
+        form.setValue(key as keyof FormSchema, value, {
           shouldTouch: true,
         });
       }
     });
   }, [colorSlug, sizeSlug, fitSlug, priceFilter, form]);
-
-  // Handle form submission to update URL parameters
-  const onSubmit = (data: filtersFormType) => {
-    setColorSlug(data.color || null);
-    setSizeSlug(data.size || null);
-    setFitSlug(data.fit || null);
-    setPriceFilter(data.price || null);
-    form.reset(data);
-  };
-
-  // Somewhat reusable Filter Select component
-  const FilterSelect = ({
-    name,
-    placeholder,
-    options,
-  }: {
-    name: keyof filtersFormType;
-    placeholder: string;
-    options: FilterOption[];
-  }) => (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <Select onValueChange={field.onChange} value={field.value}>
-            <FormControl>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {options.map((option) =>
-                option.name && option.slug?.current ? (
-                  <SelectItem key={option._id} value={option.slug.current}>
-                    {option.name}
-                  </SelectItem>
-                ) : null
-              )}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )}
-    />
-  );
-
-  // Price filter mapping to ensure proper typing and content
-  const priceOptions = Object.keys(priceFiltersQueryMap).map((key, index) => ({
-    _id: String(index),
-    name: priceFiltersQueryMap[key as keyof typeof priceFiltersQueryMap]
-      .displayName,
-    slug: key,
-  }));
 
   return (
     <div className="mt-8 px-[1rem] md:px-[2rem]">
@@ -138,75 +97,79 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
             className="flex space-x-4 mb-6"
           >
             {/* Color Filter */}
-            <FilterSelect
-              name="color"
-              placeholder="Color"
-              options={filtersData.colors}
-            />
-
-            {/* Size Filter */}
-            <FilterSelect
-              name="size"
-              placeholder="Size"
-              options={filtersData.sizes}
-            />
+            {colorOptions.length > 0 && (
+              <FormField
+                control={form.control}
+                name="color"
+                render={({ field }) => (
+                  <FormItem>
+                    <FilterSelect
+                      placeholder="Color"
+                      options={colorOptions}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Fit Filter */}
-            <FilterSelect
-              name="fit"
-              placeholder="Fit"
-              options={filtersData.fits}
-            />
+            {fitOptions.length > 0 && (
+              <FormField
+                control={form.control}
+                name="fit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FilterSelect
+                      placeholder="Fit"
+                      options={fitOptions}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            {/* Price Range Filter */}
+            {/* Size Filter */}
+            {sizeOptions.length > 0 && (
+              <FormField
+                control={form.control}
+                name="size"
+                render={({ field }) => (
+                  <FormItem>
+                    <FilterSelect
+                      placeholder="Size"
+                      options={sizeOptions}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Price Filter */}
             <FormField
               control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Price Range" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {priceOptions.map((priceOption) => (
-                        <SelectItem
-                          key={priceOption._id}
-                          value={priceOption.slug}
-                        >
-                          {priceOption.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FilterSelect
+                    placeholder="Price"
+                    options={priceOptions}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  />
                 </FormItem>
               )}
             />
 
             {/* Form Submit and Clear Controls */}
             {form.formState.isDirty && <Button type="submit">Apply</Button>}
-            {(form.getValues("color") !== "" ||
-              form.getValues("fit") !== "" ||
-              form.getValues("price") !== "" ||
-              form.getValues("size") !== "") && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  form.reset({
-                    color: "",
-                    size: "",
-                    fit: "",
-                    price: "",
-                  });
-                  setColorSlug(null);
-                  setSizeSlug(null);
-                  setFitSlug(null);
-                  setPriceFilter(null);
-                }}
-              >
+            {isAnyFilterActive && (
+              <Button type="button" variant="outline" onClick={clearFilters}>
                 Clear
               </Button>
             )}

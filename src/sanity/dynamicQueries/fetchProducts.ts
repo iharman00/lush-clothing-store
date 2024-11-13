@@ -1,21 +1,32 @@
 import { sanityFetch } from "../lib/client";
 import { ProductColors, ProductFits, Products } from "../types";
 
-export const priceFiltersQueryMap = {
-  Under$50: { displayName: "Under $50", query: "price < 50" },
-  "$50-$100": { displayName: "$50 - $100", query: "price > 50 && price < 100" },
-  "$100-$200": {
-    displayName: "$100 - $200",
-    query: "price > 100 && price < 200",
+export const priceFilters = [
+  {
+    id: "1",
+    displayName: "Under $50",
+    slug: "Under$50",
+    sanityQuery: "price < 50",
   },
-  Over$200: { displayName: "Over $200", query: "price > 200" },
-};
-
-function isValidPriceFilter(
-  filter: string
-): filter is keyof typeof priceFiltersQueryMap {
-  return filter in priceFiltersQueryMap;
-}
+  {
+    id: "2",
+    displayName: "$50 - $100",
+    slug: "$50-$100",
+    sanityQuery: "price > 50 && price < 100",
+  },
+  {
+    id: "3",
+    displayName: "$100 - $200",
+    slug: "$100-$200",
+    sanityQuery: "price > 100 && price < 200",
+  },
+  {
+    id: "4",
+    displayName: "Over $200",
+    slug: "Over$200",
+    sanityQuery: "price > 200",
+  },
+];
 
 type fetchProductsProps = {
   parentCategorySlug: string;
@@ -66,8 +77,9 @@ export default async function fetchProducts({
     ? `&& _id > "${id_of_last_product_fetched}"`
     : "";
   const priceFilter =
-    filters.priceFilter && isValidPriceFilter(filters.priceFilter)
-      ? `&& ${priceFiltersQueryMap[filters.priceFilter].query}`
+    filters.priceFilter &&
+    priceFilters.filter((pf) => pf.slug === filters.priceFilter).length > 0 // checks if priceFilter actually has a defined query
+      ? `&& ${priceFilters.filter((pf) => pf.slug === filters.priceFilter)[0].sanityQuery}`
       : "";
 
   const query = `

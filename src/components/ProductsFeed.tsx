@@ -10,6 +10,7 @@ import ProductCard, { ProductCardProps } from "@/components/ProductCard";
 import { urlFor } from "@/sanity/lib/image";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { useQueryState } from "nuqs";
+import { throttle } from "lodash";
 
 interface ProductsFeedProps {
   parentCategorySlug: string;
@@ -23,6 +24,7 @@ const ProductsFeed = ({
   const [products, setProducts] = useState<fetchProductsReturnType>([]);
   const [loadingInitialProducts, setLoadingInitialProducts] = useState(true);
   const [loadingMoreProducts, setLoadingMoreProducts] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
 
   const [colorSlug] = useQueryState("color");
   const [fitSlug] = useQueryState("fit");
@@ -32,6 +34,7 @@ const ProductsFeed = ({
   useEffect(() => {
     const getProducts = async () => {
       setLoadingInitialProducts(true);
+      setHasMoreProducts(true);
       const products = await fetchProducts({
         parentCategorySlug: parentCategorySlug,
         parentProductTypeSlug: parentProductTypeSlug,
@@ -58,36 +61,50 @@ const ProductsFeed = ({
   ]);
 
   // Load more products on scroll
-  const loadMoreProducts = useCallback(async () => {
-    const lastProduct = products[products.length - 1];
+  const loadMoreProducts = useCallback(
+    throttle(async () => {
+      if (loadingMoreProducts || !hasMoreProducts) return;
 
-    if (!lastProduct || loadingMoreProducts) return;
+      setLoadingMoreProducts(true);
 
-    setLoadingMoreProducts(true);
-    const newProducts = await fetchProducts({
-      parentCategorySlug: parentCategorySlug,
-      parentProductTypeSlug: parentProductTypeSlug,
-      filters: {
-        colorSlug,
-        fitSlug,
-        sizeSlug,
-        priceFilter,
-      },
-      number_of_products_to_fetch: 24,
-      id_of_last_product_fetched: lastProduct._id,
-    });
-    setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-    setLoadingMoreProducts(false);
-  }, [
-    products,
-    loadingMoreProducts,
-    parentCategorySlug,
-    parentProductTypeSlug,
-    colorSlug,
-    fitSlug,
-    sizeSlug,
-    priceFilter,
-  ]);
+      const lastProduct = products[products.length - 1];
+
+      const newProducts = await fetchProducts({
+        parentCategorySlug: parentCategorySlug,
+        parentProductTypeSlug: parentProductTypeSlug,
+        filters: {
+          colorSlug,
+          fitSlug,
+          sizeSlug,
+          priceFilter,
+        },
+        number_of_products_to_fetch: 24,
+        id_of_last_product_fetched: lastProduct._id,
+      });
+
+      // If we get less products than requested it likely means we ran out of products
+      if (newProducts.length < 24) {
+        setHasMoreProducts(false);
+      }
+
+      if (newProducts.length > 0 && newProducts[0]._id !== lastProduct._id) {
+        setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+      }
+
+      setLoadingMoreProducts(false);
+    }, 1000),
+    [
+      products,
+      parentCategorySlug,
+      parentProductTypeSlug,
+      loadingMoreProducts,
+      hasMoreProducts,
+      colorSlug,
+      fitSlug,
+      sizeSlug,
+      priceFilter,
+    ]
+  );
 
   // Show skeletons while the initial products are loading
   if (loadingInitialProducts)
@@ -140,7 +157,7 @@ const ProductsFeed = ({
         </div>
         <InView
           onChange={(inView) => {
-            if (inView) loadMoreProducts();
+            if (inView && hasMoreProducts) loadMoreProducts();
           }}
         >
           {loadingMoreProducts && (
