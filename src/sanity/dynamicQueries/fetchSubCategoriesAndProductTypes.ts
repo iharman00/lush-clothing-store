@@ -5,7 +5,7 @@ type fetchSubCategoriesAndProductTypesProps = {
   parentCategorySlug: string;
 };
 
-type fetchSubCategoriesAndProductTypesReturnType = Array<
+export type fetchSubCategoriesAndProductTypesReturnType = Array<
   Pick<SubCategories, "_id" | "name" | "slug"> & {
     productTypes: Array<Pick<ProductTypes, "_id" | "name" | "slug" | "image">>;
   }

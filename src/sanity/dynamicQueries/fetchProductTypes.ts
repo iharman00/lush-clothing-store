@@ -1,13 +1,13 @@
 import { sanityFetch } from "../lib/client";
 import { Categories } from "../types";
 
-type fetchProductTypesReturnType = Array<
-  Pick<Categories, "_id" | "name" | "slug">
->;
-
 type fetchProductTypesProps = {
   productTypeSlug: string;
 };
+
+export type fetchProductTypesReturnType = Array<
+  Pick<Categories, "_id" | "name" | "slug">
+>;
 
 export default async function fetchProductTypes({
   productTypeSlug,

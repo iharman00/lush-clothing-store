@@ -4,9 +4,15 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { fetchNavigationData } from "@/sanity/staticQueries";
+import { NAVIGATION_DATA_QUERYResult } from "@/sanity/types";
 
 const Footer = async () => {
-  const navData = await fetchNavigationData();
+  let navData: NAVIGATION_DATA_QUERYResult = [];
+
+  try {
+    navData = await fetchNavigationData();
+  } catch (error) {}
+
   return (
     <footer className="bg-primary text-primary-foreground pt-12 pb-8">
       <div className="container flex flex-col gap-10">

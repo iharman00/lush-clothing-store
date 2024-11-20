@@ -5,7 +5,7 @@ type fetchCategoryDataProps = {
   categorySlug: string;
 };
 
-type fetchCategoryDataReturnType = Array<
+export type fetchCategoryDataReturnType = Array<
   Pick<Categories, "_id" | "name" | "slug">
 >;
 

@@ -98,7 +98,6 @@ export default async function fetchProducts({
   }
 `;
 
-  console.log(query);
   return sanityFetch({
     query,
   });

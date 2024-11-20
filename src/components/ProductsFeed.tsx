@@ -35,19 +35,24 @@ const ProductsFeed = ({
     const getProducts = async () => {
       setLoadingInitialProducts(true);
       setHasMoreProducts(true);
-      const products = await fetchProducts({
-        parentCategorySlug: parentCategorySlug,
-        parentProductTypeSlug: parentProductTypeSlug,
-        filters: {
-          colorSlug,
-          fitSlug,
-          sizeSlug,
-          priceFilter,
-        },
-        number_of_products_to_fetch: 8,
-      });
-      setProducts(products);
-      setLoadingInitialProducts(false);
+      try {
+        const products = await fetchProducts({
+          parentCategorySlug: parentCategorySlug,
+          parentProductTypeSlug: parentProductTypeSlug,
+          filters: {
+            colorSlug,
+            fitSlug,
+            sizeSlug,
+            priceFilter,
+          },
+          number_of_products_to_fetch: 8,
+        });
+        setProducts(products);
+        setLoadingInitialProducts(false);
+      } catch (error) {
+        console.log(error);
+        setLoadingInitialProducts(false);
+      }
     };
 
     getProducts();
@@ -69,29 +74,32 @@ const ProductsFeed = ({
 
       const lastProduct = products[products.length - 1];
 
-      const newProducts = await fetchProducts({
-        parentCategorySlug: parentCategorySlug,
-        parentProductTypeSlug: parentProductTypeSlug,
-        filters: {
-          colorSlug,
-          fitSlug,
-          sizeSlug,
-          priceFilter,
-        },
-        number_of_products_to_fetch: 24,
-        id_of_last_product_fetched: lastProduct._id,
-      });
+      try {
+        const newProducts = await fetchProducts({
+          parentCategorySlug: parentCategorySlug,
+          parentProductTypeSlug: parentProductTypeSlug,
+          filters: {
+            colorSlug,
+            fitSlug,
+            sizeSlug,
+            priceFilter,
+          },
+          number_of_products_to_fetch: 24,
+          id_of_last_product_fetched: lastProduct._id,
+        });
 
-      // If we get less products than requested it likely means we ran out of products
-      if (newProducts.length < 24) {
-        setHasMoreProducts(false);
+        // If we get less products than requested it likely means we ran out of products
+        if (newProducts.length < 24) {
+          setHasMoreProducts(false);
+        }
+
+        if (newProducts.length > 0 && newProducts[0]._id !== lastProduct._id) {
+          setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+        }
+        setLoadingMoreProducts(false);
+      } catch (error) {
+        setLoadingMoreProducts(false);
       }
-
-      if (newProducts.length > 0 && newProducts[0]._id !== lastProduct._id) {
-        setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-      }
-
-      setLoadingMoreProducts(false);
     }, 1000),
     [
       products,
@@ -113,6 +121,16 @@ const ProductsFeed = ({
         {Array.from({ length: 8 }).map((_, index) => (
           <ProductCardSkeleton key={index} />
         ))}
+      </div>
+    );
+
+  // If there are no products to show
+  if (products.length === 0)
+    return (
+      <div className="mt-8 px-[1rem] md:px-[2rem]">
+        <p className="mt-2 text-xl font-bold text-muted-foreground">
+          Sorry, We couldn't find any results :&#40;
+        </p>
       </div>
     );
 
@@ -167,16 +185,6 @@ const ProductsFeed = ({
           )}
         </InView>
       </>
-    );
-
-  // If there are no products to show
-  if (products.length === 0)
-    return (
-      <div className="mt-8 px-[1rem] md:px-[2rem]">
-        <p className="mt-2 text-xl font-bold text-muted-foreground">
-          Sorry, We couldn't find any results :&#40;
-        </p>
-      </div>
     );
 };
 

@@ -1,4 +1,6 @@
-import fetchCategoryData from "@/sanity/dynamicQueries/fetchCategoryData";
+import fetchCategoryData, {
+  fetchCategoryDataReturnType,
+} from "@/sanity/dynamicQueries/fetchCategoryData";
 import Link from "next/link";
 import CategoriesCard from "@/components/CategoriesCard";
 import {
@@ -11,15 +13,27 @@ import {
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { urlFor } from "@/sanity/lib/image";
-import fetchSubCategoriesAndProductTypes from "@/sanity/dynamicQueries/fetchSubCategoriesAndProductTypes";
+import fetchSubCategoriesAndProductTypes, {
+  fetchSubCategoriesAndProductTypesReturnType,
+} from "@/sanity/dynamicQueries/fetchSubCategoriesAndProductTypes";
 
 const Page = async ({ params }: { params: { category: string } }) => {
-  const [category] = await fetchCategoryData({
-    categorySlug: params.category.toLowerCase(),
-  });
-  const subCategories = await fetchSubCategoriesAndProductTypes({
-    parentCategorySlug: params.category.toLowerCase(),
-  });
+  const categorySlug = params.category.toLowerCase();
+
+  let categories: fetchCategoryDataReturnType = [];
+  let subCategories: fetchSubCategoriesAndProductTypesReturnType = [];
+
+  // Fetch category, and subCategories concurrently
+  try {
+    [categories, subCategories] = await Promise.all([
+      fetchCategoryData({ categorySlug }),
+      fetchSubCategoriesAndProductTypes({
+        parentCategorySlug: categorySlug,
+      }),
+    ]);
+  } catch (error) {}
+
+  const [category] = categories;
 
   if (!category)
     return (

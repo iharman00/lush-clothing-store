@@ -6,9 +6,13 @@ import {
   fetchProductFits,
   fetchProductSizes,
 } from "@/sanity/staticQueries";
-import fetchProductTypes from "@/sanity/dynamicQueries/fetchProductTypes";
+import fetchProductTypes, {
+  fetchProductTypesReturnType,
+} from "@/sanity/dynamicQueries/fetchProductTypes";
 import Link from "next/link";
-import fetchCategoryData from "@/sanity/dynamicQueries/fetchCategoryData";
+import fetchCategoryData, {
+  fetchCategoryDataReturnType,
+} from "@/sanity/dynamicQueries/fetchCategoryData";
 import ProductsFilter, { FilterOption } from "@/components/ProductsFilter";
 import { Color, Slug } from "@/sanity/types";
 import { priceFilters } from "@/sanity/dynamicQueries/fetchProducts";
@@ -50,11 +54,19 @@ const page = async ({
   const categorySlug = params.category.toLowerCase();
   const productTypeSlug = params.productType.toLowerCase();
 
+  let categories: fetchCategoryDataReturnType = [];
+  let productTypes: fetchProductTypesReturnType = [];
+
   // Fetch category, and productType concurrently
-  const [[category], [productType]] = await Promise.all([
-    fetchCategoryData({ categorySlug }),
-    fetchProductTypes({ productTypeSlug }),
-  ]);
+  try {
+    [categories, productTypes] = await Promise.all([
+      fetchCategoryData({ categorySlug }),
+      fetchProductTypes({ productTypeSlug }),
+    ]);
+  } catch (error) {}
+
+  const [category] = categories;
+  const [productType] = productTypes;
 
   // Return early if category or productType does'nt exist
   if (!category || !productType)

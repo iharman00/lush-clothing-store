@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { getCurrentClientSideUser } from "@/data_access/user";
 import { fetchNavigationData } from "@/sanity/staticQueries";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { NAVIGATION_DATA_QUERYResult } from "@/sanity/types";
 
 const Header = async () => {
   let user;
@@ -36,7 +37,12 @@ const Header = async () => {
     // We do nothing
   }
 
-  const navData = await fetchNavigationData();
+  let navData: NAVIGATION_DATA_QUERYResult = [];
+
+  try {
+    navData = await fetchNavigationData();
+  } catch (error) {}
+
   return (
     <nav className="container flex justify-between py-4 ">
       {/* Mobile */}
@@ -99,7 +105,7 @@ const Header = async () => {
               alt="lush logo"
               width={50}
               height={50}
-              className="mr-4"
+              className="h-full mr-4"
             />
           </Link>
         </div>
@@ -149,7 +155,7 @@ const Header = async () => {
               alt="lush logo"
               width={50}
               height={50}
-              className="mr-4"
+              className="h-full mr-4"
             />
           </Link>
           <Separator orientation="vertical"></Separator>

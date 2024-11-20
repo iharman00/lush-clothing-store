@@ -94,85 +94,88 @@ const ProductsFilter = ({ filtersData }: ProductsFilterProps) => {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex space-x-4 mb-6"
+            className="flex flex-col md:flex-row gap-6 my-1 md:my-2"
           >
-            {/* Color Filter */}
-            {colorOptions.length > 0 && (
-              <FormField
-                control={form.control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FilterSelect
-                      placeholder="Color"
-                      options={colorOptions}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {/* Fit Filter */}
-            {fitOptions.length > 0 && (
-              <FormField
-                control={form.control}
-                name="fit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FilterSelect
-                      placeholder="Fit"
-                      options={fitOptions}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {/* Size Filter */}
-            {sizeOptions.length > 0 && (
-              <FormField
-                control={form.control}
-                name="size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FilterSelect
-                      placeholder="Size"
-                      options={sizeOptions}
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {/* Price Filter */}
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FilterSelect
-                    placeholder="Price"
-                    options={priceOptions}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  />
-                </FormItem>
+            <div className="flex space-x-4">
+              {/* Color Filter */}
+              {colorOptions.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="color"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FilterSelect
+                        placeholder="Color"
+                        options={colorOptions}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
 
-            {/* Form Submit and Clear Controls */}
-            {form.formState.isDirty && <Button type="submit">Apply</Button>}
-            {isAnyFilterActive && (
-              <Button type="button" variant="outline" onClick={clearFilters}>
-                Clear
-              </Button>
-            )}
+              {/* Fit Filter */}
+              {fitOptions.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="fit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FilterSelect
+                        placeholder="Fit"
+                        options={fitOptions}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Size Filter */}
+              {sizeOptions.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="size"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FilterSelect
+                        placeholder="Size"
+                        options={sizeOptions}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Price Filter */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FilterSelect
+                      placeholder="Price"
+                      options={priceOptions}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex gap-4">
+              {/* Form Submit and Clear Controls */}
+              {form.formState.isDirty && <Button type="submit">Apply</Button>}
+              {isAnyFilterActive && (
+                <Button type="button" variant="outline" onClick={clearFilters}>
+                  Clear
+                </Button>
+              )}
+            </div>
           </form>
         </Form>
         <ScrollBar orientation="horizontal" />
