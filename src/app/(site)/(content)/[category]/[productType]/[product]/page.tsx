@@ -80,8 +80,9 @@ const page = async ({
     );
 
   return (
-    <div className="container lg:h-[70vh] flex flex-col lg:grid grid-cols-2 xl:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)] gap-16 lg:gap-4 md:mt-20 md:mb-32 justify-items-center items-center px-0 md:px-4 mb-12">
-      <Carousel className="h-min md:mx-16">
+    <div className="container lg:h-[70vh] flex flex-col lg:grid grid-cols-2 xl:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)] gap-16 lg:gap-4 mb-12 md:mt-20 md:mb-32 justify-items-center items-center px-0 md:px-4">
+      {/* Product Images */}
+      <Carousel className="md:mx-16">
         <CarouselContent>
           {product.colorVariants.map((cv) => {
             if (cv.images)
@@ -94,7 +95,6 @@ const page = async ({
                         alt={i.alt}
                         width={3000}
                         height={3000}
-                        className="w-full h-full object-contain"
                       />
                     </CarouselItem>
                   );
@@ -111,6 +111,8 @@ const page = async ({
           <CarouselNext className="static" />
         </div>
       </Carousel>
+
+      {/* Product Details */}
       <ScrollArea className="w-full h-full lg:max-w-lg px-4 md:px-12 lg:pl-0 lg:pr-10 ">
         <div className="flex flex-col h-full justify-center">
           <div className="flex flex-col gap-10">
