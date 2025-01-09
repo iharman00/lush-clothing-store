@@ -1,5 +1,10 @@
 import { sanityFetch } from "../lib/client";
-import { ProductColors, ProductFits, Products } from "../types";
+import {
+  ProductColors,
+  ProductFits,
+  Products,
+  ProductVariants,
+} from "../types";
 
 export const priceFilters = [
   {
@@ -43,15 +48,13 @@ type fetchProductsProps = {
 
 export type fetchProductsReturnType = Array<
   Pick<Products, "_id" | "name" | "slug" | "price"> & {
-    variants: Array<{
-      images: NonNullable<Products["colorVariants"]>[number]["images"];
+    variants: {
+      images: ProductVariants["images"];
       color: Pick<ProductColors, "_id" | "name" | "slug">;
-      sizeAndStock: Array<{
-        stock: NonNullable<
-          NonNullable<Products["colorVariants"]>[number]["sizeAndStock"]
-        >[number]["stock"];
-      }>;
-    }>;
+      sizeAndStock: {
+        stock: NonNullable<ProductVariants["sizeAndStock"]>[number]["stock"];
+      }[];
+    }[];
     fit: Pick<ProductFits, "_id" | "name" | "slug">;
   }
 >;

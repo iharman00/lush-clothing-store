@@ -1,4 +1,5 @@
 "use client";
+
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn, formatPrice } from "@/lib/utils";
 import fetchProductData, {
@@ -32,6 +33,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useShoppingCart } from "@/context/ShoppingCartContext";
 
 // Custom components for Portable Text
 export const customPortableTextComponents: Partial<PortableTextReactComponents> =
@@ -56,13 +58,17 @@ const page = async ({
 }: {
   params: { category: string; product: string };
 }) => {
+  const { addItem } = useShoppingCart();
+
   let products: fetchProductDataReturnType = [];
   try {
     products = await fetchProductData({
       categorySlug: params.category,
       productSlug: params.product,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 
   const [product] = products;
 
@@ -150,7 +156,7 @@ const page = async ({
                           key={ss.size._id}
                           variant="outline"
                           // Disabled if stock is 0
-                          disabled={!(ss.stock > 0)}
+                          disabled={!(ss.stock && ss.stock > 0)}
                           className="h-full py-4"
                           style={{ textDecoration: "" }}
                         >

@@ -68,6 +68,64 @@ export type Geopoint = {
   alt?: number;
 };
 
+export type ProductVariants = {
+  _id: string;
+  _type: "productVariants";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  color?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "productColors";
+  };
+  images?: Array<{
+    asset?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+    };
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+    _key: string;
+  }>;
+  sizeAndStock?: Array<{
+    size?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "productSizes";
+    };
+    stock?: number;
+    _key: string;
+  }>;
+};
+
+export type ProductSizes = {
+  _id: string;
+  _type: "productSizes";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  slug?: Slug;
+};
+
+export type ProductColors = {
+  _id: string;
+  _type: "productColors";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  color?: Color;
+  slug?: Slug;
+};
+
 export type Products = {
   _id: string;
   _type: "products";
@@ -89,7 +147,7 @@ export type Products = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    style?: "h1" | "h2" | "h3" | "normal";
     listItem?: "bullet" | "number";
     markDefs?: Array<{
       href?: string;
@@ -107,7 +165,7 @@ export type Products = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    style?: "h1" | "h2" | "h3" | "normal";
     listItem?: "bullet" | "number";
     markDefs?: Array<{
       href?: string;
@@ -119,37 +177,12 @@ export type Products = {
     _key: string;
   }>;
   price?: number;
-  colorVariants?: Array<{
-    color?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "productColors";
-    };
-    images?: Array<{
-      asset?: {
-        _ref: string;
-        _type: "reference";
-        _weak?: boolean;
-        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-      };
-      hotspot?: SanityImageHotspot;
-      crop?: SanityImageCrop;
-      alt?: string;
-      _type: "image";
-      _key: string;
-    }>;
-    sizeAndStock?: Array<{
-      size?: {
-        _ref: string;
-        _type: "reference";
-        _weak?: boolean;
-        [internalGroqTypeReferenceTo]?: "productSizes";
-      };
-      stock?: number;
-      _key: string;
-    }>;
+  variants?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
     _key: string;
+    [internalGroqTypeReferenceTo]?: "productVariants";
   }>;
   fit?: {
     _ref: string;
@@ -166,27 +199,6 @@ export type ProductFits = {
   _updatedAt: string;
   _rev: string;
   name?: string;
-  slug?: Slug;
-};
-
-export type ProductSizes = {
-  _id: string;
-  _type: "productSizes";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  slug?: Slug;
-};
-
-export type ProductColors = {
-  _id: string;
-  _type: "productColors";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name?: string;
-  color?: Color;
   slug?: Slug;
 };
 
@@ -352,7 +364,7 @@ export type HslaColor = {
   a?: number;
 };
 
-export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Products | ProductFits | ProductSizes | ProductColors | ProductTypes | SubCategories | Categories | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | Slug | Color | RgbaColor | HsvaColor | HslaColor;
+export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | ProductVariants | ProductSizes | ProductColors | Products | ProductFits | ProductTypes | SubCategories | Categories | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | Slug | Color | RgbaColor | HsvaColor | HslaColor;
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ./src/sanity/staticQueries/index.ts
 // Variable: NAVIGATION_DATA_QUERY
