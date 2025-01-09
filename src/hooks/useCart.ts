@@ -42,11 +42,37 @@ export const useCart = create<CartState>()(
           return { items: [...state.items, newItem] };
         }),
       removeItem: (item) =>
-        set((state) => ({
-          items: state.items.filter(
-            (cartItem) => cartItem.productVariantId !== item.productVariantId
-          ),
-        })),
+        set((state) => {
+          const existingItem = state.items.find(
+            (cartItem) => cartItem.productVariantId === item.productVariantId
+          );
+
+          if (existingItem) {
+            if (existingItem.quantity > item.quantity) {
+              // If the cart item quantity is greater, reduce the quantity
+              return {
+                items: state.items.map((cartItem) =>
+                  cartItem.productVariantId === existingItem.productVariantId
+                    ? {
+                        ...cartItem,
+                        quantity: cartItem.quantity - item.quantity,
+                      }
+                    : cartItem
+                ),
+              };
+            } else {
+              // If the cart Item quantity is less than or equal, remove the item completely
+              return {
+                items: state.items.filter(
+                  (cartItem) =>
+                    cartItem.productVariantId !== item.productVariantId
+                ),
+              };
+            }
+          }
+
+          return state; // Return state unchanged if item not found
+        }),
       clearCart: () => set({ items: [] }),
     }),
     {
