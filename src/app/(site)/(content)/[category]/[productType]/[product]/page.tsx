@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn, formatPrice } from "@/lib/utils";
 import fetchProductData, {
@@ -33,7 +31,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useShoppingCart } from "@/context/ShoppingCartContext";
+import AddToCartButton from "@/components/AddToCartButton";
 
 // Custom components for Portable Text
 export const customPortableTextComponents: Partial<PortableTextReactComponents> =
@@ -58,8 +56,6 @@ const page = async ({
 }: {
   params: { category: string; product: string };
 }) => {
-  const { addItem } = useShoppingCart();
-
   let products: fetchProductDataReturnType = [];
   try {
     products = await fetchProductData({
@@ -167,8 +163,8 @@ const page = async ({
                   )}
                 </div>
               </div>
-              <Button>Add to Cart</Button>
             </div>
+            <AddToCartButton />
             <Accordion type="single" collapsible>
               {product.description && (
                 <AccordionItem value="description" className="border-b-0">
