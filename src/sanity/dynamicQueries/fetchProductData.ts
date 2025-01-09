@@ -11,7 +11,7 @@ export type fetchProductDataReturnType = Array<
     Products,
     "_id" | "name" | "slug" | "description" | "materials" | "price"
   > & {
-    colorVariants: Array<{
+    variants: Array<{
       images: NonNullable<Products["colorVariants"]>[number]["images"];
       color: Pick<ProductColors, "_id" | "name" | "slug" | "color">;
       sizeAndStock: Array<{
@@ -36,7 +36,7 @@ export default async function afetchProductData({
     && references(*[_type == "subCategories" && defined(slug.current) 
     && references(*[_type == "categories" && slug.current == "${categorySlug}"]._id)]._id)]._id)]{
         _id, name, slug, description, materials, price,
-        colorVariants[]{
+        variants[]->{
         color->{_id, name, slug, color},
         images,
         sizeAndStock[]{size->{_id, name, slug},stock}

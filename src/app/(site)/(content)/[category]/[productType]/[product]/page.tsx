@@ -1,3 +1,4 @@
+"use client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn, formatPrice } from "@/lib/utils";
 import fetchProductData, {
@@ -20,7 +21,7 @@ import {
   H3,
   Normal,
   Number,
-} from "@/sanity/components/FrontEndPortableTextComponents";
+} from "@/components/FrontEndPortableTextComponents";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import {
@@ -84,7 +85,7 @@ const page = async ({
       {/* Product Images */}
       <Carousel className="md:mx-16">
         <CarouselContent>
-          {product.colorVariants.map((cv) => {
+          {product.variants.map((cv) => {
             if (cv.images)
               return cv.images.map((i) => {
                 if (i.alt)
@@ -127,7 +128,7 @@ const page = async ({
               <div className="flex flex-col gap-4">
                 <p className="text-base font-medium">Color</p>
                 <div className="flex gap-4 flex-wrap">
-                  {product.colorVariants.map((cv) => (
+                  {product.variants.map((cv) => (
                     <Button
                       key={cv.color._id}
                       variant={"outline"}
@@ -142,7 +143,7 @@ const page = async ({
               <div className="flex flex-col gap-4">
                 <p className="text-base font-medium">Size</p>
                 <div className="grid grid-cols-5 gap-4">
-                  {product.colorVariants.map((cv) =>
+                  {product.variants.map((cv) =>
                     cv.sizeAndStock.map((ss) => {
                       return (
                         <Button

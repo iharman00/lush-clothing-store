@@ -119,8 +119,6 @@ export default async function login(data: unknown): Promise<Response> {
       return response;
     }
 
-    console.log(error);
-
     response = {
       success: false,
       message: "An unexpected error occured",

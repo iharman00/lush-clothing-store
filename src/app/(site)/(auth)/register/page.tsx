@@ -3,7 +3,6 @@ import RegisterForm from "@/components/RegisterForm";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/data_access/user";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const page = async () => {
   let user;

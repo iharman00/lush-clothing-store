@@ -43,7 +43,7 @@ type fetchProductsProps = {
 
 export type fetchProductsReturnType = Array<
   Pick<Products, "_id" | "name" | "slug" | "price"> & {
-    colorVariants: Array<{
+    variants: Array<{
       images: NonNullable<Products["colorVariants"]>[number]["images"];
       color: Pick<ProductColors, "_id" | "name" | "slug">;
       sizeAndStock: Array<{
@@ -89,7 +89,7 @@ export default async function fetchProducts({
       references(*[_type == "categories" && slug.current == "${parentCategorySlug}"]._id)]._id)]._id)] 
   | order(_id) [0...${number_of_products_to_fetch}] {
     _id, name, slug, price, 
-    colorVariants[]{
+    variants[]->{
       color->{_id, name, slug},
       images,
       sizeAndStock[]{stock}

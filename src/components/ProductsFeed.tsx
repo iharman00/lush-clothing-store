@@ -141,17 +141,17 @@ const ProductsFeed = ({
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-8 md:gap-y-16 mt-10 mb-20">
           {products.map((product) => {
             if (
-              product.colorVariants[0].sizeAndStock[0].stock &&
-              product.colorVariants[0].sizeAndStock[0].stock > 0 &&
-              product.colorVariants[0].images &&
-              product.colorVariants[0].images[0].alt &&
+              product.variants[0].sizeAndStock[0].stock &&
+              product.variants[0].sizeAndStock[0].stock > 0 &&
+              product.variants[0].images &&
+              product.variants[0].images[0].alt &&
               product.name &&
               product.price
             ) {
               let productImages: ProductCardProps["images"] = [];
 
               // Get the images of the first coloVariant
-              product.colorVariants[0].images.map((image) => {
+              product.variants[0].images.map((image) => {
                 if (image.alt)
                   productImages.push({
                     _id: image._key,

@@ -10,7 +10,7 @@ import { cache } from "react";
 // User data-access function rules
 // - purpose of these functions are to control DB data access and mutations
 // - these functions are only allowed to run on the server
-// - if you need access to data on the client, pass it down as props from the server
+// - if you need access to data on the client, pass it down as props from a server component
 // - functions either return the filtered User Object (UserDto) or throw an error
 
 export const createUser = cache(
@@ -51,7 +51,7 @@ export const getCurrentUser = cache(async () => {
   return filterUser(user);
 });
 
-// provides data for frontend consumption, therefore striping out password
+// provides data for frontend consumption after striping out the password hash
 export const getCurrentClientSideUser = cache(async () => {
   const user = await getCurrentUser();
 

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
-export default async function Home() {
+export default function Home() {
   return (
     <section className="relative grid grid-cols-2">
       {/* Background Image */}
