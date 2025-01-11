@@ -18,7 +18,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Menu, User } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
 import { urlFor } from "@/sanity/lib/image";

@@ -15,7 +15,7 @@ import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { ScrollArea } from "./ui/scroll-area";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CartItem from "./CartItem";
 import fetchProductVariant, {
   fetchProductVariantReturnType,
@@ -23,7 +23,7 @@ import fetchProductVariant, {
 import { urlFor } from "@/sanity/lib/image";
 
 const Cart = () => {
-  const { items, itemsCount } = useCart();
+  const { items } = useCart();
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<
     Array<fetchProductVariantReturnType[number] & { quantity: number }>
@@ -40,6 +40,11 @@ const Cart = () => {
     const fetchPromises = [];
 
     for (const item of items) {
+      // Skip items with zero quantity
+      if (item.quantity === 0) {
+        continue;
+      }
+
       const cacheKey = `${item.variantId}-${item.variantSizeId}`;
       if (cachedVariants.current.has(cacheKey)) {
         newCartItems.push({
@@ -62,6 +67,7 @@ const Cart = () => {
       }
     }
 
+    // Wait for all fetches to finish
     await Promise.all(fetchPromises);
     setCartItems(newCartItems);
   }, [isMounted, items]);
@@ -74,6 +80,10 @@ const Cart = () => {
     setIsMounted(true);
   }, []);
 
+  const totalItems = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
   const cartTotal = cartItems.reduce(
     (total, item) => total + item.quantity * item.parentProduct.price!,
     0
@@ -86,65 +96,63 @@ const Cart = () => {
 
   return (
     <Sheet>
-      <SheetTrigger className="group -m-2 flex items-center p-2">
+      <SheetTrigger className="group flex items-center ">
         <div className={cn(buttonVariants({ variant: "ghost" }), "gap-2")}>
           <div className="relative">
             <ShoppingCart />
-            {isMounted && itemsCount > 0 && (
+            {isMounted && totalItems > 0 && (
               <span className="absolute -top-2 left-1 ml-2 text-sm font-medium text-background bg-secondary-foreground rounded-full w-5 h-5 ">
-                {itemsCount}
+                {totalItems}
               </span>
             )}
           </div>
           <span className="hidden md:block">Cart</span>
         </div>
       </SheetTrigger>
-      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col sm:max-w-lg">
         <SheetHeader className="space-y-2.5 pr-6">
-          <SheetTitle>Cart ({itemsCount})</SheetTitle>
+          <SheetTitle>Cart ({totalItems})</SheetTitle>
         </SheetHeader>
-        {itemsCount > 0 ? (
-          <div className="h-full flex flex-col justify-between">
-            <div className="flex w-full flex-col pr-6">
-              <ScrollArea>
-                {cartItems.map((item) => {
-                  if (
-                    item.images &&
-                    item.images[0].alt &&
-                    item.parentProduct.name &&
-                    item.parentProduct.price &&
-                    item.color.name &&
-                    item.sizeAndStock[0] &&
-                    item.sizeAndStock[0].size.name
-                  ) {
-                    return (
-                      <CartItem
-                        key={item._id}
-                        item={{
-                          _id: item._id,
-                          name: item.parentProduct.name,
-                          price: item.parentProduct.price,
-                          color: item.color.name,
-                          size: {
-                            _id: item.sizeAndStock[0].size._id,
-                            name: item.sizeAndStock[0].size.name,
-                          },
-                          quantity: item.quantity,
-                          image: {
-                            _id: item.images[0]._key,
-                            url: urlFor(item.images[0]).url(),
-                            alt: item.images[0].alt,
-                          },
-                        }}
-                      />
-                    );
-                  } else {
-                    return <div key={item._id}>Sorry</div>;
-                  }
-                })}
-              </ScrollArea>
-            </div>
-            <div className="space-y-6 pr-6">
+        {totalItems > 0 ? (
+          <>
+            <ScrollArea className="h-full min-h-[60%] pr-6">
+              {cartItems.map((item) => {
+                if (
+                  item.images &&
+                  item.images[0].alt &&
+                  item.parentProduct.name &&
+                  item.parentProduct.price &&
+                  item.color.name &&
+                  item.sizeAndStock[0] &&
+                  item.sizeAndStock[0].size.name
+                ) {
+                  return (
+                    <CartItem
+                      key={item._id}
+                      item={{
+                        _id: item._id,
+                        name: item.parentProduct.name,
+                        price: item.parentProduct.price,
+                        color: item.color.name,
+                        size: {
+                          _id: item.sizeAndStock[0].size._id,
+                          name: item.sizeAndStock[0].size.name,
+                        },
+                        quantity: item.quantity,
+                        image: {
+                          _id: item.images[0]._key,
+                          url: urlFor(item.images[0]).url(),
+                          alt: item.images[0].alt,
+                        },
+                      }}
+                    />
+                  );
+                } else {
+                  return <div key={item._id}>Sorry</div>;
+                }
+              })}
+            </ScrollArea>
+            <div className="space-y-6">
               <Separator />
               <div className="space-y-1.5 text-sm">
                 <div className="flex text-muted-foreground">
@@ -177,7 +185,7 @@ const Cart = () => {
                 </SheetTrigger>
               </SheetFooter>
             </div>
-          </div>
+          </>
         ) : (
           <div className="flex h-full flex-col items-center justify-center space-y-1">
             <p className="text-xl font-semibold">Your cart is empty</p>

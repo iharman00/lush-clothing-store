@@ -101,7 +101,9 @@ const CartItem = ({ item }: CartIem) => {
           <Button
             variant={"link"}
             className="px-0 text-muted-foreground text-sm"
-            onClick={() => deleteItem(item._id)}
+            onClick={() =>
+              deleteItem({ variantId: item._id, variantSizeId: item.size._id })
+            }
           >
             Remove
           </Button>

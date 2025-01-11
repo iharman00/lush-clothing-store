@@ -9,11 +9,12 @@ export type CartItem = {
 
 type CartState = {
   items: CartItem[];
-  itemsCount: number;
   addItem: (item: CartItem) => void;
   removeItem: (item: CartItem) => void;
-  deleteItem: (itemId: CartItem["variantId"]) => void;
-  getItem: (item: Omit<CartItem, "quantity">) => CartItem | null;
+  deleteItem: (item: Pick<CartItem, "variantId" | "variantSizeId">) => void;
+  getItem: (
+    item: Pick<CartItem, "variantId" | "variantSizeId">
+  ) => CartItem | null;
   clearCart: () => void;
 };
 
@@ -21,18 +22,22 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      itemsCount: 0, // Initialize as 0
+
+      // Add an item to the cart
       addItem: (newItem) =>
         set((state) => {
           const existingItem = state.items.find(
-            (cartItem) => cartItem.variantId === newItem.variantId
+            (cartItem) =>
+              cartItem.variantId === newItem.variantId &&
+              cartItem.variantSizeId === newItem.variantSizeId
           );
 
           let updatedItems;
           if (existingItem) {
             // If the item exists, update its quantity
             updatedItems = state.items.map((cartItem) =>
-              cartItem.variantId === existingItem.variantId
+              cartItem.variantId === existingItem.variantId &&
+              cartItem.variantSizeId === existingItem.variantSizeId
                 ? {
                     ...cartItem,
                     quantity: cartItem.quantity + newItem.quantity,
@@ -46,82 +51,68 @@ export const useCart = create<CartState>()(
 
           return {
             items: updatedItems,
-            itemsCount: updatedItems.reduce(
-              (total, item) => total + item.quantity,
-              0
-            ), // Recalculate total count
           };
         }),
+
+      // Remove some quantity of an item or delete it if the quantity is zero
       removeItem: (item) =>
         set((state) => {
-          const existingItem = state.items.find(
-            (cartItem) => cartItem.variantId === item.variantId
-          );
+          const updatedItems = state.items
+            .map((cartItem) => {
+              if (
+                cartItem.variantId === item.variantId &&
+                cartItem.variantSizeId === item.variantSizeId
+              ) {
+                const newQuantity = cartItem.quantity - item.quantity;
+                if (newQuantity <= 0) {
+                  return null; // Mark item for removal
+                } else {
+                  return { ...cartItem, quantity: newQuantity }; // Update quantity
+                }
+              }
+              return cartItem; // Keep other items unchanged
+            })
+            .filter((cartItem) => cartItem !== null); // Remove nulls (items that should be deleted)
 
-          if (existingItem) {
-            let updatedItems;
-            if (existingItem.quantity > item.quantity) {
-              // Reduce quantity if more than the item to remove
-              updatedItems = state.items.map((cartItem) =>
-                cartItem.variantId === existingItem.variantId
-                  ? {
-                      ...cartItem,
-                      quantity: cartItem.quantity - item.quantity,
-                    }
-                  : cartItem
-              );
-            } else {
-              // Remove item completely if quantity is less or equal
-              updatedItems = state.items.filter(
-                (cartItem) => cartItem.variantId !== item.variantId
-              );
-            }
-
-            return {
-              items: updatedItems,
-              itemsCount: updatedItems.reduce(
-                (total, item) => total + item.quantity,
-                0
-              ), // Recalculate total count
-            };
-          }
-
-          return state;
+          return {
+            items: updatedItems,
+          };
         }),
-      deleteItem: (itemId) =>
+
+      // Delete an item from the cart completely
+      deleteItem: (item) =>
         set((state) => {
           const updatedItems = state.items.filter(
-            (cartItem) => cartItem.variantId !== itemId
+            (cartItem) =>
+              cartItem.variantId !== item.variantId ||
+              cartItem.variantSizeId !== item.variantSizeId
           );
 
           return {
             items: updatedItems,
-            itemsCount: updatedItems.reduce(
-              (total, item) => total + item.quantity,
-              0
-            ), // Recalculate total count
           };
         }),
+
+      // Get a specific item from the cart
       getItem: (item) => {
-        const items = get().items;
-        for (const cartItem of items) {
-          if (
-            cartItem.variantId === item.variantId &&
-            cartItem.variantSizeId === item.variantSizeId
-          )
-            return cartItem;
-        }
-        return null;
+        return (
+          get().items.find(
+            (cartItem) =>
+              cartItem.variantId === item.variantId &&
+              cartItem.variantSizeId === item.variantSizeId
+          ) || null
+        );
       },
+
+      // Clear the entire cart
       clearCart: () =>
         set(() => ({
           items: [],
-          itemsCount: 0, // Reset to 0
         })),
     }),
     {
-      name: "cart-storage",
-      storage: createJSONStorage(() => localStorage),
+      name: "cart-storage", // key for localStorage
+      storage: createJSONStorage(() => localStorage), // use localStorage
     }
   )
 );
