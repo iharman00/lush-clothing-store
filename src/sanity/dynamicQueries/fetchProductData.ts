@@ -28,7 +28,7 @@ export type fetchProductDataReturnType = Array<
   }
 >;
 
-export default async function afetchProductData({
+export default async function fetchProductData({
   categorySlug,
   productSlug,
 }: fetchProductDataProps): Promise<fetchProductDataReturnType> {

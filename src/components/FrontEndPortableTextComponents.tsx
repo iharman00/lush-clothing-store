@@ -1,3 +1,5 @@
+import { PortableTextReactComponents } from "next-sanity";
+
 export const H1 = ({ children }: any) => (
   <p className="text-base font-bold mb-2">{children}</p>
 );
@@ -25,3 +27,21 @@ export const Number = ({ children }: any) => (
 export const BulletListItem = ({ children }: any) => (
   <li className="mb-2">{children}</li>
 );
+
+// Custom components for Portable Text
+export const customPortableTextComponents: Partial<PortableTextReactComponents> =
+  {
+    block: {
+      h1: H1,
+      h2: H2,
+      h3: H3,
+      normal: Normal,
+    },
+    list: {
+      bullet: Bullet,
+      number: Number,
+    },
+    listItem: {
+      bullet: BulletListItem,
+    },
+  };

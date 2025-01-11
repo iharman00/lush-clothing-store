@@ -27,6 +27,7 @@ import { getCurrentClientSideUser } from "@/data_access/user";
 import { fetchNavigationData } from "@/sanity/staticQueries";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { NAVIGATION_DATA_QUERYResult } from "@/sanity/types";
+import Cart from "./Cart";
 
 const Header = async () => {
   let user;
@@ -137,9 +138,7 @@ const Header = async () => {
           </li>
           {/* Shopping Cart */}
           <li>
-            <Button variant="ghost" className="gap-2">
-              <ShoppingCart />
-            </Button>
+            <Cart />
           </li>
         </ul>
       </div>
@@ -255,10 +254,7 @@ const Header = async () => {
             </li>
             <li>
               {/* Shopping Cart */}
-              <Button variant="ghost" className="gap-2">
-                <ShoppingCart />
-                Cart
-              </Button>
+              <Cart />
             </li>
           </ul>
         </div>
