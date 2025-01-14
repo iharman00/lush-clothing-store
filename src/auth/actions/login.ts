@@ -1,6 +1,6 @@
 "use server";
 
-import { loginFormSchema, LoginFormType } from "@/auth/schemas/loginFormSchema";
+import { loginFormSchema, LoginFormType } from "@/schemas/auth/loginFormSchema";
 import { Prisma } from "@prisma/client";
 import { verify } from "argon2";
 import { lucia } from "@/auth";
@@ -11,9 +11,10 @@ import { revalidatePath } from "next/cache";
 import {
   InvalidDataError,
   PasswordMismatchError,
-} from "@/auth/schemas/customErrors";
+} from "@/schemas/auth/customErrors";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { getUserByEmail } from "@/data_access/user";
+import prisma from "@/lib/prisma";
 
 type LoginFormArrayType = {
   [Key in keyof LoginFormType]?: LoginFormType[Key][];
@@ -50,9 +51,17 @@ export default async function login(data: unknown): Promise<Response> {
       throw new PasswordMismatchError("Incorrect password");
     }
 
-    // 4. Create Session
-    const session = await lucia.createSession(user.id, {});
-    // lucia.createSession also creates the session in the database
+    // 4. Create Session in DB
+    // check if session already exists
+    let session = await prisma.session.findUnique({
+      where: { userId: user.id },
+    });
+
+    // create a new session if session doesn't exist or isn't valid
+    if (!session || !(await lucia.validateSession(session?.id)).session) {
+      session = await lucia.createSession(user.id, {});
+    }
+
     const sessionCookie = lucia.createSessionCookie(session.id);
 
     // 5. Send Session cookie
@@ -123,6 +132,8 @@ export default async function login(data: unknown): Promise<Response> {
       success: false,
       message: "An unexpected error occured",
     };
+
+    console.log(error);
 
     return response;
   }

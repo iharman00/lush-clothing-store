@@ -8,14 +8,14 @@ import { redirect } from "next/navigation";
 import {
   verifyEmailFormSchema,
   VerifyEmailFormType,
-} from "@/auth/schemas/verifyEmailFormSchema";
+} from "@/schemas/auth/verifyEmailFormSchema";
 import { verifyVerificationCode } from "@/auth/utils/verifyVerificationCode";
 import { ZodError } from "zod";
 import {
   InvalidDataError,
   OTPVerificationError,
   InvalidUserSessionError,
-} from "@/auth/schemas/customErrors";
+} from "@/schemas/auth/customErrors";
 import { setUserEmailVerified } from "@/data_access/user";
 
 type VerifyEmailFormArrayType = {

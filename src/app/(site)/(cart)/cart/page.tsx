@@ -6,66 +6,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
-import fetchProductVariant, {
-  fetchProductVariantReturnType,
-} from "@/sanity/dynamicQueries/fetchProductVariant";
-import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 const page = () => {
-  const { items } = useCart();
-  const [cartItems, setCartItems] = useState<
-    Array<fetchProductVariantReturnType[number] & { quantity: number }>
-  >([]);
-  const cachedVariants = useRef(new Map()); // Cache fetched variants
-
-  const fetchCartItems = useCallback(async () => {
-    if (items.length === 0) {
-      setCartItems([]);
-      return;
-    }
-
-    const newCartItems = [];
-    const fetchPromises = [];
-
-    for (const item of items) {
-      const cacheKey = `${item.variantId}-${item.variantSizeId}`;
-      if (cachedVariants.current.has(cacheKey)) {
-        newCartItems.push({
-          ...cachedVariants.current.get(cacheKey),
-          quantity: item.quantity,
-        });
-      } else {
-        fetchPromises.push(
-          fetchProductVariant({
-            variantId: item.variantId,
-            sizeId: item.variantSizeId,
-          }).then(([variant]) => {
-            cachedVariants.current.set(cacheKey, variant);
-            newCartItems.push({
-              ...variant,
-              quantity: item.quantity,
-            });
-          })
-        );
-      }
-    }
-
-    await Promise.all(fetchPromises);
-    setCartItems(newCartItems);
-  }, [items]);
-
-  useEffect(() => {
-    fetchCartItems();
-  }, [fetchCartItems]);
+  const cartItems = Object.values(useCart((state) => state.items));
 
   const totalItems = cartItems.reduce(
     (total, item) => total + item.quantity,
     0
   );
   const cartTotal = cartItems.reduce(
-    (total, item) => total + item.quantity * item.parentProduct.price!,
+    (total, item) => total + item.quantity * item.price!,
     0
   );
   const tax = 12;
@@ -80,47 +31,35 @@ const page = () => {
         <h1 className="text-3xl font-bold">Cart</h1>
         <Separator />
         {totalItems > 0 ? (
-          <div className="h-full flex flex-col justify-between">
-            <div className="flex w-full flex-col pr-6">
-              <ScrollArea>
-                {cartItems.map((item) => {
-                  if (
-                    item.images &&
-                    item.images[0].alt &&
-                    item.parentProduct.name &&
-                    item.parentProduct.price &&
-                    item.color.name &&
-                    item.sizeAndStock[0] &&
-                    item.sizeAndStock[0].size.name
-                  ) {
-                    return (
-                      <CartItem
-                        key={item._id}
-                        item={{
-                          _id: item._id,
-                          name: item.parentProduct.name,
-                          price: item.parentProduct.price,
-                          color: item.color.name,
-                          size: {
-                            _id: item.sizeAndStock[0].size._id,
-                            name: item.sizeAndStock[0].size.name,
-                          },
-                          quantity: item.quantity,
-                          image: {
-                            _id: item.images[0]._key,
-                            url: urlFor(item.images[0]).url(),
-                            alt: item.images[0].alt,
-                          },
-                        }}
-                      />
-                    );
-                  } else {
-                    return <div key={item._id}>Sorry</div>;
-                  }
-                })}
-              </ScrollArea>
-            </div>
-          </div>
+          <ScrollArea className="h-full min-h-[60%]">
+            {cartItems.map((item) => {
+              if (item.image) {
+                return (
+                  <CartItem
+                    key={`${item.variantId}-${item.variantSizeId}`}
+                    item={{
+                      _id: item.variantId,
+                      name: item.name,
+                      price: item.price,
+                      color: item.color,
+                      size: {
+                        _id: item.variantSizeId,
+                        name: item.size,
+                      },
+                      quantity: item.quantity,
+                      image: {
+                        _id: item.image._id,
+                        url: item.image.url,
+                        alt: item.image.alt,
+                      },
+                    }}
+                  />
+                );
+              } else {
+                return <div key={item.variantId}>Sorry</div>;
+              }
+            })}
+          </ScrollArea>
         ) : (
           <div className="flex h-full flex-col items-center justify-center space-y-1">
             <p className="text-xl font-semibold">Your cart is empty</p>

@@ -3,7 +3,7 @@ import "server-only";
 import { validateRequest } from "@/auth/middlewares";
 import prisma from "@/lib/prisma";
 import { filterUser } from "@/data_access/user/userDTO";
-import { InvalidUserSessionError } from "@/auth/schemas/customErrors";
+import { InvalidUserSessionError } from "@/schemas/auth/customErrors";
 import { User } from "@prisma/client";
 import { cache } from "react";
 

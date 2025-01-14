@@ -23,7 +23,8 @@ interface CartIem {
 }
 
 const CartItem = ({ item }: CartIem) => {
-  const { deleteItem, addItem, removeItem } = useCart();
+  const setItemCount = useCart((state) => state.setItemCount);
+  const removeItem = useCart((state) => state.removeItem);
 
   return (
     <div className="grid grid-cols-3 grid-rows-1 gap-6 my-6 h-40">
@@ -56,10 +57,10 @@ const CartItem = ({ item }: CartIem) => {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  removeItem({
+                  setItemCount({
                     variantId: item._id,
                     variantSizeId: item.size._id,
-                    quantity: 1,
+                    quantity: item.quantity - 1,
                   })
                 }
               >
@@ -77,10 +78,10 @@ const CartItem = ({ item }: CartIem) => {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  addItem({
+                  setItemCount({
                     variantId: item._id,
                     variantSizeId: item.size._id,
-                    quantity: 1,
+                    quantity: item.quantity + 1,
                   })
                 }
               >
@@ -102,7 +103,7 @@ const CartItem = ({ item }: CartIem) => {
             variant={"link"}
             className="px-0 text-muted-foreground text-sm"
             onClick={() =>
-              deleteItem({ variantId: item._id, variantSizeId: item.size._id })
+              removeItem({ variantId: item._id, variantSizeId: item.size._id })
             }
           >
             Remove

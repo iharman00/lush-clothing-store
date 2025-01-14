@@ -13,7 +13,6 @@ import { customPortableTextComponents } from "@/components/FrontEndPortableTextC
 import { PortableText } from "next-sanity";
 import { fetchProductDataReturnType } from "@/sanity/dynamicQueries/fetchProductData";
 import { useCart } from "@/hooks/use-cart";
-import { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -35,7 +34,7 @@ type ColorVariant = ProductDetails["product"]["variants"][number];
 type Size = ColorVariant["sizeAndStock"][number]["size"];
 
 const ProductDetails = ({ product }: ProductDetails) => {
-  const { addItem } = useCart();
+  const addItem = useCart((state) => state.addItem);
   const { toast } = useToast();
 
   // React Hook Form setup
@@ -65,7 +64,15 @@ const ProductDetails = ({ product }: ProductDetails) => {
       addItem({
         variantId: data.variantId,
         variantSizeId: data.variantSizeId,
-        quantity: 1,
+        name: product.name!,
+        color: selectedVariant?.color.name!,
+        image: {
+          _id: selectedVariant?.images![0]._key!,
+          url: urlFor(selectedVariant?.images![0]!).url(),
+          alt: selectedVariant?.images![0].alt!,
+        },
+        price: product.price!,
+        size: selectedSize.size.name!,
       });
       toast({
         description: `${product.name} has been added to the cart`,

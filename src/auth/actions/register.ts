@@ -3,7 +3,7 @@
 import {
   registerFormSchema,
   RegisterFormType,
-} from "@/auth/schemas/registerFormSchema";
+} from "@/schemas/auth/registerFormSchema";
 import { Prisma } from "@prisma/client";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { createUser } from "@/data_access/user";
-import { InvalidDataError } from "../schemas/customErrors";
+import { InvalidDataError } from "../../schemas/auth/customErrors";
 import { hash } from "argon2";
 
 type RegisterFormArrayType = {
@@ -69,7 +69,7 @@ export default async function register(data: unknown): Promise<Response> {
     // 7. Redirect user to verify-email
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    // Custom error - thrown when we unexpected data is received
+    // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
       response = {
         success: false,

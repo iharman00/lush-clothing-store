@@ -3,7 +3,7 @@ import "server-only";
 import prisma from "@/lib/prisma";
 import { type User } from "lucia";
 import { isWithinExpirationDate } from "oslo";
-import { OTPVerificationError } from "@/auth/schemas/customErrors";
+import { OTPVerificationError } from "@/schemas/auth/customErrors";
 
 export async function verifyVerificationCode(
   user: User,

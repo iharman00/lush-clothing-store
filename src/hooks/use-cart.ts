@@ -1,118 +1,154 @@
+import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
+import { urlFor } from "@/sanity/lib/image";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type CartItem = {
+export interface CartItem {
   variantId: string;
   variantSizeId: string;
+  name: string;
+  color: string;
+  size: string;
+  image: {
+    _id: string;
+    url: string;
+    alt: string;
+  };
+  price: number;
   quantity: number;
-};
+}
 
-type CartState = {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (item: CartItem) => void;
-  deleteItem: (item: Pick<CartItem, "variantId" | "variantSizeId">) => void;
-  getItem: (
-    item: Pick<CartItem, "variantId" | "variantSizeId">
-  ) => CartItem | null;
+interface CartStore {
+  items: {
+    [key: string]: CartItem;
+  };
+  addItem: (item: Omit<CartItem, "quantity">) => void;
+  removeItem: (item: Pick<CartItem, "variantId" | "variantSizeId">) => void;
+  setItemCount: (
+    item: Pick<CartItem, "variantId" | "variantSizeId" | "quantity">
+  ) => void;
   clearCart: () => void;
-};
+  refreshCartItems: () => void;
+}
 
-export const useCart = create<CartState>()(
+export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
-      items: [],
-
-      // Add an item to the cart
+      items: {},
       addItem: (newItem) =>
         set((state) => {
-          const existingItem = state.items.find(
-            (cartItem) =>
-              cartItem.variantId === newItem.variantId &&
-              cartItem.variantSizeId === newItem.variantSizeId
-          );
+          const key = `${newItem.variantId}-${newItem.variantSizeId}`;
+          const existingItem = state.items[key];
+          let updatedItems = { ...state.items };
 
-          let updatedItems;
+          // If item exists increase quantity
           if (existingItem) {
-            // If the item exists, update its quantity
-            updatedItems = state.items.map((cartItem) =>
-              cartItem.variantId === existingItem.variantId &&
-              cartItem.variantSizeId === existingItem.variantSizeId
-                ? {
-                    ...cartItem,
-                    quantity: cartItem.quantity + newItem.quantity,
-                  }
-                : cartItem
-            );
+            updatedItems[key].quantity = existingItem.quantity + 1;
           } else {
-            // If the item doesn't exist, add it to the cart
-            updatedItems = [...state.items, newItem];
+            // else add the item to the state
+            updatedItems[key] = {
+              ...newItem,
+              quantity: 1,
+            };
           }
 
           return {
             items: updatedItems,
           };
         }),
-
-      // Remove some quantity of an item or delete it if the quantity is zero
       removeItem: (item) =>
         set((state) => {
-          const updatedItems = state.items
-            .map((cartItem) => {
-              if (
-                cartItem.variantId === item.variantId &&
-                cartItem.variantSizeId === item.variantSizeId
-              ) {
-                const newQuantity = cartItem.quantity - item.quantity;
-                if (newQuantity <= 0) {
-                  return null; // Mark item for removal
-                } else {
-                  return { ...cartItem, quantity: newQuantity }; // Update quantity
-                }
-              }
-              return cartItem; // Keep other items unchanged
-            })
-            .filter((cartItem) => cartItem !== null); // Remove nulls (items that should be deleted)
+          const key = `${item.variantId}-${item.variantSizeId}`;
+          const existingItem = state.items[key];
+          let updatedItems = { ...state.items };
 
+          // If item doesn't exist, return existing state
+          if (!existingItem) {
+            return state;
+          }
+
+          // Else remove the item
+          delete updatedItems[key];
           return {
             items: updatedItems,
           };
         }),
-
-      // Delete an item from the cart completely
-      deleteItem: (item) =>
+      setItemCount: (item) =>
         set((state) => {
-          const updatedItems = state.items.filter(
-            (cartItem) =>
-              cartItem.variantId !== item.variantId ||
-              cartItem.variantSizeId !== item.variantSizeId
-          );
+          const key = `${item.variantId}-${item.variantSizeId}`;
+          const existingItem = state.items[key];
+          let updatedItems = { ...state.items };
+
+          // If item doesn't exist, return existing state
+          if (!existingItem) {
+            return state;
+          }
+
+          // if quantity is less than or equal to 0, remove the item
+          if (item.quantity <= 0) {
+            delete updatedItems[key];
+          } else {
+            // else update the quantity
+            updatedItems[key].quantity = item.quantity;
+          }
 
           return {
             items: updatedItems,
           };
         }),
-
-      // Get a specific item from the cart
-      getItem: (item) => {
-        return (
-          get().items.find(
-            (cartItem) =>
-              cartItem.variantId === item.variantId &&
-              cartItem.variantSizeId === item.variantSizeId
-          ) || null
-        );
-      },
-
-      // Clear the entire cart
       clearCart: () =>
         set(() => ({
-          items: [],
+          items: {},
         })),
+      refreshCartItems: async () => {
+        const items = Object.entries(get().items);
+
+        // If there are no items in local storage set items to be empty
+        if (items.length === 0)
+          return {
+            items: {},
+          };
+
+        const newCartItems: CartStore["items"] = {};
+        const fetchPromises = [];
+
+        for (const [key, item] of items) {
+          fetchPromises.push(
+            fetchProductVariant({
+              variantId: item.variantId,
+              sizeId: item.variantSizeId,
+            }).then(([variant]) => {
+              newCartItems[key] = {
+                variantId: variant._id,
+                variantSizeId: variant.sizeAndStock[0].size._id,
+                name: variant.parentProduct.name!,
+                color: variant.color.name!,
+                size: variant.sizeAndStock[0].size.name!,
+                image: {
+                  _id: variant.images![0]._key!,
+                  url: urlFor(variant.images![0]).url(),
+                  alt: variant.images![0].alt!,
+                },
+                price: item.price,
+                quantity: item.quantity,
+              };
+            })
+          );
+        }
+
+        await Promise.all(fetchPromises);
+
+        set({
+          items: newCartItems,
+        });
+      },
     }),
     {
       name: "cart-storage", // key for localStorage
-      storage: createJSONStorage(() => localStorage), // use localStorage
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );
+
+// Refresh products on app start to avoid using stale product data
+useCart.getState().refreshCartItems();

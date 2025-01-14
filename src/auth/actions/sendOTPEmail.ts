@@ -5,7 +5,7 @@ import sendVerificationCode from "@/auth/utils/sendVerificationCode";
 import {
   InvalidOTPRequestError,
   InvalidUserSessionError,
-} from "@/auth/schemas/customErrors";
+} from "@/schemas/auth/customErrors";
 
 export type Response = {
   success: boolean;

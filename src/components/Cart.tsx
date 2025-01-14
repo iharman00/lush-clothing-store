@@ -15,66 +15,13 @@ import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { ScrollArea } from "./ui/scroll-area";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import CartItem from "./CartItem";
-import fetchProductVariant, {
-  fetchProductVariantReturnType,
-} from "@/sanity/dynamicQueries/fetchProductVariant";
-import { urlFor } from "@/sanity/lib/image";
 
 const Cart = () => {
-  const { items } = useCart();
+  const cartItems = Object.values(useCart((state) => state.items));
+
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<
-    Array<fetchProductVariantReturnType[number] & { quantity: number }>
-  >([]);
-  const cachedVariants = useRef(new Map()); // Cache fetched variants
-
-  const fetchCartItems = useCallback(async () => {
-    if (!isMounted || items.length === 0) {
-      setCartItems([]);
-      return;
-    }
-
-    const newCartItems = [];
-    const fetchPromises = [];
-
-    for (const item of items) {
-      // Skip items with zero quantity
-      if (item.quantity === 0) {
-        continue;
-      }
-
-      const cacheKey = `${item.variantId}-${item.variantSizeId}`;
-      if (cachedVariants.current.has(cacheKey)) {
-        newCartItems.push({
-          ...cachedVariants.current.get(cacheKey),
-          quantity: item.quantity,
-        });
-      } else {
-        fetchPromises.push(
-          fetchProductVariant({
-            variantId: item.variantId,
-            sizeId: item.variantSizeId,
-          }).then(([variant]) => {
-            cachedVariants.current.set(cacheKey, variant);
-            newCartItems.push({
-              ...variant,
-              quantity: item.quantity,
-            });
-          })
-        );
-      }
-    }
-
-    // Wait for all fetches to finish
-    await Promise.all(fetchPromises);
-    setCartItems(newCartItems);
-  }, [isMounted, items]);
-
-  useEffect(() => {
-    fetchCartItems();
-  }, [fetchCartItems]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -85,7 +32,7 @@ const Cart = () => {
     0
   );
   const cartTotal = cartItems.reduce(
-    (total, item) => total + item.quantity * item.parentProduct.price!,
+    (total, item) => total + item.quantity * item.price!,
     0
   );
   const tax = 12;
@@ -117,38 +64,30 @@ const Cart = () => {
           <>
             <ScrollArea className="h-full min-h-[60%] pr-6">
               {cartItems.map((item) => {
-                if (
-                  item.images &&
-                  item.images[0].alt &&
-                  item.parentProduct.name &&
-                  item.parentProduct.price &&
-                  item.color.name &&
-                  item.sizeAndStock[0] &&
-                  item.sizeAndStock[0].size.name
-                ) {
+                if (item.image) {
                   return (
                     <CartItem
-                      key={item._id}
+                      key={`${item.variantId}-${item.variantSizeId}`}
                       item={{
-                        _id: item._id,
-                        name: item.parentProduct.name,
-                        price: item.parentProduct.price,
-                        color: item.color.name,
+                        _id: item.variantId,
+                        name: item.name,
+                        price: item.price,
+                        color: item.color,
                         size: {
-                          _id: item.sizeAndStock[0].size._id,
-                          name: item.sizeAndStock[0].size.name,
+                          _id: item.variantSizeId,
+                          name: item.size,
                         },
                         quantity: item.quantity,
                         image: {
-                          _id: item.images[0]._key,
-                          url: urlFor(item.images[0]).url(),
-                          alt: item.images[0].alt,
+                          _id: item.image._id,
+                          url: item.image.url,
+                          alt: item.image.alt,
                         },
                       }}
                     />
                   );
                 } else {
-                  return <div key={item._id}>Sorry</div>;
+                  return <div key={item.variantId}>Sorry</div>;
                 }
               })}
             </ScrollArea>
@@ -167,7 +106,7 @@ const Cart = () => {
                   <span className="flex-1">Tax</span>
                   <span>{formatPrice(taxAmount)}</span>
                 </div>
-                <div className="flex">
+                <div className="flex text-lg pt-2">
                   <span className="flex-1">Total</span>
                   <span>{formatPrice(totalWithTax)}</span>
                 </div>

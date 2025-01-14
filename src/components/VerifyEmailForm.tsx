@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   verifyEmailFormSchema,
   VerifyEmailFormType,
-} from "@/auth/schemas/verifyEmailFormSchema";
+} from "@/schemas/auth/verifyEmailFormSchema";
 import verifyEmail, {
   type Response as ActionResponse,
 } from "@/auth/actions/verifyEmail";
