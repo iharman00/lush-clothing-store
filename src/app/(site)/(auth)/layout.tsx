@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/toaster";
 import { MoveLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,7 +15,6 @@ export default function AuthLayout({
   const router = useRouter();
   return (
     <div>
-      <Toaster />
       <div className="h-screen w-full grid grid-cols-1 lg:grid-cols-12 items-center">
         <div className="relative hidden w-full h-full lg:col-span-6 lg:flex flex-col justify-center items-center p-2 rounded-xl">
           <Image

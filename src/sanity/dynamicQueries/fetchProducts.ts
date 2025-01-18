@@ -42,8 +42,8 @@ type fetchProductsProps = {
     fitSlug: string | null;
     priceFilter: string | null;
   };
-  number_of_products_to_fetch?: number;
-  id_of_last_product_fetched?: string;
+  limit?: number;
+  id_of_last_product_fetched: string | null;
 };
 
 export type fetchProductsReturnType = Array<
@@ -63,15 +63,15 @@ export default async function fetchProducts({
   parentCategorySlug,
   parentProductTypeSlug,
   filters,
-  number_of_products_to_fetch = 10,
+  limit = 10,
   id_of_last_product_fetched,
 }: fetchProductsProps): Promise<fetchProductsReturnType> {
   // Construct filter conditions
   const colorFilter = filters.colorSlug
-    ? `&& "${filters.colorSlug}" in colorVariants[].color->slug.current`
+    ? `&& "${filters.colorSlug}" in variants[]->.color->slug.current`
     : "";
   const sizeFilter = filters.sizeSlug
-    ? `&& "${filters.sizeSlug}" in colorVariants[].sizeAndStock[].size->slug.current`
+    ? `&& "${filters.sizeSlug}" in variants[]->.sizeAndStock[].size->slug.current`
     : "";
   const fitFilter = filters.fitSlug
     ? `&& fit->slug.current == "${filters.fitSlug}"`
@@ -90,7 +90,7 @@ export default async function fetchProducts({
   references(*[_type == "productTypes" && slug.current == "${parentProductTypeSlug}" && 
     references(*[_type == "subCategories" && defined(slug.current) && 
       references(*[_type == "categories" && slug.current == "${parentCategorySlug}"]._id)]._id)]._id)] 
-  | order(_id) [0...${number_of_products_to_fetch}] {
+  | order(_id) [0...${limit}] {
     _id, name, slug, price, 
     variants[]->{
       color->{_id, name, slug},
@@ -101,6 +101,7 @@ export default async function fetchProducts({
   }
 `;
 
+  console.log(query);
   return sanityFetch({
     query,
   });

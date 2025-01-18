@@ -115,10 +115,15 @@ export const products = defineType({
       of: [
         {
           type: "reference",
-          to: [{ type: "productVariants" }],
+          to: [
+            {
+              type: "productVariants",
+              validation: (Rule) => Rule.unique().required().min(1),
+            },
+          ],
         },
       ],
-      validation: (Rule) => Rule.unique().required().min(1),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "fit",
