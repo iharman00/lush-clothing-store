@@ -27,7 +27,7 @@ const CartItem = ({ item }: CartIem) => {
   const removeItem = useCart((state) => state.removeItem);
 
   return (
-    <div className="grid grid-cols-3 grid-rows-1 gap-6 my-6 h-40">
+    <div className="grid grid-cols-3 grid-rows-1 gap-6 my-6 h-40 group">
       <div className="col-span-1">
         {item.image && item.image.alt && (
           <Image
@@ -35,7 +35,7 @@ const CartItem = ({ item }: CartIem) => {
             alt={item.image.alt}
             width={1000}
             height={1000}
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-contain object-top"
           />
         )}
       </div>

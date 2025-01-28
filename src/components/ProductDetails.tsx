@@ -148,7 +148,13 @@ const ProductDetails = ({ product }: ProductDetails) => {
                       style={{
                         backgroundColor: variant.color.color?.hex,
                       }}
-                      onClick={() => setValue("variantId", variant._id)} // Update form value
+                      onClick={() => {
+                        setValue("variantId", variant._id);
+                        setValue(
+                          "variantSizeId",
+                          variant.sizeAndStock[0].size._id
+                        );
+                      }}
                     />
                   ))}
                 </div>

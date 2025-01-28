@@ -8,7 +8,7 @@ import { User } from "@prisma/client";
 import { cache } from "react";
 
 // User data-access function rules
-// - purpose of these functions are to control DB data access and mutations
+// - purpose of these functions is to control DB data access and mutations
 // - these functions are only allowed to run on the server
 // - if you need access to data on the client, pass it down as props from a server component
 // - functions either return the filtered User Object (UserDto) or throw an error
@@ -52,13 +52,13 @@ export const getCurrentUser = cache(async () => {
 });
 
 // provides data for frontend consumption after striping out the password hash
-export const getCurrentClientSideUser = cache(async () => {
+export const getCurrentClientSideUser = async () => {
   const user = await getCurrentUser();
 
   const { password, ...userWithoutPassword } = user;
 
   return userWithoutPassword;
-});
+};
 
 export const getUserByEmail = cache(async ({ email }: Pick<User, "email">) => {
   const user = await prisma.user.findUniqueOrThrow({

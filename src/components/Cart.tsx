@@ -119,7 +119,7 @@ const Cart = () => {
                       className: "w-full",
                     })}
                   >
-                    Continue to Checkout
+                    Review and checkout
                   </Link>
                 </SheetTrigger>
               </SheetFooter>
