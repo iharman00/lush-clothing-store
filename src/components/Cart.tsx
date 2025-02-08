@@ -35,11 +35,6 @@ const Cart = () => {
     (total, item) => total + item.quantity * item.price!,
     0
   );
-  const tax = 12;
-  const taxAmount = parseFloat(((cartTotal * tax) / 100).toFixed(2));
-  const totalWithTax = Math.floor(
-    parseFloat((cartTotal + taxAmount).toFixed(2))
-  );
 
   return (
     <Sheet>
@@ -102,13 +97,9 @@ const Cart = () => {
                   <span className="flex-1">Shipping Fee</span>
                   <span>Free</span>
                 </div>
-                <div className="flex text-muted-foreground">
-                  <span className="flex-1">Tax</span>
-                  <span>{formatPrice(taxAmount)}</span>
-                </div>
                 <div className="flex text-lg pt-2">
                   <span className="flex-1">Total</span>
-                  <span>{formatPrice(totalWithTax)}</span>
+                  <span>{formatPrice(cartTotal)}</span>
                 </div>
               </div>
               <SheetFooter>

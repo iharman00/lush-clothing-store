@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 import {
   InvalidDataError,
   PasswordMismatchError,
-} from "@/schemas/auth/customErrors";
+} from "@/schemas/customErrors";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { getUserByEmail } from "@/data_access/user";
 import prisma from "@/lib/prisma";
@@ -77,7 +77,7 @@ export default async function login(data: unknown): Promise<Response> {
     // 6. Redirect user to homepage or verify-email page
     // This needs to be done outside try catch block because of the way redirect works
   } catch (error) {
-    // Custom error - thrown when we unexpected data is received
+    // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
       response = {
         success: false,
@@ -132,8 +132,6 @@ export default async function login(data: unknown): Promise<Response> {
       success: false,
       message: "An unexpected error occured",
     };
-
-    console.log(error);
 
     return response;
   }

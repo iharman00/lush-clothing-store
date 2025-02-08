@@ -14,7 +14,8 @@ export default function CartLayout({
 }) {
   const router = useRouter();
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
       <div className="px-1 py-2 md:px-8 md:py-6 flex justify-between items-center w-full h-fit">
         <div className="flex items-center gap-2">
           {/* Back button */}
@@ -49,7 +50,7 @@ export default function CartLayout({
           Exit
         </Button>
       </div>
-      {children}
+      <div className="flex-grow">{children}</div>
     </div>
   );
 }

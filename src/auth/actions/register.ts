@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { createUser } from "@/data_access/user";
-import { InvalidDataError } from "../../schemas/auth/customErrors";
+import { InvalidDataError } from "../../schemas/customErrors";
 import { hash } from "argon2";
 
 type RegisterFormArrayType = {

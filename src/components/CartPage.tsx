@@ -1,37 +1,19 @@
 "use client";
 
 import CartItem from "@/components/CartItem";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { UserDTO } from "@/data_access/user/userDTO";
 import { useCart } from "@/hooks/use-cart";
-import getStripe from "@/lib/get-stripe";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect } from "react";
 
 interface CartPageProps {
   user: Omit<UserDTO, "password"> | null;
 }
 
-const stripe = getStripe();
-
 const CartPage = ({ user }: CartPageProps) => {
-  useEffect(() => {
-    // Check to see if this is a redirect back from Checkout
-    const query = new URLSearchParams(window.location.search);
-    if (query.get("success")) {
-      console.log("Order placed! You will receive an email confirmation.");
-    }
-
-    if (query.get("canceled")) {
-      console.log(
-        "Order canceled -- continue to shop around and checkout when you’re ready."
-      );
-    }
-  }, []);
-
   const cartItems = Object.values(useCart((state) => state.items));
 
   const totalItems = cartItems.reduce(
@@ -41,11 +23,6 @@ const CartPage = ({ user }: CartPageProps) => {
   const cartTotal = cartItems.reduce(
     (total, item) => total + item.quantity * item.price!,
     0
-  );
-  const tax = 12;
-  const taxAmount = parseFloat(((cartTotal * tax) / 100).toFixed(2));
-  const totalWithTax = Math.floor(
-    parseFloat((cartTotal + taxAmount).toFixed(2))
   );
 
   return (
@@ -103,39 +80,34 @@ const CartPage = ({ user }: CartPageProps) => {
               <span>{formatPrice(cartTotal)}</span>
             </div>
             <div className="flex text-muted-foreground">
-              <span className="flex-1">Shipping Fee</span>
+              <span className="flex-1">Shipping</span>
               <span>Free</span>
             </div>
-            <div className="flex text-muted-foreground">
-              <span className="flex-1">Tax</span>
-              <span>{formatPrice(taxAmount)}</span>
-            </div>
-            <div className="flex">
+            <div className="flex text-lg pt-2">
               <span className="flex-1">Total</span>
-              <span>{formatPrice(totalWithTax)}</span>
+              <span>{formatPrice(cartTotal)}</span>
             </div>
           </div>
           {user ? (
-            <form action="/api/checkout">
-              <Button
+            <Link
+              href="/checkout"
+              className={buttonVariants({
+                className: "w-full",
+              })}
+            >
+              Continue
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/checkout"
                 className={buttonVariants({
                   className: "w-full",
                 })}
               >
-                Continue
-              </Button>
-            </form>
-          ) : (
-            <>
-              <form action="/api/checkout">
-                <Button
-                  className={buttonVariants({
-                    className: "w-full",
-                  })}
-                >
-                  Continue as Guest
-                </Button>
-              </form>
+                Continue as Guest
+              </Link>
+
               <div className="relative flex items-center justify-center">
                 <Separator className="w-full" />
                 <p className="absolute bg-white px-2">or</p>

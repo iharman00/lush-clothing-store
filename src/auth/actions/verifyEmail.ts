@@ -15,7 +15,7 @@ import {
   InvalidDataError,
   OTPVerificationError,
   InvalidUserSessionError,
-} from "@/schemas/auth/customErrors";
+} from "@/schemas/customErrors";
 import { setUserEmailVerified } from "@/data_access/user";
 
 type VerifyEmailFormArrayType = {

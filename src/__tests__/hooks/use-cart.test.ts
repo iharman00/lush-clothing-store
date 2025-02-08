@@ -24,6 +24,7 @@ describe("useCart store", () => {
 
   beforeEach(() => {
     useCart.getState().clearCart();
+    localStorage.clear();
   });
 
   test("should add a new item to the cart", () => {
