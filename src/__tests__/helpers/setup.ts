@@ -1,4 +1,8 @@
 import { vi } from "vitest";
+import loadEnv from "./loadEnv";
+
+// Very important - loads the env variables from env.test
+loadEnv();
 
 vi.mock("react", async (importOriginal) => {
   return {
