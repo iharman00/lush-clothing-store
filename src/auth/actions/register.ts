@@ -26,7 +26,9 @@ export type Response = {
   fields?: Partial<RegisterFormType>;
 };
 
-export default async function register(data: unknown): Promise<Response> {
+export default async function register(
+  data: unknown
+): Promise<Response | void> {
   let rawFormData;
   let response: Response;
 

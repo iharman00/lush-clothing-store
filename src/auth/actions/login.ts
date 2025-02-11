@@ -27,7 +27,7 @@ export type Response = {
   fields?: Partial<LoginFormType>;
 };
 
-export default async function login(data: unknown): Promise<Response> {
+export default async function login(data: unknown): Promise<Response | void> {
   let rawFormData;
   let user;
   let response: Response;
@@ -127,7 +127,6 @@ export default async function login(data: unknown): Promise<Response> {
       };
       return response;
     }
-
     response = {
       success: false,
       message: "An unexpected error occured",

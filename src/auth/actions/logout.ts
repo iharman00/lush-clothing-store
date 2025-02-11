@@ -10,7 +10,7 @@ type Response = {
   message: string;
 };
 
-export default async function logout(): Promise<Response | null> {
+export default async function logout(): Promise<Response> {
   const { session } = await validateRequest();
   if (!session) {
     const response: Response = {
