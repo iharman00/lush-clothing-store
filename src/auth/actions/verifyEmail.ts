@@ -72,8 +72,13 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
       sessionCookie.attributes
     );
 
-    // 8. Redirect user to success page
-    // This needs to be done outside try catch block because of the way redirect works
+    // 8. Send success response
+    response = {
+      success: true,
+      message: "Email verified successfully",
+    };
+
+    return response;
   } catch (error) {
     // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
@@ -125,6 +130,4 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
 
     return response;
   }
-  revalidatePath("/");
-  redirect("/email-verified");
 }

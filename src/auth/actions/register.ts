@@ -8,8 +8,6 @@ import { Prisma } from "@prisma/client";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { createUser } from "@/data_access/user";
 import { InvalidDataError } from "../../schemas/customErrors";
@@ -26,9 +24,7 @@ export type Response = {
   fields?: Partial<RegisterFormType>;
 };
 
-export default async function register(
-  data: unknown
-): Promise<Response | void> {
+export default async function register(data: unknown): Promise<Response> {
   let rawFormData;
   let response: Response;
 
@@ -68,8 +64,13 @@ export default async function register(
     // 6. Send verification code to the currently logged in user
     await sendOTPEmail();
 
-    // 7. Redirect user to verify-email
-    // This needs to be done outside try catch block because of the way redirect works
+    // 7. Send success response
+    response = {
+      success: true,
+      message: "Registration successful",
+    };
+
+    return response;
   } catch (error) {
     // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
@@ -114,7 +115,4 @@ export default async function register(
 
     return response;
   }
-
-  revalidatePath("/");
-  redirect("/verify-email");
 }

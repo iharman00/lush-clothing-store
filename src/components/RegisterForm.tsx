@@ -26,10 +26,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export function RegisterForm() {
+  const router = useRouter();
   const { toast } = useToast();
-  const [state, setState] = useState<ActionResponse | null>(null);
+  const [formState, setFormState] = useState<ActionResponse | null>(null);
   const form = useForm<RegisterFormType>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -38,7 +40,7 @@ export function RegisterForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      ...(state?.fields ?? {}),
+      ...(formState?.fields ?? {}),
     },
   });
   const submit: SubmitHandler<RegisterFormType> = async (data) => {
@@ -47,14 +49,18 @@ export function RegisterForm() {
       formData.append(key, val);
     });
     const res = await register(formData);
-    setState(res);
+    setFormState(res);
+    if (res.success) {
+      toast({ description: res.message });
+      router.push("/verify-email");
+    }
   };
 
   useEffect(() => {
-    if (state?.success === false) {
-      toast({ variant: "destructive", description: state.message });
-      if (state?.errors?.email) {
-        state.errors.email.map((err) => {
+    if (formState?.success === false) {
+      toast({ variant: "destructive", description: formState.message });
+      if (formState?.errors?.email) {
+        formState.errors.email.map((err) => {
           form.setError("email", {
             type: "manual",
             message: err,
@@ -62,7 +68,7 @@ export function RegisterForm() {
         });
       }
     }
-  }, [state]);
+  }, [formState]);
 
   return (
     <Form {...form}>

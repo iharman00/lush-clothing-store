@@ -32,8 +32,10 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { UserDTO } from "@/data_access/user/userDTO";
 import sendOTPEmail from "@/auth/actions/sendOTPEmail";
+import { useRouter } from "next/navigation";
 
 const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
+  const router = useRouter();
   const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 
@@ -52,6 +54,10 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
     });
     const res = await verifyEmail(formData);
     setFormState(res);
+    if (res.success) {
+      toast({ description: res.message });
+      router.push("/email-verified");
+    }
   };
 
   useEffect(() => {

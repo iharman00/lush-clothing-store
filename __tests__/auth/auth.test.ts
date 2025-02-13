@@ -53,29 +53,28 @@ describe("Auth", () => {
       };
 
       const formData = objectToFormData(user);
-      const result = await register(formData);
+      const res = await register(formData);
 
       const dbUser = await prisma.user.findFirst({
         where: { email: user.email },
       });
-      expect(dbUser).toBeDefined();
 
-      // register() calls redirect, so no return value
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
+      expect(dbUser).toBeDefined();
     });
 
     test("should fail for invalid form data", async () => {
       const user = { email: "not-an-email" };
       const invalidFormData = objectToFormData(user);
 
-      const result = await register(invalidFormData);
+      const res = await register(invalidFormData);
 
       const dbUser = await prisma.user.findFirst({
         where: { email: user.email },
       });
-      expect(dbUser).toBeNull();
 
-      expect(result?.success).toBe(false);
+      expect(res.success).toBe(false);
+      expect(dbUser).toBeNull();
     });
 
     test("should fail if a user already exists", async () => {
@@ -91,9 +90,9 @@ describe("Auth", () => {
       await register(formData);
 
       // Try to register again
-      const result = await register(formData);
+      const res = await register(formData);
 
-      expect(result?.success).toBe(false);
+      expect(res.success).toBe(false);
     });
     test("should hash user's password before saving it to the database", async () => {
       const user: RegisterFormType = {
@@ -105,13 +104,14 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(user);
 
-      const result = await register(formData);
+      const res = await register(formData);
       const dbUser = await prisma.user.findFirst({
         where: { email: user.email },
       });
 
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
       expect(dbUser).toBeDefined();
+
       const isHashed = await verify(dbUser!.password, user.password);
       expect(isHashed).toBe(true);
     });
@@ -125,15 +125,15 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(user);
 
-      const result = await register(formData);
+      const res = await register(formData);
       const dbUser = await prisma.user.findFirst({
         where: { email: user.email },
         include: { sessions: true },
       });
 
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
       expect(dbUser).toBeDefined();
-      expect(dbUser!.sessions).toHaveLength(1);
+      expect(dbUser?.sessions).toHaveLength(1);
     });
   });
   describe("Login", () => {
@@ -162,10 +162,9 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(userDetails);
 
-      const result = await login(formData);
+      const res = await login(formData);
 
-      // login() calls redirect, so no return value
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
     });
     test("should fail if password is wrong", async () => {
       const userDetails: LoginFormType = {
@@ -174,9 +173,9 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(userDetails);
 
-      const result = await login(formData);
+      const res = await login(formData);
 
-      expect(result?.success).toBe(false);
+      expect(res.success).toBe(false);
     });
     test("should fail if user doesn't exist", async () => {
       const userDetails: LoginFormType = {
@@ -185,9 +184,9 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(userDetails);
 
-      const result = await login(formData);
+      const res = await login(formData);
 
-      expect(result?.success).toBe(false);
+      expect(res.success).toBe(false);
     });
     test("should fail for invalid data", async () => {
       const userDetails = {
@@ -195,9 +194,9 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(userDetails);
 
-      const result = await login(formData);
+      const res = await login(formData);
 
-      expect(result?.success).toBe(false);
+      expect(res.success).toBe(false);
     });
     test("should create a session in DB", async () => {
       // Making sure there are no sessions in the DB from previous register calls
@@ -211,15 +210,15 @@ describe("Auth", () => {
       };
       const formData = objectToFormData(userDetails);
 
-      const result = await login(formData);
+      const res = await login(formData);
       const dbUser = await prisma.user.findFirst({
         where: { email: registereduser.email },
         include: { sessions: true },
       });
 
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
       expect(dbUser).toBeDefined();
-      expect(dbUser!.sessions).toHaveLength(1);
+      expect(dbUser?.sessions).toHaveLength(1);
     });
     test("should not return an expired session", async () => {
       const userDetails: LoginFormType = {
@@ -238,9 +237,9 @@ describe("Auth", () => {
         where: { userId: dbUser?.id },
       });
 
-      const result = await login(formData);
+      const res = await login(formData);
 
-      expect(result).toBeUndefined();
+      expect(res.success).toBe(true);
       // Should not set the auth cookie for the expired session
       expect(setCookieMock).toBeCalledWith(
         lucia.sessionCookieName,
@@ -288,13 +287,13 @@ describe("Auth", () => {
         }
       );
 
-      const response = await logout();
+      const res = await logout();
       const dbUserAfterLogout = await prisma.user.findFirst({
         where: { email: user.email },
         include: { sessions: true },
       });
 
-      expect(response.success).toBe(true);
+      expect(res.success).toBe(true);
       expect(dbUserAfterLogout!.sessions).toHaveLength(0);
     });
     test("should fail if session cookie is invalid", async () => {
@@ -312,9 +311,9 @@ describe("Auth", () => {
         }
       );
 
-      const response = await logout();
+      const res = await logout();
 
-      expect(response.success).toBe(false);
+      expect(res.success).toBe(false);
     });
   });
   describe("Validate request", () => {
@@ -355,10 +354,10 @@ describe("Auth", () => {
         }
       );
 
-      const result = await validateRequest();
+      const res = await validateRequest();
 
-      expect(result.user?.email).toBe(dbUser?.email);
-      expect(result.session?.id).toBe(dbUser?.sessions[0].id);
+      expect(res.user?.email).toBe(dbUser?.email);
+      expect(res.session?.id).toBe(dbUser?.sessions[0].id);
     });
     test("should fail if the session has expired", async () => {
       const dbUser = await prisma.user.findFirst({
@@ -386,10 +385,10 @@ describe("Auth", () => {
         }
       );
 
-      const result = await validateRequest();
+      const res = await validateRequest();
 
-      expect(result.user).toBeNull();
-      expect(result.session).toBeNull();
+      expect(res.user).toBeNull();
+      expect(res.session).toBeNull();
     });
     test("should fail if the session cookie is invalid", async () => {
       // Mock the get cookie call when it asks for the session cookie
@@ -406,10 +405,10 @@ describe("Auth", () => {
         }
       );
 
-      const result = await validateRequest();
+      const res = await validateRequest();
 
-      expect(result.user).toBeNull();
-      expect(result.session).toBeNull();
+      expect(res.user).toBeNull();
+      expect(res.session).toBeNull();
     });
   });
 });

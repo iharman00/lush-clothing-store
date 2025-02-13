@@ -1,17 +1,31 @@
 services:
-  db:
+  db_dev:
     image: postgres
-    container_name: postgres-db
+    container_name: postgres-db-dev
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: test_database
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_database
     ports:
       - "5432:5432"
     volumes:
-      - db:/var/lib/postgresql/data
+      - db_dev:/var/lib/postgresql/data
+  db_test:
+    image: postgres
+    container_name: postgres-db-test
+    restart: always
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_database
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_test:/var/lib/postgresql/data
 
 volumes:
-  db:
+  db_test:
+    driver: local
+  db_dev:
     driver: local

@@ -6,13 +6,10 @@ import { verify } from "argon2";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
 import { ZodError } from "zod";
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import {
   InvalidDataError,
   PasswordMismatchError,
 } from "@/schemas/customErrors";
-import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import { getUserByEmail } from "@/data_access/user";
 import prisma from "@/lib/prisma";
 
@@ -27,7 +24,7 @@ export type Response = {
   fields?: Partial<LoginFormType>;
 };
 
-export default async function login(data: unknown): Promise<Response | void> {
+export default async function login(data: unknown): Promise<Response> {
   let rawFormData;
   let user;
   let response: Response;
@@ -71,11 +68,13 @@ export default async function login(data: unknown): Promise<Response | void> {
       sessionCookie.attributes
     );
 
-    // 6. Send verification code to the user is email is not verified
-    if (!user.emailVerified) await sendOTPEmail();
+    // 6. Send success response
+    response = {
+      success: true,
+      message: "Log in successful",
+    };
 
-    // 6. Redirect user to homepage or verify-email page
-    // This needs to be done outside try catch block because of the way redirect works
+    return response;
   } catch (error) {
     // Custom error - thrown when unexpected data is received
     if (error instanceof InvalidDataError) {
@@ -134,8 +133,4 @@ export default async function login(data: unknown): Promise<Response | void> {
 
     return response;
   }
-
-  revalidatePath("/");
-  if (!user.emailVerified) redirect("/verify-email");
-  redirect("/");
 }

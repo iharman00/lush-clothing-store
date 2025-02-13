@@ -20,8 +20,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export function LoginForm() {
+  const router = useRouter();
   const { toast } = useToast();
   const [formState, setFormState] = useState<ActionResponse | null>(null);
 
@@ -41,6 +43,10 @@ export function LoginForm() {
     });
     const res = await login(formData);
     setFormState(res);
+    if (res.success) {
+      toast({ description: res.message });
+      router.push("/");
+    }
   };
 
   useEffect(() => {
