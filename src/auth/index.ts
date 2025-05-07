@@ -14,6 +14,7 @@ export const lucia = new Lucia(adapter, {
     return {
       emailVerified: attributes.emailVerified,
       email: attributes.email,
+      stripe_customer_id: attributes.stripe_customer_id,
     };
   },
 });
@@ -25,6 +26,7 @@ declare module "lucia" {
     DatabaseUserAttributes: {
       email: string;
       emailVerified: boolean;
+      stripe_customer_id?: string;
     };
   }
 }

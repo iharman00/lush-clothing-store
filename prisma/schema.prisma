@@ -15,6 +15,7 @@ datasource db {
 
 model User {
   id                    String  @id @default(cuid())
+  stripe_customer_id    String?  @unique
   firstName             String
   lastName              String
   email                 String  @unique
@@ -25,6 +26,7 @@ model User {
   
   sessions              Session[]
   emailVerificationCode EmailVerificationCode[]
+  orders                Orders[]
   @@map("users")
 }
 
@@ -38,12 +40,38 @@ model Session {
 }
 
 model EmailVerificationCode {
-  id                    String @id @default(cuid())
+  id                    String  @id @default(cuid())
   code                  String
-  userId                String @unique
+  userId                String  @unique
   email                 String
   expiresAt             DateTime
 
   user                  User  @relation(references: [id], fields: [userId], onDelete: Cascade)
   @@map("email_verification_codes")
+}
+
+model Orders{
+  id                          String  @id @default(cuid())
+  stripe_checkout_session_id  String  @unique
+  userId                      String? // userId optional for guest users
+  userEmail                   String
+  createdAt                   DateTime @default(now())
+  orderTotal                  Int
+  isPaid                      Boolean
+  orderItems                  OrderItems[]
+  user                        User?  @relation(references: [id], fields: [userId], onDelete: Cascade)
+  @@map("orders")
+}
+
+model OrderItems{
+  id                    String  @id @default(cuid())
+  createdAt             DateTime @default(now())
+  orderId               String
+  productId             String
+  productVariantId      String
+  productSizeId         String
+  price                 Int
+  quantity              Int
+  order                 Orders  @relation(references: [id], fields: [orderId], onDelete: Cascade)
+  @@map("order_items")
 }

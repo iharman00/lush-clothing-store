@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { useCart } from "@/hooks/use-cart";
+import { CartItem, useCart } from "@/hooks/use-cart";
 
 // Mock fetchProductVariant to return empty data because it runs in refreshCartItems on store setup
 vi.mock("@/sanity/dynamicQueries/fetchProductVariant", () => ({
@@ -7,9 +7,10 @@ vi.mock("@/sanity/dynamicQueries/fetchProductVariant", () => ({
 }));
 
 describe("useCart store", () => {
-  const newItem = {
-    variantId: "123",
-    variantSizeId: "456",
+  const newItem: Omit<CartItem, "quantity"> = {
+    productId: "123",
+    variantId: "345",
+    variantSizeId: "567",
     name: "Product Name",
     color: "Red",
     size: "M",
@@ -20,7 +21,7 @@ describe("useCart store", () => {
     },
     price: 100,
   };
-  const itemKey = newItem.variantId + "-" + newItem.variantSizeId;
+  const itemKey = `${newItem.productId}-${newItem.variantId}-${newItem.variantSizeId}`;
 
   beforeEach(() => {
     useCart.getState().clearCart();
@@ -53,6 +54,7 @@ describe("useCart store", () => {
 
     addItem(newItem);
     removeItem({
+      productId: newItem.productId,
       variantId: newItem.variantId,
       variantSizeId: newItem.variantSizeId,
     });
@@ -67,6 +69,7 @@ describe("useCart store", () => {
 
     addItem(newItem);
     setItemCount({
+      productId: newItem.productId,
       variantId: newItem.variantId,
       variantSizeId: newItem.variantSizeId,
       quantity: 5,
@@ -82,6 +85,7 @@ describe("useCart store", () => {
 
     addItem(newItem);
     setItemCount({
+      productId: newItem.productId,
       variantId: newItem.variantId,
       variantSizeId: newItem.variantSizeId,
       quantity: 0,

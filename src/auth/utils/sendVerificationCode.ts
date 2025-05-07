@@ -1,7 +1,7 @@
 import "server-only";
 
 import generateEmailVerificationCode from "@/auth/utils/generateEmailVerificationCode";
-import { EmailTemplate } from "./VerifyEmailTemplate";
+import { VerifyEmailTemplate } from "./VerifyEmailTemplate";
 import { Resend } from "resend";
 import { UserDTO } from "@/data_access/user/userDTO";
 
@@ -16,6 +16,6 @@ export default async function sendVerificationCode(user: UserDTO) {
     from: `Lush <${process.env.RESEND_EMAIL}>`,
     to: user.email,
     subject: "Email Verification Code",
-    react: EmailTemplate({ verificationCode }),
+    react: VerifyEmailTemplate({ verificationCode }),
   });
 }

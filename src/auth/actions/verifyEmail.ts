@@ -3,8 +3,6 @@
 import { validateRequest } from "@/auth/middlewares";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import {
   verifyEmailFormSchema,
   VerifyEmailFormType,
@@ -16,7 +14,12 @@ import {
   OTPVerificationError,
   InvalidUserSessionError,
 } from "@/schemas/customErrors";
-import { setUserEmailVerified } from "@/data_access/user";
+import {
+  getCurrentUser,
+  setUserEmailVerified,
+  setUserStripeCustomerId,
+} from "@/data_access/user";
+import Stripe from "stripe";
 
 type VerifyEmailFormArrayType = {
   [Key in keyof VerifyEmailFormType]?: VerifyEmailFormType[Key][];
@@ -29,6 +32,8 @@ export type Response = {
   fields?: Partial<VerifyEmailFormType>;
 };
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+
 export default async function verifyEmail(data: unknown): Promise<Response> {
   let rawFormData;
   let validatedData: VerifyEmailFormType;
@@ -36,7 +41,7 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
 
   try {
     // 1. Check if user exists
-    let { user, session } = await validateRequest();
+    let user = await getCurrentUser();
     if (!user) throw new InvalidUserSessionError("User is not logged in");
 
     // 2. Check, extract and validate data
@@ -50,18 +55,31 @@ export default async function verifyEmail(data: unknown): Promise<Response> {
 
     // 3. Validate pin
     // Throws InvalidOTPError if verification fails
-    await verifyVerificationCode(user, validatedData.pin);
+    await verifyVerificationCode(
+      { id: user.id, email: user.email },
+      validatedData.pin
+    );
+
+    // 4. Create customer on stripe
+    if (!user.stripe_customer_id) {
+      const stripeCustomer = await stripe.customers.create({
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      });
+      await setUserStripeCustomerId({
+        id: user.id,
+        stripe_customer_id: stripeCustomer.id,
+      });
+    }
 
     // 4. Create new session if code is valid
     await lucia.invalidateUserSessions(user.id);
 
-    // 5. Update user's emailVerified to true
-    // If user's email is'nt already verified
-    if (!user.emailVerified)
-      await setUserEmailVerified({ id: user.id, emailVerified: true });
+    // 5. Update user's details
+    await setUserEmailVerified({ id: user.id, emailVerified: true });
 
     // 6. Create Session
-    session = await lucia.createSession(user.id, {});
+    const session = await lucia.createSession(user.id, {});
     // lucia.createSession also creates the session in the database
     const sessionCookie = lucia.createSessionCookie(session.id);
 

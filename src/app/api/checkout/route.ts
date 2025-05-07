@@ -5,9 +5,16 @@ import {
   CheckoutProductSchema,
 } from "@/schemas/checkout/CheckoutProductSchema";
 import { z, ZodError } from "zod";
-import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
+import fetchProductVariant, {
+  fetchProductVariantReturnType,
+} from "@/sanity/dynamicQueries/fetchProductVariant";
 import { urlFor } from "@/sanity/lib/image";
-import { InvalidDataError } from "@/schemas/customErrors";
+import {
+  InvalidAuthorizationError,
+  InvalidDataError,
+} from "@/schemas/customErrors";
+import { validateRequest } from "@/auth/middlewares";
+import { getOrder } from "@/data_access/order";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -18,47 +25,90 @@ type Response = {
   clientSecret?: string | null;
 };
 
+export type LineItemMetadata = {
+  productId: string;
+  variantId: string;
+  sizeId: string;
+};
+
+export type CheckoutSessionMetadata = {
+  existingUserId: string | null;
+};
+
+type ProductVariantType = fetchProductVariantReturnType[number] & {
+  quantity: number;
+  sizeId: string;
+};
+
 // Helper functions
-async function createLineItems(
+// Fetches live product data from sanity and adds some additional properties
+async function fetchProductVariants(
   products: CheckoutProduct[]
+): Promise<ProductVariantType[]> {
+  const fetchedProducts = await Promise.all(
+    products.map(async (product) => {
+      const [variant] = await fetchProductVariant({
+        productId: product.productId,
+        variantId: product.variantId,
+        sizeId: product.sizeId,
+      });
+
+      if (variant) {
+        return {
+          ...variant,
+          quantity: product.quantity,
+          sizeId: product.sizeId,
+        } as ProductVariantType;
+      }
+      return null;
+    })
+  );
+
+  // Filter out any null values if some products didn't have variants
+  return fetchedProducts.filter((product) => product !== null);
+}
+
+async function createLineItems(
+  products: ProductVariantType[]
 ): Promise<Stripe.Checkout.SessionCreateParams.LineItem[]> {
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  const fetchPromises = products.map(async (product) => {
-    const [variant] = await fetchProductVariant({
-      variantId: product.variantId,
-      sizeId: product.sizeId,
-    });
-
+  products.forEach((variant) => {
+    const metadata: LineItemMetadata = {
+      productId: variant.parentProduct._id,
+      variantId: variant._id,
+      sizeId: variant.sizeId,
+    };
     lineItems.push({
       price_data: {
         product_data: {
           name: variant.parentProduct.name!,
           description: `Size: ${variant.sizeAndStock[0].size.name} | Color: ${variant.color.name}`,
           images: [urlFor(variant.images![0]).url()],
-          metadata: {
-            Size: variant.sizeAndStock[0].size.name!,
-            Color: variant.color.name!,
-          },
+          metadata: metadata,
         },
         unit_amount: variant.parentProduct.price! * 100,
         currency: "CAD",
       },
-      quantity: product.quantity,
+      quantity: variant.quantity,
       adjustable_quantity: { enabled: true },
     });
   });
 
-  await Promise.all(fetchPromises);
   return lineItems;
 }
 
-// Handlers
 export async function POST(req: NextRequest): Promise<NextResponse<Response>> {
   try {
     // Validate incoming data
     const body = await req.json();
     const parsedProducts = z.array(CheckoutProductSchema).parse(body);
+
+    // If user is logged in, make sure their email is verified before proceeding
+    const { user } = await validateRequest();
+    if (user && !user.emailVerified) {
+      throw new InvalidAuthorizationError("User email is not verified");
+    }
 
     // Throw custom error
     if (parsedProducts.length === 0)
@@ -66,15 +116,27 @@ export async function POST(req: NextRequest): Promise<NextResponse<Response>> {
         "Atleast one item is required to initiate checkout"
       );
 
+    // Fetch product variants from Sanity CMS
+    const fetchedProducts = await fetchProductVariants(parsedProducts);
+
     // create line items for creating checkout session
-    const lineItems = await createLineItems(parsedProducts);
+    const lineItems = await createLineItems(fetchedProducts);
+
+    const sessionMetadata: CheckoutSessionMetadata = {
+      existingUserId: user?.id ? user.id : null,
+    };
 
     // Create Checkout Session
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded",
       line_items: lineItems,
       mode: "payment",
-      return_url: `${req.headers.get("origin")}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+      // Add customer stripe id if user is logged in and email is verified
+      ...(user && user.emailVerified && user.stripe_customer_id
+        ? { customer: user.stripe_customer_id }
+        : {}),
+      return_url: `${req.headers.get("origin")}/checkout/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: sessionMetadata,
     });
 
     // Success response with the client secret
@@ -89,6 +151,14 @@ export async function POST(req: NextRequest): Promise<NextResponse<Response>> {
       return NextResponse.json(
         { success: false, message: "Invalid data" },
         { status: 400 }
+      );
+    }
+
+    // Custom error thrown when  there are no items in the request body
+    if (err instanceof InvalidAuthorizationError) {
+      return NextResponse.json(
+        { success: false, message: err.message },
+        { status: 403 }
       );
     }
 
@@ -114,20 +184,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const sessionId = searchParams.get("session_id");
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: "Missing session_id" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const order = await getOrder(sessionId);
+
+    if (!order) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
 
     return NextResponse.json({
-      status: session.status,
-      customer_email: session.customer_details?.email || "No email provided",
+      isPaid: order.isPaid,
     });
   } catch (err) {
-    console.error("Stripe Error:", err);
     return NextResponse.json(
       { error: "An unknown error occurred" },
       { status: 500 }

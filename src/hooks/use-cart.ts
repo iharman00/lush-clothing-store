@@ -1,9 +1,11 @@
 import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
 import { urlFor } from "@/sanity/lib/image";
+import { Item } from "@radix-ui/react-accordion";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 export interface CartItem {
+  productId: string;
   variantId: string;
   variantSizeId: string;
   name: string;
@@ -23,9 +25,14 @@ interface CartStore {
     [key: string]: CartItem;
   };
   addItem: (item: Omit<CartItem, "quantity">) => void;
-  removeItem: (item: Pick<CartItem, "variantId" | "variantSizeId">) => void;
+  removeItem: (
+    item: Pick<CartItem, "productId" | "variantId" | "variantSizeId">
+  ) => void;
   setItemCount: (
-    item: Pick<CartItem, "variantId" | "variantSizeId" | "quantity">
+    item: Pick<
+      CartItem,
+      "productId" | "variantId" | "variantSizeId" | "quantity"
+    >
   ) => void;
   clearCart: () => void;
   refreshCartItems: () => void;
@@ -37,7 +44,7 @@ export const useCart = create<CartStore>()(
       items: {},
       addItem: (newItem) =>
         set((state) => {
-          const key = `${newItem.variantId}-${newItem.variantSizeId}`;
+          const key = `${newItem.productId}-${newItem.variantId}-${newItem.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
@@ -58,7 +65,7 @@ export const useCart = create<CartStore>()(
         }),
       removeItem: (item) =>
         set((state) => {
-          const key = `${item.variantId}-${item.variantSizeId}`;
+          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
@@ -75,7 +82,7 @@ export const useCart = create<CartStore>()(
         }),
       setItemCount: (item) =>
         set((state) => {
-          const key = `${item.variantId}-${item.variantSizeId}`;
+          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
@@ -115,10 +122,12 @@ export const useCart = create<CartStore>()(
         for (const [key, item] of items) {
           fetchPromises.push(
             fetchProductVariant({
+              productId: item.productId,
               variantId: item.variantId,
               sizeId: item.variantSizeId,
             }).then(([variant]) => {
               newCartItems[key] = {
+                productId: variant.parentProduct._id,
                 variantId: variant._id,
                 variantSizeId: variant.sizeAndStock[0].size._id,
                 name: variant.parentProduct.name!,

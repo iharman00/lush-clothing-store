@@ -3,7 +3,13 @@ import { experimental_taintUniqueValue } from "react";
 
 export type UserDTO = Pick<
   User,
-  "id" | "firstName" | "lastName" | "email" | "emailVerified" | "password"
+  | "id"
+  | "firstName"
+  | "lastName"
+  | "email"
+  | "emailVerified"
+  | "stripe_customer_id"
+  | "password"
 >;
 
 export function filterUser(user: User): UserDTO {
@@ -20,6 +26,7 @@ export function filterUser(user: User): UserDTO {
     lastName: user.lastName,
     email: user.email,
     emailVerified: user.emailVerified,
+    stripe_customer_id: user.stripe_customer_id,
     password: user.password,
   };
 }

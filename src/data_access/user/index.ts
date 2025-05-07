@@ -2,7 +2,7 @@ import "server-only";
 
 import { validateRequest } from "@/auth/middlewares";
 import prisma from "@/lib/prisma";
-import { filterUser } from "@/data_access/user/userDTO";
+import { filterUser, UserDTO } from "@/data_access/user/userDTO";
 import { InvalidUserSessionError } from "@/schemas/customErrors";
 import { User } from "@prisma/client";
 import { cache } from "react";
@@ -34,29 +34,38 @@ export const createUser = cache(
 );
 
 // Return currently logged in userDTO
-export const getCurrentUser = cache(async () => {
+export const getCurrentUser = cache(async (): Promise<UserDTO | null> => {
   const { user: validatedUser, session } = await validateRequest();
 
   // Throw custom error when user or session not available
   if (!validatedUser || !session) {
-    throw new InvalidUserSessionError("User not logged in");
+    return null;
   }
 
-  const user = await prisma.user.findUniqueOrThrow({
-    where: {
-      id: validatedUser.id,
-    },
-  });
-
-  return filterUser(user);
+  try {
+    const user = await prisma.user.findUniqueOrThrow({
+      where: {
+        id: validatedUser.id,
+      },
+    });
+    return filterUser(user);
+  } catch (err) {
+    return null;
+  }
 });
 
 // provides data for frontend consumption after striping out the password hash
-export const getCurrentClientSideUser = async () => {
+export const getCurrentClientSideUser = async (): Promise<Omit<
+  UserDTO,
+  "password"
+> | null> => {
   const user = await getCurrentUser();
 
-  const { password, ...userWithoutPassword } = user;
+  if (!user) {
+    return null;
+  }
 
+  const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;
 };
 
@@ -78,6 +87,24 @@ export const setUserEmailVerified = cache(
       },
       data: {
         emailVerified,
+      },
+    });
+
+    return filterUser(user);
+  }
+);
+
+export const setUserStripeCustomerId = cache(
+  async ({
+    id,
+    stripe_customer_id,
+  }: Pick<User, "id" | "stripe_customer_id">) => {
+    const user = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        stripe_customer_id,
       },
     });
 

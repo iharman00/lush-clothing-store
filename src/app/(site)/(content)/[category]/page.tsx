@@ -16,6 +16,7 @@ import { urlFor } from "@/sanity/lib/image";
 import fetchSubCategoriesAndProductTypes, {
   fetchSubCategoriesAndProductTypesReturnType,
 } from "@/sanity/dynamicQueries/fetchSubCategoriesAndProductTypes";
+import { notFound } from "next/navigation";
 
 const Page = async ({ params }: { params: { category: string } }) => {
   const categorySlug = params.category.toLowerCase();
@@ -35,18 +36,7 @@ const Page = async ({ params }: { params: { category: string } }) => {
 
   const [category] = categories;
 
-  if (!category)
-    return (
-      <section className="container text-center flex flex-col justify-center items-center gap-2 my-20">
-        <h1 className="text-4xl md:text-5xl font-bold">Page not found.</h1>
-        <p className="mt-2 text-sm md:text-base">
-          Sorry, the page you are looking for does not exist or has been moved.
-        </p>
-        <Link href="/" className={cn(buttonVariants(), "mt-4 w-fit")}>
-          Go Back Home
-        </Link>
-      </section>
-    );
+  if (!category) notFound();
 
   return (
     <>

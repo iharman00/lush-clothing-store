@@ -1,12 +1,12 @@
 import "server-only";
 
 import prisma from "@/lib/prisma";
-import { type User } from "lucia";
 import { isWithinExpirationDate } from "oslo";
 import { OTPVerificationError } from "@/schemas/customErrors";
+import { User } from "@prisma/client";
 
 export async function verifyVerificationCode(
-  user: User,
+  user: Pick<User, "id" | "email">,
   verificationCode: string
 ): Promise<boolean> {
   const databaseCode = await prisma.emailVerificationCode.findUnique({

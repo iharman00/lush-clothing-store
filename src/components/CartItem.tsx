@@ -8,7 +8,8 @@ import { Separator } from "./ui/separator";
 
 interface CartIem {
   item: {
-    _id: string;
+    id: string;
+    variantId: string;
     name: string;
     color: string;
     size: { _id: string; name: string };
@@ -58,7 +59,8 @@ const CartItem = ({ item }: CartIem) => {
                 size="sm"
                 onClick={() =>
                   setItemCount({
-                    variantId: item._id,
+                    productId: item.id,
+                    variantId: item.variantId,
                     variantSizeId: item.size._id,
                     quantity: item.quantity - 1,
                   })
@@ -79,7 +81,8 @@ const CartItem = ({ item }: CartIem) => {
                 size="sm"
                 onClick={() =>
                   setItemCount({
-                    variantId: item._id,
+                    productId: item.id,
+                    variantId: item.variantId,
                     variantSizeId: item.size._id,
                     quantity: item.quantity + 1,
                   })
@@ -103,7 +106,11 @@ const CartItem = ({ item }: CartIem) => {
             variant={"link"}
             className="px-0 text-muted-foreground text-sm"
             onClick={() =>
-              removeItem({ variantId: item._id, variantSizeId: item.size._id })
+              removeItem({
+                productId: item.id,
+                variantId: item.variantId,
+                variantSizeId: item.size._id,
+              })
             }
           >
             Remove

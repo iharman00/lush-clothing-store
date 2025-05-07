@@ -38,7 +38,8 @@ const CartPage = ({ user }: CartPageProps) => {
                   <CartItem
                     key={`${item.variantId}-${item.variantSizeId}`}
                     item={{
-                      _id: item.variantId,
+                      id: item.productId,
+                      variantId: item.variantId,
                       name: item.name,
                       price: item.price,
                       color: item.color,

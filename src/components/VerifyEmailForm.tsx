@@ -112,6 +112,7 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
         <Button
           variant="link"
           className="mt-2"
+          type="button"
           onClick={async () => {
             const res = await sendOTPEmail();
             if (res.success) {

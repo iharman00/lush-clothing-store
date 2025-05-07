@@ -16,8 +16,10 @@ export default async function sendOTPEmail(): Promise<Response> {
   let response: Response;
   try {
     // 1. Validate Request and find the user
-    // This throws InvalidUserSessionError if user doesn't exist
     const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      throw new InvalidUserSessionError("User not found");
+    }
 
     // 2. Send Verification code
     if (currentUser.emailVerified)

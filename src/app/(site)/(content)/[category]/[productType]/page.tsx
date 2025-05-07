@@ -1,6 +1,4 @@
 import ProductsFeed from "@/components/ProductsFeed";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   fetchProductColors,
   fetchProductFits,
@@ -9,13 +7,13 @@ import {
 import fetchProductTypes, {
   fetchProductTypesReturnType,
 } from "@/sanity/dynamicQueries/fetchProductTypes";
-import Link from "next/link";
 import fetchCategoryData, {
   fetchCategoryDataReturnType,
 } from "@/sanity/dynamicQueries/fetchCategoryData";
 import ProductsFilter, { FilterOption } from "@/components/ProductsFilter";
 import { Color, Slug } from "@/sanity/types";
 import { priceFilters } from "@/sanity/dynamicQueries/fetchProducts";
+import { notFound } from "next/navigation";
 
 // Helper function to create options array to pass to ProductsFilter
 type CreateOptionsType = {
@@ -68,19 +66,7 @@ const page = async ({
   const [category] = categories;
   const [productType] = productTypes;
 
-  // Return early if category or productType does'nt exist
-  if (!category || !productType)
-    return (
-      <section className="container text-center flex flex-col justify-center items-center gap-2 my-20">
-        <h1 className="text-4xl md:text-5xl font-bold">Page not found.</h1>
-        <p className="mt-2 text-sm md:text-base">
-          Sorry, the page you are looking for does not exist or has been moved.
-        </p>
-        <Link href="/" className={cn(buttonVariants(), "mt-4 w-fit")}>
-          Go Back Home
-        </Link>
-      </section>
-    );
+  if (!category || !productType) notFound();
 
   // Fetch product colors, fits, and sizes concurrently
   const [productColors, productSizes, productFits] = await Promise.all([

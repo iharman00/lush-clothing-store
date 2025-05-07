@@ -100,8 +100,6 @@ export default async function fetchProducts({
     fit->{_id, name, slug}
   }
 `;
-
-  console.log(query);
   return sanityFetch({
     query,
   });

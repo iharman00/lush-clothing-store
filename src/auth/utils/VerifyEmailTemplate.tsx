@@ -1,12 +1,12 @@
 import * as React from "react";
 
-interface EmailTemplateProps {
+interface VerifyEmailTemplateProps {
   verificationCode: string;
 }
 
-export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
-  verificationCode,
-}) => (
+export const VerifyEmailTemplate: React.FC<
+  Readonly<VerifyEmailTemplateProps>
+> = ({ verificationCode }) => (
   <div
     style={{
       fontFamily: "Arial, sans-serif",

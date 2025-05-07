@@ -11,6 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - db_dev:/var/lib/postgresql/data
+
   db_test:
     image: postgres
     container_name: postgres-db-test
@@ -23,6 +24,19 @@ services:
       - "5433:5432"
     volumes:
       - db_test:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@dev.com
+      PGADMIN_DEFAULT_PASSWORD: dev1234
+    ports:
+      - "8080:80"
+    depends_on:
+      - db_dev
+      - db_test
 
 volumes:
   db_test:

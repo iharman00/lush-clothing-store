@@ -7,6 +7,7 @@ import {
 } from "../types";
 
 type fetchProductVariantProps = {
+  productId: string;
   variantId: string;
   sizeId: string;
 };
@@ -25,6 +26,7 @@ export type fetchProductVariantReturnType = Array<
 >;
 
 export default async function fetchProductVariant({
+  productId,
   variantId,
   sizeId,
 }: fetchProductVariantProps): Promise<fetchProductVariantReturnType> {
@@ -37,7 +39,7 @@ export default async function fetchProductVariant({
         size-> {_id, name},
         stock
     },
-    "parentProduct": *[_type == "products" && references(^._id) && defined(slug.current)][0] {
+    "parentProduct": *[_type == "products" && _id == "${productId}" && defined(slug.current)][0] {
         _id,
         name,
         slug,

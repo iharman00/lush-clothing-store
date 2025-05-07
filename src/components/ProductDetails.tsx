@@ -62,6 +62,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
 
     if (selectedSize && selectedSize.stock! > 0) {
       addItem({
+        productId: product._id,
         variantId: data.variantId,
         variantSizeId: data.variantSizeId,
         name: product.name!,
