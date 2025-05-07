@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { UserDTO } from "@/data_access/user/userDTO";
 import { User } from "lucide-react";
+import Link from "next/link";
 
 const AccountMenu = ({
   user,
@@ -39,7 +40,9 @@ const AccountMenu = ({
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Orders</DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/orders">Orders</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem>Wishlist</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

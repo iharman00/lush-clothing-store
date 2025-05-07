@@ -38,3 +38,18 @@ export async function getOrder(session_id: string) {
     include: { orderItems: true },
   });
 }
+
+export async function getOrdersByUserId(
+  userId: string,
+  pageParams: number = 1,
+  limit: number = 10
+) {
+  // Pagination logic
+  const skip = (pageParams - 1) * limit;
+  return prisma.orders.findMany({
+    where: { userId },
+    include: { orderItems: true },
+    skip,
+    take: limit,
+  });
+}

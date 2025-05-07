@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import LoadingSpinner from "./ui/LoadingSpinner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -69,7 +70,7 @@ export function LoginForm() {
         });
       }
     }
-  }, [formState]);
+  }, [formState, form, toast]);
 
   return (
     <Form {...form}>
@@ -120,11 +121,7 @@ export function LoginForm() {
           disabled={form.formState.isSubmitting}
           size="lg"
         >
-          {form.formState.isSubmitting ? (
-            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-          ) : (
-            "Log In"
-          )}
+          {form.formState.isSubmitting ? <LoadingSpinner /> : "Log In"}
         </Button>
       </form>
     </Form>
