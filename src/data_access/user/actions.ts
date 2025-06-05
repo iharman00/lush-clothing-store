@@ -6,6 +6,10 @@ import { getCurrentUser } from ".";
 export const getCurrentClientSideUser = async () => {
   const user = await getCurrentUser();
 
+  if (!user) {
+    return null;
+  }
+
   const { password, ...userWithoutPassword } = user;
 
   return userWithoutPassword;

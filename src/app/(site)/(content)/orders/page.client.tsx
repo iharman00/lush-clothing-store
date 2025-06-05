@@ -6,11 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { OrderItems, Orders } from "@prisma/client";
-import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
+import fetchProductVariant, {
+  fetchProductVariantReturnType,
+} from "@/sanity/dynamicQueries/fetchProductVariant";
 import React, { useEffect } from "react";
 import { getOrdersByUserIdAction } from "@/actions/getOrdersByUserId";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { formatPrice } from "@/lib/utils";
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
 
 interface OrderCardProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   order: Orders & {
@@ -19,7 +23,10 @@ interface OrderCardProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
-  const [items, setItems] = React.useState<any[]>([]);
+  type ProductVariantWithQuantity = NonNullable<
+    fetchProductVariantReturnType[number]
+  > & { quantity: number };
+  const [items, setItems] = React.useState<ProductVariantWithQuantity[]>([]);
 
   useEffect(() => {
     const loadItems = async () => {
@@ -37,7 +44,8 @@ const OrderCard = ({ order }: OrderCardProps) => {
           }
         })
       );
-      setItems(variants.filter(Boolean));
+      // Filter out null values
+      setItems(variants.filter((v): v is NonNullable<typeof v> => v !== null));
     };
 
     loadItems();
@@ -56,6 +64,22 @@ const OrderCard = ({ order }: OrderCardProps) => {
         </div>
 
         <Separator />
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+          {items.map((item, index) => {
+            if (item.images && item.images[0].alt)
+              return (
+                <Image
+                  key={index}
+                  src={urlFor(item.images[0]).url()}
+                  alt={item.images[0].alt || "Product Image"}
+                  width={1000}
+                  height={1000}
+                  className="w-full h-full object-cover rounded-md"
+                />
+              );
+          })}
+        </div>
 
         <div className="space-y-2">
           {items.map((item, index) => (

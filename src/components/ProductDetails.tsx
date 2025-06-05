@@ -1,7 +1,6 @@
 "use client";
 
 import { cn, formatPrice } from "@/lib/utils";
-import { Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Accordion,
@@ -38,7 +37,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
   const { toast } = useToast();
 
   // React Hook Form setup
-  const { handleSubmit, setValue, watch, control, getValues } = useForm({
+  const { handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       variantId: product.variants[0]._id,
       variantSizeId: product.variants[0].sizeAndStock[0].size._id,
@@ -130,7 +129,6 @@ const ProductDetails = ({ product }: ProductDetails) => {
                 <h1 className="text-xl">{product.name}</h1>
                 {product.price && <p>{formatPrice(product.price)}</p>}
               </div>
-              <Heart />
             </div>
             <div className="flex flex-col gap-8">
               {/* Product Colors */}

@@ -37,14 +37,11 @@ const AccountMenu = ({
         {userNameVisibility && user.firstName}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
         <DropdownMenuItem>
           <Link href="/orders">Orders</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>Wishlist</DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={async () => {
             const res = await logout();
