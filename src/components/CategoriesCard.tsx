@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-interface CategoriesCardType {
+interface CategoriesCardType extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   image: {
     url: string;
@@ -9,9 +10,20 @@ interface CategoriesCardType {
   };
 }
 
-const CategoriesCard = ({ title, image }: CategoriesCardType) => {
+const CategoriesCard = ({
+  title,
+  image,
+  className,
+  ...props
+}: CategoriesCardType) => {
   return (
-    <Card className="relative aspect-[3/4] w-52 lg:w-72 h-full flex flex-col justify-end items-start overflow-clip group">
+    <Card
+      className={cn(
+        "relative aspect-[3/4] w-52 lg:w-72 h-full flex flex-col justify-end items-start overflow-clip group",
+        className
+      )}
+      {...props}
+    >
       <Image
         src={image.url}
         alt={image.alt}

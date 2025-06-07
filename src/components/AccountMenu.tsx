@@ -37,8 +37,6 @@ const AccountMenu = ({
         {userNameVisibility && user.firstName}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
         <DropdownMenuItem>
           <Link href="/orders">Orders</Link>
         </DropdownMenuItem>

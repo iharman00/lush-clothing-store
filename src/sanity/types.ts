@@ -396,6 +396,48 @@ export type NAVIGATION_DATA_QUERYResult = Array<{
     }>;
   }>;
 }>;
+// Variable: RECENTLY_ADDED_PRODUCTS_QUERY
+// Query: *[_type == "products" && defined(slug.current)] | order(_createdAt desc)[0...20] {        _id, name, slug,          variants[]->{          color->{_id, name, slug},          images,        },        "productType": productType->{          _id, name, slug,          "subCategory": parentSubCategory->{            _id, name, slug,            "category": parentCategory->{              _id, name, slug        }      }    }  }
+export type RECENTLY_ADDED_PRODUCTS_QUERYResult = Array<{
+  _id: string;
+  name: string | null;
+  slug: Slug | null;
+  variants: Array<{
+    color: {
+      _id: string;
+      name: string | null;
+      slug: Slug | null;
+    } | null;
+    images: Array<{
+      asset?: {
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+      };
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      alt?: string;
+      _type: "image";
+      _key: string;
+    }> | null;
+  }> | null;
+  productType: {
+    _id: string;
+    name: string | null;
+    slug: Slug | null;
+    subCategory: {
+      _id: string;
+      name: string | null;
+      slug: Slug | null;
+      category: {
+        _id: string;
+        name: string | null;
+        slug: Slug | null;
+      } | null;
+    } | null;
+  } | null;
+}>;
 // Variable: PRODUCT_COLORS_QUERY
 // Query: *[_type == "productColors" && defined(slug.current)]{        _id, name, color, slug   }
 export type PRODUCT_COLORS_QUERYResult = Array<{
@@ -424,6 +466,7 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     "*[_type == \"categories\" && defined(slug.current)]{\n        _id, name, slug, image,\n        \"subCategories\": *[_type == \"subCategories\" && references(^._id)]{\n          _id, name, slug, \n          \"productTypes\": *[_type == \"productTypes\" && references(^._id)]{\n            _id, name, slug, \n      }\n    }\n  }\n    ": NAVIGATION_DATA_QUERYResult;
+    "*[_type == \"products\" && defined(slug.current)] | order(_createdAt desc)[0...20] {\n        _id, name, slug,\n          variants[]->{\n          color->{_id, name, slug},\n          images,\n        },\n        \"productType\": productType->{\n          _id, name, slug,\n          \"subCategory\": parentSubCategory->{\n            _id, name, slug,\n            \"category\": parentCategory->{\n              _id, name, slug\n        }\n      }\n    }\n  }\n": RECENTLY_ADDED_PRODUCTS_QUERYResult;
     "*[_type == \"productColors\" && defined(slug.current)]{\n        _id, name, color, slug \n  }\n    ": PRODUCT_COLORS_QUERYResult;
     "*[_type == \"productSizes\" && defined(slug.current)]{\n        _id, name, slug \n  }\n    ": PRODUCT_SIZES_QUERYResult;
     "*[_type == \"productFits\" && defined(slug.current)]{\n        _id, name, slug \n  }\n    ": PRODUCT_FITS_QUERYResult;

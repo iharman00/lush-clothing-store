@@ -9,7 +9,7 @@ export default async function ContentLayout({
   return (
     <>
       <Header />
-      <main className="flex-grow">{children}</main>
+      <main>{children}</main>
       <Footer />
     </>
   );

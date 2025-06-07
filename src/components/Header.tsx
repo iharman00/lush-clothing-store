@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
 import { Menu, User } from "lucide-react";
-import { DesktopSearchInput, MobileSearchInput } from "./ui/search-input";
 import AccountMenu from "./AccountMenu";
 import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
@@ -45,7 +44,7 @@ const Header = async () => {
   } catch (error) {}
 
   return (
-    <nav className="container flex justify-between py-4 ">
+    <nav className="container flex justify-between py-4 border-b-2">
       {/* Mobile */}
       <div className="lg:hidden w-full flex justify-between">
         <div className="flex items-center gap-4">
@@ -111,14 +110,6 @@ const Header = async () => {
           </Link>
         </div>
         <ul className="flex">
-          {/* Mobile Search input*/}
-          <li>
-            <MobileSearchInput
-              type="search"
-              placeholder="Search"
-              className="mr-2"
-            />
-          </li>
           {/* Mobile Account menu */}
           <li>
             {user && <AccountMenu user={user} userNameVisibility={false} />}
@@ -226,13 +217,6 @@ const Header = async () => {
           </NavigationMenu>
         </div>
         <div className="flex gap-2">
-          {/* Desktop Search Input */}
-          <DesktopSearchInput
-            type="search"
-            placeholder="Search"
-            className="mr-2"
-          />
-          <Separator orientation="vertical" />
           <ul className="flex justify-self-end">
             <li>
               {/* Desktop Account menu */}

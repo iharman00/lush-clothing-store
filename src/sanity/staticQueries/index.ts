@@ -6,6 +6,7 @@ export {
   fetchProductColors,
   fetchProductFits,
   fetchProductSizes,
+  fetchRecentlyAddedProducts,
 };
 
 const fetchNavigationData = async () => {
@@ -21,6 +22,29 @@ const fetchNavigationData = async () => {
   }
     `);
   return sanityFetch({ query: NAVIGATION_DATA_QUERY });
+};
+
+const fetchRecentlyAddedProducts = async () => {
+  const RECENTLY_ADDED_PRODUCTS_QUERY =
+    defineQuery(`*[_type == "products" && defined(slug.current)] | order(_createdAt desc)[0...20] {
+        _id, name, slug,
+          variants[]->{
+          color->{_id, name, slug},
+          images,
+        },
+        "productType": productType->{
+          _id, name, slug,
+          "subCategory": parentSubCategory->{
+            _id, name, slug,
+            "category": parentCategory->{
+              _id, name, slug
+        }
+      }
+    }
+  }
+`);
+
+  return sanityFetch({ query: RECENTLY_ADDED_PRODUCTS_QUERY });
 };
 
 const fetchProductColors = async () => {

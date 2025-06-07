@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Instagram } from "lucide-react";
+import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -22,22 +22,16 @@ const Footer = async () => {
           <div className="flex flex-col gap-4">
             <h3 className="text-lg font-semibold">About Us</h3>
             <p className="text-muted-foreground text-sm">
-              We offer premium quality clothing with the latest trends. Shop
-              with us for the best in fashion.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              <span className="underline">
-                We are not a real company, this is a portfolio project.
-              </span>
+              We are not a real company, this is a portfolio project.
               <Link
-                href="https://iharman.dev/#projects"
+                href="https://iharman.dev/"
                 target="_blank"
                 className={cn(
                   buttonVariants({ variant: "link" }),
-                  "text-muted-foreground text-sm p-0 h-auto ml-2"
+                  "text-muted-foreground underline text-sm px-0 h-auto"
                 )}
               >
-                Read more
+                Visit my portfolio here.
               </Link>
             </p>
           </div>
@@ -97,7 +91,7 @@ const Footer = async () => {
                 href="https://facebook.com"
                 className="text-gray-400 hover:text-white"
               >
-                <Instagram size={24} />
+                <Facebook size={24} />
               </Link>
               <Link
                 href="https://instagram.com"
@@ -109,7 +103,7 @@ const Footer = async () => {
                 href="https://twitter.com"
                 className="text-gray-400 hover:text-white"
               >
-                <Instagram size={24} />
+                <Twitter size={24} />
               </Link>
             </div>
           </div>
