@@ -19,35 +19,14 @@ export default async function Home() {
   return (
     <>
       <section className="relative">
-        {/* Split Background Images */}
-        <div className="grid grid-cols-2 md:grid-cols-4 h-full">
+        {/* Background Image */}
+        <div className="h-full">
           <Image
-            src="/hero-men.jpg"
+            src="/home-page-hero.jpg"
             alt="Men Collection"
             width={2000}
             height={2000}
-            className="object-cover w-full h-full"
-          />
-          <Image
-            src="/hero-women.jpg"
-            alt="Women Collection"
-            width={2000}
-            height={2000}
-            className="object-cover w-full h-full"
-          />
-          <Image
-            src="/hero3.jpg"
-            alt="Men Collection"
-            width={2000}
-            height={2000}
-            className="object-cover w-full h-full"
-          />
-          <Image
-            src="/hero4.jpg"
-            alt="Women Collection"
-            width={2000}
-            height={2000}
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full aspect-[4/3] md:aspect-[16/7]"
           />
         </div>
 
@@ -57,10 +36,10 @@ export default async function Home() {
         {/* Content */}
         <div className="absolute inset-0 flex items-center justify-center text-primary-foreground px-6">
           <div className="text-center max-w-2xl space-y-6">
-            <h1 className="text-5xl xl:text-7xl font-light tracking-wide uppercase">
+            <h1 className="text-4xl md:text-6xl xl:text-8xl font-light tracking-wide uppercase">
               Modern Essentials
             </h1>
-            <p className="text-lg font-light text-primary-foreground">
+            <p className="text-base md:text-lg font-light text-primary-foreground">
               Discover our latest collection for men and women.
             </p>
             <div className="mt-12 flex gap-6 justify-center">
@@ -123,6 +102,75 @@ export default async function Home() {
                   </Link>
                 );
             })}
+        </div>
+      </section>
+      <section className="my-16 relative">
+        {/* Split Background Images */}
+        <div className="grid grid-cols-2">
+          <Image
+            src="/hero-men.jpg"
+            alt="Men Collection"
+            width={2000}
+            height={2000}
+            className=" object-cover aspect-[4/3] md:aspect-[16/9] object-top"
+          />
+          <Image
+            src="/hero-women.jpg"
+            alt="Women Collection"
+            width={2000}
+            height={2000}
+            className=" object-cover aspect-[4/3] md:aspect-[16/9] object-center"
+          />
+          <Image
+            src="/hero3.jpg"
+            alt="Men Collection"
+            width={2000}
+            height={2000}
+            className=" object-cover aspect-[4/3] md:aspect-[16/9] object-top"
+          />
+          <Image
+            src="/hero4.jpg"
+            alt="Women Collection"
+            width={2000}
+            height={2000}
+            className=" object-cover aspect-[4/3] md:aspect-[16/9]"
+          />
+        </div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black opacity-30"></div>
+
+        {/* Content */}
+        <div className="absolute inset-0 flex items-center justify-center text-primary-foreground px-6">
+          <div className="text-center max-w-2xl space-y-6">
+            <h1 className="text-4xl md:text-6xl xl:text-7xl font-light tracking-wide uppercase">
+              Dive In
+            </h1>
+            <p className="text-base md:text-lg font-light text-primary-foreground">
+              Suit up in minimalist swimwear. Classic trunks, one-pieces and
+              more.
+            </p>
+            <div className="mt-12 flex gap-6 justify-center">
+              <Link
+                href="/men"
+                className={cn(
+                  buttonVariants({ variant: "link" }),
+                  "uppercase px-6 tracking-wider bg-transparent text-primary-foreground"
+                )}
+              >
+                Shop Men
+              </Link>
+              <Link
+                href="/women"
+                className={cn(
+                  buttonVariants({ variant: "link" }),
+                  "uppercase px-6 tracking-wider bg-transparent text-primary-foreground"
+                )}
+              >
+                Shop Women
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </>
