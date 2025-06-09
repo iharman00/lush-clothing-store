@@ -36,6 +36,5 @@ export default async function logout(): Promise<Response> {
     message: "Logged out successfully",
   };
 
-  revalidatePath("/");
   return response;
 }

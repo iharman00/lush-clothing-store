@@ -20,9 +20,11 @@ export default async function Page() {
   }
 
   return (
-    <div className="container max-w-4xl py-10 pb-28">
+    <div className="container max-w-4xl mt-20 mb-28">
       <div className="mb-8 flex items-center gap-2">
-        <h1 className="text-4xl font-bold">Your orders</h1>
+        <h1 className="text-4xl md:text-5xl xl:text-7xl font-light tracking-wide uppercase">
+          Your orders
+        </h1>
       </div>
 
       <OrdersClientPage user={user} />

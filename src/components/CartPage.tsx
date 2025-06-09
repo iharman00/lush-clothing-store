@@ -15,7 +15,8 @@ interface CartPageProps {
 
 const CartPage = ({ user }: CartPageProps) => {
   const cartItems = Object.values(useCart((state) => state.items));
-
+  console.log("cartItems");
+  console.log(cartItems);
   const totalItems = cartItems.reduce(
     (total, item) => total + item.quantity,
     0
@@ -32,34 +33,28 @@ const CartPage = ({ user }: CartPageProps) => {
         <Separator />
         {totalItems > 0 ? (
           <ScrollArea className="h-full min-h-[60%]">
-            {cartItems.map((item) => {
-              if (item.image) {
-                return (
-                  <CartItem
-                    key={`${item.variantId}-${item.variantSizeId}`}
-                    item={{
-                      id: item.productId,
-                      variantId: item.variantId,
-                      name: item.name,
-                      price: item.price,
-                      color: item.color,
-                      size: {
-                        _id: item.variantSizeId,
-                        name: item.size,
-                      },
-                      quantity: item.quantity,
-                      image: {
-                        _id: item.image._id,
-                        url: item.image.url,
-                        alt: item.image.alt,
-                      },
-                    }}
-                  />
-                );
-              } else {
-                return <div key={item.variantId}>Sorry</div>;
-              }
-            })}
+            {cartItems.map((item) => (
+              <CartItem
+                key={`${item.variantId}-${item.variantSizeId}`}
+                item={{
+                  id: item.productId,
+                  variantId: item.variantId,
+                  name: item.name,
+                  price: item.price,
+                  color: item.color,
+                  size: {
+                    _id: item.variantSizeId,
+                    name: item.size,
+                  },
+                  quantity: item.quantity,
+                  image: {
+                    _id: item.image._id,
+                    url: item.image.url,
+                    alt: item.image.alt,
+                  },
+                }}
+              />
+            ))}
           </ScrollArea>
         ) : (
           <div className="flex h-full flex-col items-center justify-center space-y-1">

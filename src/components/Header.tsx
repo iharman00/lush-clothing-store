@@ -18,7 +18,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Separator } from "@/components/ui/separator";
-import { Menu, User } from "lucide-react";
+import { Heart, Menu, User } from "lucide-react";
 import AccountMenu from "./AccountMenu";
 import { urlFor } from "@/sanity/lib/image";
 import { cn } from "@/lib/utils";
@@ -127,6 +127,20 @@ const Header = async () => {
               </Link>
             )}
           </li>
+          {/* Wishlist*/}
+          {!user && (
+            <li>
+              <Link
+                href={"/wishlist"}
+                className={buttonVariants({
+                  variant: "ghost",
+                  className: "flex gap-2",
+                })}
+              >
+                <Heart />
+              </Link>
+            </li>
+          )}
           {/* Shopping Cart */}
           <li>
             <Cart />
@@ -236,6 +250,20 @@ const Header = async () => {
                 </Link>
               )}
             </li>
+            {/* Wishlist*/}
+            {!user && (
+              <li>
+                <Link
+                  href={"/wishlist"}
+                  className={buttonVariants({
+                    variant: "ghost",
+                    className: "flex gap-2",
+                  })}
+                >
+                  <Heart /> <span className="hidden md:block">Wishlist</span>
+                </Link>
+              </li>
+            )}
             <li>
               {/* Shopping Cart */}
               <Cart />

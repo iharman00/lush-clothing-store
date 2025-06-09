@@ -4,6 +4,7 @@ import {
   Products,
   ProductSizes,
   ProductVariants,
+  Slug,
 } from "../types";
 
 type fetchProductDataProps = {
@@ -25,6 +26,21 @@ export type fetchProductDataReturnType = Array<
         size: Pick<ProductSizes, "_id" | "name" | "slug">;
       }[];
     }[];
+    productType: {
+      _id: string;
+      name: string;
+      slug: Slug;
+      subCategory: {
+        _id: string;
+        name: string;
+        slug: Slug;
+        category: {
+          _id: string;
+          name: string;
+          slug: Slug;
+        };
+      };
+    };
   }
 >;
 
@@ -44,6 +60,15 @@ export default async function fetchProductData({
           images,
           sizeAndStock[]{size->{_id, name, slug},stock}
         },
+         "productType": productType->{
+          _id, name, slug,
+          "subCategory": parentSubCategory->{
+            _id, name, slug,
+            "category": parentCategory->{
+              _id, name, slug
+        }
+      }
+    }
     }
   `;
   return sanityFetch({

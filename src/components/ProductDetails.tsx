@@ -24,16 +24,18 @@ import { urlFor } from "@/sanity/lib/image";
 import { ScrollArea } from "./ui/scroll-area";
 import { useToast } from "./ui/use-toast";
 import { useForm } from "react-hook-form";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { Heart } from "lucide-react";
 
 interface ProductDetails {
   product: fetchProductDataReturnType[number];
 }
 
-type ColorVariant = ProductDetails["product"]["variants"][number];
-type Size = ColorVariant["sizeAndStock"][number]["size"];
-
 const ProductDetails = ({ product }: ProductDetails) => {
-  const addItem = useCart((state) => state.addItem);
+  const addCartItem = useCart((state) => state.addItem);
+  const addWishlistItem = useWishlist((state) => state.addItem);
+  const removeWishlistItem = useWishlist((state) => state.removeItem);
+  const wishlistItems = useWishlist((state) => state.items);
   const { toast } = useToast();
 
   // React Hook Form setup
@@ -60,7 +62,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
     );
 
     if (selectedSize && selectedSize.stock! > 0) {
-      addItem({
+      addCartItem({
         productId: product._id,
         variantId: data.variantId,
         variantSizeId: data.variantSizeId,
@@ -72,7 +74,8 @@ const ProductDetails = ({ product }: ProductDetails) => {
           alt: selectedVariant?.images![0].alt!,
         },
         price: product.price!,
-        size: selectedSize.size.name!,
+        size: selectedSize?.size.name!,
+        url: `/${product.productType.subCategory.category.slug.current}/${product.productType.slug.current}/${product.slug?.current}`,
       });
       toast({
         description: `${product.name} has been added to the cart`,
@@ -124,11 +127,70 @@ const ProductDetails = ({ product }: ProductDetails) => {
       <ScrollArea className="w-full h-full lg:max-w-lg px-4 md:px-12 lg:pl-0 lg:pr-10 ">
         <div className="flex flex-col h-full justify-center">
           <div className="flex flex-col gap-10 px-1">
-            <div className="flex justify-between">
+            <div className="flex justify-between ">
               <div className="flex flex-col gap-1">
                 <h1 className="text-xl">{product.name}</h1>
                 {product.price && <p>{formatPrice(product.price)}</p>}
               </div>
+              <Button
+                variant={"ghost"}
+                size="icon"
+                className={cn(
+                  "rounded-full",
+                  `${product._id}-${selectedVariantId}-${selectedVariantSizeId}` in
+                    wishlistItems && "text-white bg-red-400"
+                )}
+                onClick={() => {
+                  try {
+                    const key = `${product._id}-${selectedVariantId}-${selectedVariantSizeId}`;
+                    if (key in wishlistItems) {
+                      removeWishlistItem({
+                        productId: product._id,
+                        variantId: selectedVariantId,
+                        variantSizeId: selectedVariantSizeId,
+                      });
+                      toast({
+                        description: `${product.name} has been removed from your wishlist`,
+                      });
+                      return;
+                    }
+
+                    const data = watch();
+                    const selectedVariant = product.variants.find(
+                      (variant) => variant._id === data.variantId
+                    );
+                    const selectedSize = selectedVariant?.sizeAndStock.find(
+                      (sizeStock) => sizeStock.size._id === data.variantSizeId
+                    );
+
+                    addWishlistItem({
+                      productId: product._id,
+                      variantId: data.variantId,
+                      variantSizeId: data.variantSizeId,
+                      name: product.name!,
+                      color: selectedVariant?.color.name!,
+                      image: {
+                        _id: selectedVariant?.images![0]._key!,
+                        url: urlFor(selectedVariant?.images![0]!).url(),
+                        alt: selectedVariant?.images![0].alt!,
+                      },
+                      price: product.price!,
+                      size: selectedSize?.size.name!,
+                      url: `/${product.productType.subCategory.category.slug.current}/${product.productType.slug.current}/${product.slug?.current}`,
+                    });
+                    toast({
+                      description: `${product.name} has been added to your wishlist`,
+                    });
+                  } catch (error) {
+                    toast({
+                      variant: "destructive",
+                      description: "Failed to add to wishlist.",
+                    });
+                  }
+                }}
+              >
+                <Heart />
+              </Button>
             </div>
             <div className="flex flex-col gap-8">
               {/* Product Colors */}
@@ -140,9 +202,9 @@ const ProductDetails = ({ product }: ProductDetails) => {
                       key={variant.color._id}
                       size={"icon"}
                       className={cn(
-                        "rounded-full",
+                        "rounded-full focus-visible:ring-offset-4",
                         variant._id === selectedVariantId &&
-                          "ring-ring ring-2 ring-offset-2 ring-offset-background "
+                          "ring-ring ring-2 ring-offset-2"
                       )}
                       style={{
                         backgroundColor: variant.color.color?.hex,
@@ -173,7 +235,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
                         size={"lg"}
                         className={cn(
                           selectedVariantSizeId === variant.size._id &&
-                            "ring-ring ring-2 ring-offset-background",
+                            "border-2 border-solid border-black",
                           !(variant.stock && variant.stock > 0) &&
                             "line-through"
                         )}

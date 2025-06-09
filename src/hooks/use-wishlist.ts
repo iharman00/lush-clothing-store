@@ -1,10 +1,9 @@
 import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
 import { urlFor } from "@/sanity/lib/image";
-import { Item } from "@radix-ui/react-accordion";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export interface CartItem {
+export interface WishlistItem {
   productId: string;
   variantId: string;
   variantSizeId: string;
@@ -21,25 +20,25 @@ export interface CartItem {
   url: string;
 }
 
-interface CartStore {
+interface WishlistStore {
   items: {
-    [key: string]: CartItem;
+    [key: string]: WishlistItem;
   };
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<WishlistItem, "quantity">) => void;
   removeItem: (
-    item: Pick<CartItem, "productId" | "variantId" | "variantSizeId">
+    item: Pick<WishlistItem, "productId" | "variantId" | "variantSizeId">
   ) => void;
   setItemCount: (
     item: Pick<
-      CartItem,
+      WishlistItem,
       "productId" | "variantId" | "variantSizeId" | "quantity"
     >
   ) => void;
-  clearCart: () => void;
-  refreshCartItems: () => void;
+  clearWishlist: () => void;
+  refreshWishlistItems: () => void;
 }
 
-export const useCart = create<CartStore>()(
+export const useWishlist = create<WishlistStore>()(
   persist(
     (set, get) => ({
       items: {},
@@ -104,11 +103,11 @@ export const useCart = create<CartStore>()(
             items: updatedItems,
           };
         }),
-      clearCart: () =>
+      clearWishlist: () =>
         set(() => ({
           items: {},
         })),
-      refreshCartItems: async () => {
+      refreshWishlistItems: async () => {
         const items = Object.entries(get().items);
 
         // If there are no items in local storage set items to be empty
@@ -117,7 +116,7 @@ export const useCart = create<CartStore>()(
             items: {},
           };
 
-        const newCartItems: CartStore["items"] = {};
+        const newCartItems: WishlistStore["items"] = {};
         const fetchPromises = [];
 
         for (const [key, item] of items) {
@@ -155,11 +154,11 @@ export const useCart = create<CartStore>()(
       },
     }),
     {
-      name: "cart-storage",
+      name: "wishlist-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )
 );
 
 // Refresh products on app start to avoid using stale product data
-useCart.getState().refreshCartItems();
+useWishlist.getState().refreshWishlistItems();

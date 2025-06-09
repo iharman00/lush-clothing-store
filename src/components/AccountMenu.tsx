@@ -40,11 +40,13 @@ const AccountMenu = ({
         <DropdownMenuItem>
           <Link href="/orders">Orders</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href="/wishlist">Wishlist</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
             const res = await logout();
             if (res?.success) {
-              router.push("/");
               router.refresh();
               toast({
                 description: res.message,

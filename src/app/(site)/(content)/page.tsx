@@ -40,7 +40,8 @@ export default async function Home() {
               Modern Essentials
             </h1>
             <p className="text-base md:text-lg font-light text-primary-foreground">
-              Discover our latest collection for men and women.
+              Suit up in minimalist swimwear. Classic trunks, one-pieces and
+              more.
             </p>
             <div className="mt-12 flex gap-6 justify-center">
               <Link
@@ -143,12 +144,11 @@ export default async function Home() {
         {/* Content */}
         <div className="absolute inset-0 flex items-center justify-center text-primary-foreground px-6">
           <div className="text-center max-w-2xl space-y-6">
-            <h1 className="text-4xl md:text-6xl xl:text-7xl font-light tracking-wide uppercase">
+            <h2 className="text-4xl md:text-6xl xl:text-7xl font-light tracking-wide uppercase">
               Dive In
-            </h1>
+            </h2>
             <p className="text-base md:text-lg font-light text-primary-foreground">
-              Suit up in minimalist swimwear. Classic trunks, one-pieces and
-              more.
+              Discover our latest collection for men and women.
             </p>
             <div className="mt-12 flex gap-6 justify-center">
               <Link

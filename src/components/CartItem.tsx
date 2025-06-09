@@ -29,8 +29,8 @@ const CartItem = ({ item }: CartIem) => {
 
   return (
     <div className="grid grid-cols-3 grid-rows-1 gap-6 my-6 h-40 group">
-      <div className="col-span-1">
-        {item.image && item.image.alt && (
+      {item.image && item.image.alt && (
+        <div className="col-span-1">
           <Image
             src={item.image.url}
             alt={item.image.alt}
@@ -38,8 +38,8 @@ const CartItem = ({ item }: CartIem) => {
             height={1000}
             className="w-full h-full object-contain object-top"
           />
-        )}
-      </div>
+        </div>
+      )}
       {/* Item Details */}
       <div className="col-span-2 flex justify-between">
         <div className="flex flex-col justify-between">
