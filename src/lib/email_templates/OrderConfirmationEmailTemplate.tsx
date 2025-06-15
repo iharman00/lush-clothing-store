@@ -1,6 +1,5 @@
 import * as React from "react";
 import { formatPrice } from "@/lib/utils";
-import Image from "next/image";
 
 interface OrderConfirmationEmailTemplateProps {
   orderId: string;
@@ -79,7 +78,7 @@ export const OrderConfirmationEmailTemplate = ({
               marginBottom: "10px",
             }}
           >
-            <Image
+            <img
               src={item.imageUrl}
               alt={item.name}
               style={{
