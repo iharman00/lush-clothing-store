@@ -73,7 +73,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
           {items.map((item) => {
-            const image = item.variant.images?.[0];
+            const image = item.variants[0].images?.[0];
             if (!image) return null;
 
             return (
@@ -96,8 +96,8 @@ const OrderCard = ({ order }: OrderCardProps) => {
               className="flex justify-between text-sm"
             >
               <span>
-                {item.name} — {item.variant.color?.name},{" "}
-                {item.variant.sizeAndStock?.[0]?.size?.name}
+                {item.name} — {item.variants[0].color?.name},{" "}
+                {item.variants[0].sizeAndStock?.[0]?.size?.name}
               </span>
               <span>x{item.quantity}</span>
             </div>

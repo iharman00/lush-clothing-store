@@ -78,15 +78,15 @@ async function createLineItems(
   products.forEach((item) => {
     const metadata: LineItemMetadata = {
       productId: item._id,
-      variantId: item._id,
+      variantId: item.variants[0]._key,
       sizeId: item.sizeId,
     };
     lineItems.push({
       price_data: {
         product_data: {
           name: item.name!,
-          description: `Size: ${item.variant.sizeAndStock[0].size.name} | Color: ${item.variant.color.name}`,
-          images: [urlFor(item.variant.images![0]).url()],
+          description: `Size: ${item.variants[0].sizeAndStock[0].size.name} | Color: ${item.variants[0].color.name}`,
+          images: [urlFor(item.variants[0].images![0]).url()],
           metadata: metadata,
         },
         unit_amount: item.price * 100,

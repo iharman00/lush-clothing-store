@@ -126,30 +126,29 @@ export const useCart = create<CartStore>()(
               variantId: cartItem.variantId,
               sizeId: cartItem.variantSizeId,
             }).then((item) => {
-              if (
-                !item?.variant ||
-                !item.variant.sizeAndStock?.length ||
-                !item.variant.images?.length
-              ) {
-                console.warn("Invalid cart item fetched:", item);
-                return; // skip this item
-              }
-
-              const sizeStock = item.variant.sizeAndStock[0];
-              const image = item.variant.images[0];
+              const variant = item.variants && item.variants[0];
+              const sizeStock =
+                variant?.sizeAndStock && variant.sizeAndStock[0];
+              const image = variant?.images && variant.images[0];
 
               newCartItems[key] = {
                 productId: item._id,
-                variantId: item.variant._key,
-                variantSizeId: sizeStock.size._id,
+                variantId: variant?._key ?? "",
+                variantSizeId: sizeStock?.size?._id ?? "",
                 name: item.name,
-                color: item.variant.color?.name || "Unknown",
-                size: sizeStock.size?.name || "Unknown",
-                image: {
-                  _id: image._key!,
-                  url: urlFor(image).url(),
-                  alt: image.alt || "Product image",
-                },
+                color: variant?.color?.name || "Unknown",
+                size: sizeStock?.size?.name || "Unknown",
+                image: image
+                  ? {
+                      _id: image._key!,
+                      url: urlFor(image).url(),
+                      alt: image.alt || "Product image",
+                    }
+                  : {
+                      _id: "",
+                      url: "",
+                      alt: "Product image",
+                    },
                 price: cartItem.price,
                 quantity: cartItem.quantity,
                 url: cartItem.url,

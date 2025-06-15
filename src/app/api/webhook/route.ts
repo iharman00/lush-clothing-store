@@ -141,14 +141,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
                   return {
                     _id: variant._id,
                     name: variant.name || "Unknown Product",
-                    color: variant.variant.color?.name || "Unknown Color",
+                    color: variant.variants[0].color?.name || "Unknown Color",
                     size:
-                      variant.variant.sizeAndStock?.[0]?.size?.name ||
+                      variant.variants[0].sizeAndStock?.[0]?.size?.name ||
                       "Unknown Size",
                     price: variant.price || 0,
                     quantity: item.quantity,
-                    imageUrl: variant.variant.images?.[0]
-                      ? urlFor(variant.variant.images[0]).url()
+                    imageUrl: variant.variants[0].images?.[0]
+                      ? urlFor(variant.variants[0].images[0]).url()
                       : "/placeholder.jpg",
                   };
                 } catch (err) {

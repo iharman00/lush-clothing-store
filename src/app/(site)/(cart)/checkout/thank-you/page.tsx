@@ -108,37 +108,47 @@ export default async function Page(props: PageProps) {
             {orderItems.length > 0 ? (
               <Carousel opts={{ dragFree: true }} className="relative mt-8">
                 <CarouselContent className="flex gap-4">
-                  {orderItems.map((item) => (
-                    <CarouselItem key={item._id} className="pl-4 basis-1/8">
-                      <ThankYouPageItem
-                        key={`${item._id}-${item.variant.sizeAndStock[0].size._id}`}
-                        item={{
-                          _id: item._id,
-                          name: item.name,
-                          price: item.price,
-                          color: item.variant.color.name || "Unknown Color",
-                          size: {
-                            _id:
-                              item.variant.sizeAndStock?.[0]?.size?._id ||
-                              "N/A",
-                            name:
-                              item.variant.sizeAndStock?.[0]?.size?.name ||
-                              "Unknown Size",
-                          },
-                          quantity: item.quantity,
-                          image: {
-                            _id: item.variant.images?.[0]?._key || "N/A",
-                            url: item.variant.images?.[0]
-                              ? urlFor(item.variant.images[0]).url()
-                              : "/placeholder.jpg",
-                            alt:
-                              item.variant.images?.[0]?.alt ||
-                              "No image available",
-                          },
-                        }}
-                      />
-                    </CarouselItem>
-                  ))}
+                  {orderItems.map((item) => {
+                    const orderItemKey =
+                      item._id +
+                      item.variants[0]._key +
+                      item.variants[0].sizeAndStock[0].size._id;
+                    return (
+                      <CarouselItem
+                        key={orderItemKey}
+                        className="pl-4 basis-1/8"
+                      >
+                        <ThankYouPageItem
+                          key={`${item._id}-${item.variants[0].sizeAndStock[0].size._id}`}
+                          item={{
+                            _id: item._id,
+                            name: item.name,
+                            price: item.price,
+                            color:
+                              item.variants[0].color.name || "Unknown Color",
+                            size: {
+                              _id:
+                                item.variants[0].sizeAndStock?.[0]?.size?._id ||
+                                "N/A",
+                              name:
+                                item.variants[0].sizeAndStock?.[0]?.size
+                                  ?.name || "Unknown Size",
+                            },
+                            quantity: item.quantity,
+                            image: {
+                              _id: item.variants[0].images?.[0]?._key || "N/A",
+                              url: item.variants[0].images?.[0]
+                                ? urlFor(item.variants[0].images[0]).url()
+                                : "/placeholder.jpg",
+                              alt:
+                                item.variants[0].images?.[0]?.alt ||
+                                "No image available",
+                            },
+                          }}
+                        />
+                      </CarouselItem>
+                    );
+                  })}
                 </CarouselContent>
                 <div className="absolute -top-10 right-14">
                   <CarouselPrevious />

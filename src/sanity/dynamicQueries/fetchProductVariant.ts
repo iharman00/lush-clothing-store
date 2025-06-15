@@ -12,7 +12,7 @@ export type fetchProductVariantReturnType = {
   name: string;
   slug: Products["slug"];
   price: number;
-  variant: {
+  variants: {
     _key: string;
     images: NonNullable<Products["variants"]>[number]["images"];
     color: Pick<ProductColors, "_id" | "name" | "slug">;
@@ -20,7 +20,7 @@ export type fetchProductVariantReturnType = {
       size: Pick<ProductSizes, "_id" | "name">;
       stock: number;
     }[];
-  };
+  }[];
 };
 
 export default async function fetchProductVariant({
@@ -34,7 +34,7 @@ export default async function fetchProductVariant({
   name,
   slug,
   price,
-  "variant": variants[_key == "${variantId}"]{
+  "variants": variants[_key == "${variantId}"]{
     _key,
     images,
     color->{_id, name, slug},
