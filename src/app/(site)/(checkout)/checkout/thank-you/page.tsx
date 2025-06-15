@@ -39,7 +39,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   if (!order) {
     return (
-      <div className="mt-40 flex flex-col justify-center items-center gap-4">
+      <div className="container text-center mt-40 flex flex-col justify-center items-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin" />
         <p className="text-lg font-medium text-foreground">
           Hang tight! We&apos;re processing your order now.
@@ -73,7 +73,7 @@ export default async function Page({ searchParams }: PageProps) {
       <div className="relative hidden w-full h-full xl:col-span-3 xl:flex flex-col justify-center items-center p-2 rounded-xl">
         <Image
           src="/checkout-thank-you.jpg"
-          alt="hero Image"
+          alt="A greek statue making bubles with a chewing gum in its mouth"
           width={5000}
           height={5000}
           className="object-cover object-top w-full h-full"

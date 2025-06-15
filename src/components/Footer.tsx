@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { fetchNavigationData } from "@/sanity/staticQueries";
 import { NAVIGATION_DATA_QUERYResult } from "@/sanity/types";
@@ -69,15 +69,12 @@ const Footer = async () => {
                 { name: "FAQS", slug: "faqs" },
               ].map((info, index) => (
                 <li key={index}>
-                  <Link
-                    href={`help/${info.slug}`}
-                    className={cn(
-                      buttonVariants({ variant: "link" }),
-                      "text-muted-foreground text-sm p-0 h-auto"
-                    )}
+                  <Button
+                    variant={"link"}
+                    className={"text-muted-foreground text-sm p-0 h-auto"}
                   >
                     {info.name}
-                  </Link>
+                  </Button>
                 </li>
               ))}
             </ul>

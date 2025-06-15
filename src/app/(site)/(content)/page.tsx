@@ -23,7 +23,7 @@ export default async function Home() {
         <div className="h-full">
           <Image
             src="/home-page-hero.jpg"
-            alt="Men Collection"
+            alt="A women wearing a white bikini and a hat laying on beach sand"
             width={2000}
             height={2000}
             className="object-cover w-full h-full aspect-[4/3] md:aspect-[16/7]"
@@ -109,29 +109,29 @@ export default async function Home() {
         {/* Split Background Images */}
         <div className="grid grid-cols-2">
           <Image
-            src="/hero-men.jpg"
-            alt="Men Collection"
+            src="/hero-1.jpg"
+            alt="A man wearing a black leather jacket and khaki pants posing for the camera"
             width={2000}
             height={2000}
             className=" object-cover aspect-[4/3] md:aspect-[16/9] object-top"
           />
           <Image
-            src="/hero-women.jpg"
-            alt="Women Collection"
+            src="/hero-2.jpg"
+            alt="A women wearing a white trench coat posing for the camera"
             width={2000}
             height={2000}
-            className=" object-cover aspect-[4/3] md:aspect-[16/9] object-center"
+            className="object-cover aspect-[4/3] md:aspect-[16/9] object-center"
           />
           <Image
-            src="/hero3.jpg"
-            alt="Men Collection"
+            src="/hero-3.jpg"
+            alt="A women wearing white pants and a black top posing for the camera"
             width={2000}
             height={2000}
-            className=" object-cover aspect-[4/3] md:aspect-[16/9] object-top"
+            className="object-cover aspect-[4/3] md:aspect-[16/9] object-top"
           />
           <Image
-            src="/hero4.jpg"
-            alt="Women Collection"
+            src="/hero-4.jpg"
+            alt="A women wearing all black leather clothes posing for the camera"
             width={2000}
             height={2000}
             className=" object-cover aspect-[4/3] md:aspect-[16/9]"

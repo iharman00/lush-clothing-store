@@ -14,6 +14,25 @@ import ProductsFilter, { FilterOption } from "@/components/ProductsFilter";
 import { Color, Slug } from "@/sanity/types";
 import { priceFilters } from "@/sanity/dynamicQueries/fetchProducts";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { category: string; productType: string };
+}): Promise<Metadata> {
+  const categorySlug = params.category.toLowerCase();
+  const categoryName =
+    categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
+
+  const productType = params.productType.toLowerCase();
+  const productTypeName =
+    productType.charAt(0).toUpperCase() + productType.slice(1);
+
+  return {
+    title: `${categoryName}'s ${productTypeName} | Lush Clothing Store`,
+  };
+}
 
 // Helper function to create options array to pass to ProductsFilter
 type CreateOptionsType = {

@@ -3,6 +3,22 @@ import fetchProductData, {
 } from "@/sanity/dynamicQueries/fetchProductData";
 import ProductDetails from "@/components/ProductDetails";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { product: string };
+}): Promise<Metadata> {
+  const productSlug = params.product.toLowerCase();
+  const productName = (
+    productSlug.charAt(0).toUpperCase() + productSlug.slice(1)
+  ).replaceAll("-", " ");
+
+  return {
+    title: `${productName} | Lush Clothing Store`,
+  };
+}
 
 const page = async ({
   params,

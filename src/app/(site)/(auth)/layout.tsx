@@ -19,7 +19,7 @@ export default function AuthLayout({
         <div className="relative hidden w-full h-full lg:col-span-6 lg:flex flex-col justify-center items-center p-2 rounded-xl">
           <Image
             src="/auth-hero.jpg"
-            alt="hero Image"
+            alt="Topless girl standing with her back to the camera and has flowers tucked into her pants"
             width={2000}
             height={2000}
             className="absolute inset-0 object-cover object-top w-full h-full"

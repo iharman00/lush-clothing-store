@@ -17,6 +17,20 @@ import fetchSubCategoriesAndProductTypes, {
   fetchSubCategoriesAndProductTypesReturnType,
 } from "@/sanity/dynamicQueries/fetchSubCategoriesAndProductTypes";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { category: string };
+}): Promise<Metadata> {
+  const categorySlug = params.category.toLowerCase();
+  const categoryName =
+    categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
+  return {
+    title: `${categoryName}'s clothing | Lush Clothing Store`,
+  };
+}
 
 const Page = async ({ params }: { params: { category: string } }) => {
   const categorySlug = params.category.toLowerCase();
@@ -80,7 +94,7 @@ const Page = async ({ params }: { params: { category: string } }) => {
                   </Carousel>
                 ) : (
                   <p className="mt-4 font-bold text-muted-foreground">
-                    Sorry, We couldn't find any results :&#40;
+                    Sorry, We couldn&apos;t find any results :&#40;
                   </p>
                 )}
               </div>
@@ -89,7 +103,7 @@ const Page = async ({ params }: { params: { category: string } }) => {
         ) : (
           <div className="mt-8">
             <p className="mt-2 text-sm md:text-base font-bold text-muted-foreground">
-              Sorry, We couldn't find any results :&#40;
+              Sorry, We couldn&apos;t find any results :&#40;
             </p>
             <Link href="/" className={cn(buttonVariants(), "mt-4")}>
               Go Back Home
