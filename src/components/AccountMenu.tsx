@@ -38,10 +38,14 @@ const AccountMenu = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem>
-          <Link href="/orders">Orders</Link>
+          <Link href="/orders" className="w-full">
+            Orders
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Link href="/wishlist">Wishlist</Link>
+          <Link href="/wishlist" className="w-full">
+            Wishlist
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={async () => {
