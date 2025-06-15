@@ -130,7 +130,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             const orderItems = await Promise.all(
               order.orderItems.map(async (item) => {
                 try {
-                  const [variant] = await fetchProductVariant({
+                  const variant = await fetchProductVariant({
                     productId: item.productId,
                     variantId: item.productVariantId,
                     sizeId: item.productSizeId,
@@ -140,14 +140,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
                   return {
                     _id: variant._id,
-                    name: variant.parentProduct?.name || "Unknown Product",
-                    color: variant.color?.name || "Unknown Color",
+                    name: variant.name || "Unknown Product",
+                    color: variant.variant.color?.name || "Unknown Color",
                     size:
-                      variant.sizeAndStock?.[0]?.size?.name || "Unknown Size",
-                    price: variant.parentProduct?.price || 0,
+                      variant.variant.sizeAndStock?.[0]?.size?.name ||
+                      "Unknown Size",
+                    price: variant.price || 0,
                     quantity: item.quantity,
-                    imageUrl: variant.images?.[0]
-                      ? urlFor(variant.images[0]).url()
+                    imageUrl: variant.variant.images?.[0]
+                      ? urlFor(variant.variant.images[0]).url()
                       : "/placeholder.jpg",
                   };
                 } catch (err) {

@@ -1,11 +1,5 @@
 import { sanityFetch } from "../lib/client";
-import {
-  ProductColors,
-  Products,
-  ProductSizes,
-  ProductVariants,
-  Slug,
-} from "../types";
+import { ProductColors, Products, ProductSizes, Slug } from "../types";
 
 type fetchProductDataProps = {
   categorySlug: string;
@@ -18,11 +12,13 @@ export type fetchProductDataReturnType = Array<
     "_id" | "name" | "slug" | "description" | "materials" | "price"
   > & {
     variants: {
-      _id: ProductVariants["_id"];
-      images: ProductVariants["images"];
+      _key: NonNullable<Products["variants"]>[number]["_key"];
       color: Pick<ProductColors, "_id" | "name" | "slug" | "color">;
+      images: NonNullable<Products["variants"]>[number]["images"];
       sizeAndStock: {
-        stock: NonNullable<ProductVariants["sizeAndStock"]>[number]["stock"];
+        stock: NonNullable<
+          NonNullable<Products["variants"]>[number]["sizeAndStock"]
+        >[number]["stock"];
         size: Pick<ProductSizes, "_id" | "name" | "slug">;
       }[];
     }[];
@@ -54,8 +50,8 @@ export default async function fetchProductData({
     && references(*[_type == "subCategories" && defined(slug.current) 
     && references(*[_type == "categories" && slug.current == "${categorySlug}"]._id)]._id)]._id)]{
         _id, name, slug, description, materials, price,
-        variants[]->{
-          _id,
+        variants[]{
+          _key,
           color->{_id, name, slug, color},
           images,
           sizeAndStock[]{size->{_id, name, slug},stock}

@@ -54,7 +54,7 @@ export default async function Page(props: PageProps) {
     await Promise.all(
       order.orderItems.map(async (item) => {
         try {
-          const [variant] = await fetchProductVariant({
+          const variant = await fetchProductVariant({
             productId: item.productId,
             variantId: item.productVariantId,
             sizeId: item.productSizeId,
@@ -111,25 +111,29 @@ export default async function Page(props: PageProps) {
                   {orderItems.map((item) => (
                     <CarouselItem key={item._id} className="pl-4 basis-1/8">
                       <ThankYouPageItem
-                        key={`${item._id}-${item.sizeAndStock?.[0]?.size?._id}`}
+                        key={`${item._id}-${item.variant.sizeAndStock[0].size._id}`}
                         item={{
                           _id: item._id,
-                          name: item.parentProduct?.name || "Unknown Product",
-                          price: item.parentProduct?.price || 0,
-                          color: item.color?.name || "Unknown Color",
+                          name: item.name,
+                          price: item.price,
+                          color: item.variant.color.name || "Unknown Color",
                           size: {
-                            _id: item.sizeAndStock?.[0]?.size?._id || "N/A",
+                            _id:
+                              item.variant.sizeAndStock?.[0]?.size?._id ||
+                              "N/A",
                             name:
-                              item.sizeAndStock?.[0]?.size?.name ||
+                              item.variant.sizeAndStock?.[0]?.size?.name ||
                               "Unknown Size",
                           },
                           quantity: item.quantity,
                           image: {
-                            _id: item.images?.[0]?._key || "N/A",
-                            url: item.images?.[0]
-                              ? urlFor(item.images[0]).url()
+                            _id: item.variant.images?.[0]?._key || "N/A",
+                            url: item.variant.images?.[0]
+                              ? urlFor(item.variant.images[0]).url()
                               : "/placeholder.jpg",
-                            alt: item.images?.[0]?.alt || "No image available",
+                            alt:
+                              item.variant.images?.[0]?.alt ||
+                              "No image available",
                           },
                         }}
                       />

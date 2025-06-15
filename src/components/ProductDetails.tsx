@@ -41,7 +41,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
   // React Hook Form setup
   const { handleSubmit, setValue, watch } = useForm({
     defaultValues: {
-      variantId: product.variants[0]._id,
+      variantId: product.variants[0]._key,
       variantSizeId: product.variants[0].sizeAndStock[0].size._id,
     },
   });
@@ -55,7 +55,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
     variantSizeId: string;
   }) => {
     const selectedVariant = product.variants.find(
-      (variant) => variant._id === data.variantId
+      (variant) => variant._key === data.variantId
     );
     const selectedSize = selectedVariant?.sizeAndStock.find(
       (sizeStock) => sizeStock.size._id === data.variantSizeId
@@ -94,7 +94,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
       <Carousel className="md:mx-16">
         <CarouselContent>
           {product.variants
-            .find((variant) => variant._id === selectedVariantId)
+            .find((variant) => variant._key === selectedVariantId)
             ?.images?.map((i) => {
               if (i.alt)
                 return (
@@ -157,7 +157,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
 
                     const data = watch();
                     const selectedVariant = product.variants.find(
-                      (variant) => variant._id === data.variantId
+                      (variant) => variant._key === data.variantId
                     );
                     const selectedSize = selectedVariant?.sizeAndStock.find(
                       (sizeStock) => sizeStock.size._id === data.variantSizeId
@@ -203,14 +203,14 @@ const ProductDetails = ({ product }: ProductDetails) => {
                       size={"icon"}
                       className={cn(
                         "rounded-full focus-visible:ring-offset-4",
-                        variant._id === selectedVariantId &&
+                        variant._key === selectedVariantId &&
                           "ring-ring ring-2 ring-offset-2"
                       )}
                       style={{
                         backgroundColor: variant.color.color?.hex,
                       }}
                       onClick={() => {
-                        setValue("variantId", variant._id);
+                        setValue("variantId", variant._key);
                         setValue(
                           "variantSizeId",
                           variant.sizeAndStock[0].size._id
@@ -226,7 +226,7 @@ const ProductDetails = ({ product }: ProductDetails) => {
                 <p className="text-base font-medium">Size</p>
                 <div className="grid grid-cols-5 gap-4">
                   {product.variants
-                    .find((variant) => variant._id === selectedVariantId)
+                    .find((variant) => variant._key === selectedVariantId)
                     ?.sizeAndStock.map((variant) => (
                       <Button
                         key={variant.size._id}

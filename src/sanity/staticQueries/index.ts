@@ -28,7 +28,7 @@ const fetchRecentlyAddedProducts = async () => {
   const RECENTLY_ADDED_PRODUCTS_QUERY =
     defineQuery(`*[_type == "products" && defined(slug.current)] | order(_createdAt desc)[0...20] {
         _id, name, slug,
-          variants[]->{
+          variants[]{
           color->{_id, name, slug},
           images,
         },

@@ -19,6 +19,7 @@ describe("useCart store", () => {
       url: "http://example.com/img.jpg",
       alt: "Alt text",
     },
+    url: "http://example.com/product",
     price: 100,
   };
   const itemKey = `${newItem.productId}-${newItem.variantId}-${newItem.variantSizeId}`;

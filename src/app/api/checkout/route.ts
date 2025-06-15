@@ -37,7 +37,7 @@ export type CheckoutSessionMetadata = {
   existingUserId: string | null;
 };
 
-type ProductVariantType = fetchProductVariantReturnType[number] & {
+type ProductVariantType = fetchProductVariantReturnType & {
   quantity: number;
   sizeId: string;
 };
@@ -49,7 +49,7 @@ async function fetchProductVariants(
 ): Promise<ProductVariantType[]> {
   const fetchedProducts = await Promise.all(
     products.map(async (product) => {
-      const [variant] = await fetchProductVariant({
+      const variant = await fetchProductVariant({
         productId: product.productId,
         variantId: product.variantId,
         sizeId: product.sizeId,
@@ -75,24 +75,24 @@ async function createLineItems(
 ): Promise<Stripe.Checkout.SessionCreateParams.LineItem[]> {
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-  products.forEach((variant) => {
+  products.forEach((item) => {
     const metadata: LineItemMetadata = {
-      productId: variant.parentProduct._id,
-      variantId: variant._id,
-      sizeId: variant.sizeId,
+      productId: item._id,
+      variantId: item._id,
+      sizeId: item.sizeId,
     };
     lineItems.push({
       price_data: {
         product_data: {
-          name: variant.parentProduct.name!,
-          description: `Size: ${variant.sizeAndStock[0].size.name} | Color: ${variant.color.name}`,
-          images: [urlFor(variant.images![0]).url()],
+          name: item.name!,
+          description: `Size: ${item.variant.sizeAndStock[0].size.name} | Color: ${item.variant.color.name}`,
+          images: [urlFor(item.variant.images![0]).url()],
           metadata: metadata,
         },
-        unit_amount: variant.parentProduct.price! * 100,
+        unit_amount: item.price * 100,
         currency: "CAD",
       },
-      quantity: variant.quantity,
+      quantity: item.quantity,
       adjustable_quantity: { enabled: true },
     });
   });

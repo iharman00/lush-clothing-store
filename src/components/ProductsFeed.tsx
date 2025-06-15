@@ -61,6 +61,9 @@ const ProductsFeed = ({
   // Flatten the pages into a single array
   const products = data?.pages.flat() || [];
 
+  console.log("products");
+  console.log(products);
+
   // Loading state for initial data
   if (isLoading) {
     return (

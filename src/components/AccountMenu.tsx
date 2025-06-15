@@ -4,8 +4,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { buttonVariants } from "./ui/button";
@@ -62,6 +60,7 @@ const AccountMenu = ({
               description: res?.message,
             });
           }}
+          className="hover:cursor-pointer"
         >
           Log out
         </DropdownMenuItem>

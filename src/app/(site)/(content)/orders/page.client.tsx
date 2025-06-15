@@ -1,20 +1,22 @@
 "use client";
 
-import { UserDTO } from "@/data_access/user/userDTO";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { OrderItems, Orders } from "@prisma/client";
+import { Orders, OrderItems } from "@prisma/client";
+
+import { UserDTO } from "@/data_access/user/userDTO";
+import { getOrdersByUserIdAction } from "@/actions/getOrdersByUserId";
 import fetchProductVariant, {
   fetchProductVariantReturnType,
 } from "@/sanity/dynamicQueries/fetchProductVariant";
-import React, { useEffect } from "react";
-import { getOrdersByUserIdAction } from "@/actions/getOrdersByUserId";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { formatPrice } from "@/lib/utils";
-import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import { formatPrice } from "@/lib/utils";
 
 interface OrderCardProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   order: Orders & {
@@ -22,43 +24,47 @@ interface OrderCardProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   };
 }
 
+type ProductVariantWithQuantity = NonNullable<fetchProductVariantReturnType> & {
+  quantity: number;
+};
+
 const OrderCard = ({ order }: OrderCardProps) => {
-  type ProductVariantWithQuantity = NonNullable<
-    fetchProductVariantReturnType[number]
-  > & { quantity: number };
-  const [items, setItems] = React.useState<ProductVariantWithQuantity[]>([]);
+  const [items, setItems] = useState<ProductVariantWithQuantity[]>([]);
 
   useEffect(() => {
     const loadItems = async () => {
       const variants = await Promise.all(
         order.orderItems.map(async (item) => {
           try {
-            const [variant] = await fetchProductVariant({
+            const variant = await fetchProductVariant({
               productId: item.productId,
               variantId: item.productVariantId,
               sizeId: item.productSizeId,
             });
             return variant ? { ...variant, quantity: item.quantity } : null;
-          } catch {
+          } catch (err) {
+            console.error("Error fetching product variant:", err);
             return null;
           }
         })
       );
-      // Filter out null values
-      setItems(variants.filter((v): v is NonNullable<typeof v> => v !== null));
+
+      setItems(
+        variants.filter((v): v is ProductVariantWithQuantity => v !== null)
+      );
     };
 
     loadItems();
-  }, [order.orderItems]);
+  }, [order]);
 
   return (
     <Card className="rounded-2xl shadow-md hover:shadow-lg transition">
       <CardContent className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold ">Order #{order.id}</h3>
+            <h3 className="text-lg font-semibold">Order #{order.id}</h3>
             <p className="text-sm text-muted-foreground">
-              Ordered placed on {new Date(order.createdAt).toLocaleDateString()}
+              Ordered on {new Date(order.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -66,25 +72,33 @@ const OrderCard = ({ order }: OrderCardProps) => {
         <Separator />
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-          {items.map((item, index) => {
-            if (item.images && item.images[0].alt)
-              return (
-                <Image
-                  key={index}
-                  src={urlFor(item.images[0]).url()}
-                  alt={item.images[0].alt || "Product Image"}
-                  width={1000}
-                  height={1000}
-                  className="w-full h-full object-cover rounded-md"
-                />
-              );
+          {items.map((item) => {
+            const image = item.variant.images?.[0];
+            if (!image) return null;
+
+            return (
+              <Image
+                key={`${item._id}-${image._key}`}
+                src={urlFor(image).url()}
+                alt={image.alt || "Product Image"}
+                width={1000}
+                height={1000}
+                className="w-full h-full object-cover rounded-md"
+              />
+            );
           })}
         </div>
 
         <div className="space-y-2">
-          {items.map((item, index) => (
-            <div key={index} className="flex justify-between text-sm">
-              <span>{item.parentProduct.name}</span>
+          {items.map((item) => (
+            <div
+              key={`${item._id}-${item.quantity}`}
+              className="flex justify-between text-sm"
+            >
+              <span>
+                {item.name} — {item.variant.color?.name},{" "}
+                {item.variant.sizeAndStock?.[0]?.size?.name}
+              </span>
               <span>x{item.quantity}</span>
             </div>
           ))}
@@ -103,13 +117,19 @@ const OrderCard = ({ order }: OrderCardProps) => {
 
 const OrdersClientPage = ({ user }: { user: Omit<UserDTO, "password"> }) => {
   const limit = 5;
+
   const { data, isLoading, isError, isFetching, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
       queryKey: ["orders"],
       initialPageParam: 1,
       queryFn: async ({ pageParam }) => {
-        const res = await getOrdersByUserIdAction(user.id, pageParam, limit);
-        return { ...res, pageParam };
+        try {
+          const res = await getOrdersByUserIdAction(user.id, pageParam, limit);
+          return { ...res, pageParam };
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+          throw new Error("Failed to fetch orders");
+        }
       },
       getNextPageParam: (lastPage) => {
         return lastPage.data.length === limit
@@ -127,7 +147,11 @@ const OrdersClientPage = ({ user }: { user: Omit<UserDTO, "password"> }) => {
   }
 
   if (isLoading) {
-    return <div className="container max-w-4xl py-10">Loading...</div>;
+    return (
+      <div className="container max-w-4xl py-10">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (data?.pages[0].data.length === 0) {
@@ -136,15 +160,14 @@ const OrdersClientPage = ({ user }: { user: Omit<UserDTO, "password"> }) => {
 
   return (
     <div className="grid gap-6">
-      {data?.pages.map(
-        (order: { data: (Orders & { orderItems: OrderItems[] })[] }) =>
-          order.data.map((order: Orders & { orderItems: OrderItems[] }) => (
-            <OrderCard key={order.id} order={order} />
-          ))
+      {data?.pages.map((page) =>
+        page.data.map((order: Orders & { orderItems: OrderItems[] }) => (
+          <OrderCard key={order.id} order={order} />
+        ))
       )}
       {hasNextPage && (
         <Button className="mt-10 w-max mx-auto" onClick={() => fetchNextPage()}>
-          Load more {isFetching && <LoadingSpinner />}
+          Load more {isFetching && <LoadingSpinner className="ml-2" />}
         </Button>
       )}
     </div>

@@ -1,10 +1,5 @@
 import { sanityFetch } from "../lib/client";
-import {
-  ProductColors,
-  Products,
-  ProductSizes,
-  ProductVariants,
-} from "../types";
+import { ProductColors, Products, ProductSizes } from "../types";
 
 type fetchProductVariantProps = {
   productId: string;
@@ -12,18 +7,21 @@ type fetchProductVariantProps = {
   sizeId: string;
 };
 
-export type fetchProductVariantReturnType = Array<
-  Pick<ProductVariants, "_id" | "images"> & {
+export type fetchProductVariantReturnType = {
+  _id: string;
+  name: string;
+  slug: Products["slug"];
+  price: number;
+  variant: {
+    _key: string;
+    images: NonNullable<Products["variants"]>[number]["images"];
     color: Pick<ProductColors, "_id" | "name" | "slug">;
     sizeAndStock: {
       size: Pick<ProductSizes, "_id" | "name">;
-      stock: NonNullable<ProductVariants["sizeAndStock"]>[number]["stock"];
+      stock: number;
     }[];
-    parentProduct: NonNullable<
-      Pick<Products, "_id" | "name" | "slug" | "price">
-    >;
-  }
->;
+  };
+};
 
 export default async function fetchProductVariant({
   productId,
@@ -31,21 +29,21 @@ export default async function fetchProductVariant({
   sizeId,
 }: fetchProductVariantProps): Promise<fetchProductVariantReturnType> {
   const query = `
-*[_type == "productVariants" && _id == "${variantId}"]{
-    _id,
+*[_type == "products" && _id == "${productId}"]{
+  _id,
+  name,
+  slug,
+  price,
+  "variant": variants[_key == "${variantId}"]{
+    _key,
     images,
     color->{_id, name, slug},
     sizeAndStock[defined(size._ref) && size._ref == "${sizeId}"]{
-        size-> {_id, name},
-        stock
-    },
-    "parentProduct": *[_type == "products" && _id == "${productId}" && defined(slug.current)][0] {
-        _id,
-        name,
-        slug,
-        price,
+      size->{_id, name},
+      stock
     }
-}`;
+  }
+}[0]`;
 
   return sanityFetch({
     query,

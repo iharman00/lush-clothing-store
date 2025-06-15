@@ -24,12 +24,15 @@ interface WishlistStore {
   items: {
     [key: string]: WishlistItem;
   };
-  addItem: (item: Omit<WishlistItem, "quantity">) => void;
+  addItem: (wishlistItem: Omit<WishlistItem, "quantity">) => void;
   removeItem: (
-    item: Pick<WishlistItem, "productId" | "variantId" | "variantSizeId">
+    wishlistItem: Pick<
+      WishlistItem,
+      "productId" | "variantId" | "variantSizeId"
+    >
   ) => void;
   setItemCount: (
-    item: Pick<
+    wishlistItem: Pick<
       WishlistItem,
       "productId" | "variantId" | "variantSizeId" | "quantity"
     >
@@ -48,11 +51,11 @@ export const useWishlist = create<WishlistStore>()(
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item exists increase quantity
+          // If wishlistItem exists increase quantity
           if (existingItem) {
             updatedItems[key].quantity = existingItem.quantity + 1;
           } else {
-            // else add the item to the state
+            // else add the wishlistItem to the state
             updatedItems[key] = {
               ...newItem,
               quantity: 1,
@@ -63,40 +66,40 @@ export const useWishlist = create<WishlistStore>()(
             items: updatedItems,
           };
         }),
-      removeItem: (item) =>
+      removeItem: (wishlistItem) =>
         set((state) => {
-          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
+          const key = `${wishlistItem.productId}-${wishlistItem.variantId}-${wishlistItem.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item doesn't exist, return existing state
+          // If wishlistItem doesn't exist, return existing state
           if (!existingItem) {
             return state;
           }
 
-          // Else remove the item
+          // Else remove the wishlistItem
           delete updatedItems[key];
           return {
             items: updatedItems,
           };
         }),
-      setItemCount: (item) =>
+      setItemCount: (wishlistItem) =>
         set((state) => {
-          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
+          const key = `${wishlistItem.productId}-${wishlistItem.variantId}-${wishlistItem.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item doesn't exist, return existing state
+          // If wishlistItem doesn't exist, return existing state
           if (!existingItem) {
             return state;
           }
 
-          // if quantity is less than or equal to 0, remove the item
-          if (item.quantity <= 0) {
+          // if quantity is less than or equal to 0, remove the wishlistItem
+          if (wishlistItem.quantity <= 0) {
             delete updatedItems[key];
           } else {
             // else update the quantity
-            updatedItems[key].quantity = item.quantity;
+            updatedItems[key].quantity = wishlistItem.quantity;
           }
 
           return {
@@ -119,28 +122,43 @@ export const useWishlist = create<WishlistStore>()(
         const newCartItems: WishlistStore["items"] = {};
         const fetchPromises = [];
 
-        for (const [key, item] of items) {
+        for (const [key, wishlistItem] of items) {
           fetchPromises.push(
             fetchProductVariant({
-              productId: item.productId,
-              variantId: item.variantId,
-              sizeId: item.variantSizeId,
-            }).then(([variant]) => {
+              productId: wishlistItem.productId,
+              variantId: wishlistItem.variantId,
+              sizeId: wishlistItem.variantSizeId,
+            }).then((item) => {
+              if (
+                !item?.variant ||
+                !item.variant.sizeAndStock?.length ||
+                !item.variant.images?.length
+              ) {
+                console.warn(
+                  "Invalid cart wishlistItem fetched:",
+                  wishlistItem
+                );
+                return; // skip this wishlistItem
+              }
+
+              const sizeStock = item.variant.sizeAndStock[0];
+              const image = item.variant.images[0];
+
               newCartItems[key] = {
-                productId: variant.parentProduct._id,
-                variantId: variant._id,
-                variantSizeId: variant.sizeAndStock[0].size._id,
-                name: variant.parentProduct.name!,
-                color: variant.color.name!,
-                size: variant.sizeAndStock[0].size.name!,
+                productId: item._id,
+                variantId: item.variant._key,
+                variantSizeId: sizeStock.size._id,
+                name: item.name,
+                color: item.variant.color?.name || "Unknown",
+                size: sizeStock.size?.name || "Unknown",
                 image: {
-                  _id: variant.images![0]._key!,
-                  url: urlFor(variant.images![0]).url(),
-                  alt: variant.images![0].alt!,
+                  _id: image._key!,
+                  url: urlFor(image).url(),
+                  alt: image.alt || "Product image",
                 },
                 price: item.price,
-                quantity: item.quantity,
-                url: item.url,
+                quantity: wishlistItem.quantity,
+                url: wishlistItem.url,
               };
             })
           );

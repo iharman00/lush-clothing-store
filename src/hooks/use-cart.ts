@@ -1,6 +1,5 @@
 import fetchProductVariant from "@/sanity/dynamicQueries/fetchProductVariant";
 import { urlFor } from "@/sanity/lib/image";
-import { Item } from "@radix-ui/react-accordion";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -25,12 +24,12 @@ interface CartStore {
   items: {
     [key: string]: CartItem;
   };
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (cartItem: Omit<CartItem, "quantity">) => void;
   removeItem: (
-    item: Pick<CartItem, "productId" | "variantId" | "variantSizeId">
+    cartItem: Pick<CartItem, "productId" | "variantId" | "variantSizeId">
   ) => void;
   setItemCount: (
-    item: Pick<
+    cartItem: Pick<
       CartItem,
       "productId" | "variantId" | "variantSizeId" | "quantity"
     >
@@ -49,11 +48,11 @@ export const useCart = create<CartStore>()(
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item exists increase quantity
+          // If cartItem exists increase quantity
           if (existingItem) {
             updatedItems[key].quantity = existingItem.quantity + 1;
           } else {
-            // else add the item to the state
+            // else add the cartItem to the state
             updatedItems[key] = {
               ...newItem,
               quantity: 1,
@@ -64,40 +63,40 @@ export const useCart = create<CartStore>()(
             items: updatedItems,
           };
         }),
-      removeItem: (item) =>
+      removeItem: (cartItem) =>
         set((state) => {
-          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
+          const key = `${cartItem.productId}-${cartItem.variantId}-${cartItem.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item doesn't exist, return existing state
+          // If cartItem doesn't exist, return existing state
           if (!existingItem) {
             return state;
           }
 
-          // Else remove the item
+          // Else remove the cartItem
           delete updatedItems[key];
           return {
             items: updatedItems,
           };
         }),
-      setItemCount: (item) =>
+      setItemCount: (cartItem) =>
         set((state) => {
-          const key = `${item.productId}-${item.variantId}-${item.variantSizeId}`;
+          const key = `${cartItem.productId}-${cartItem.variantId}-${cartItem.variantSizeId}`;
           const existingItem = state.items[key];
           let updatedItems = { ...state.items };
 
-          // If item doesn't exist, return existing state
+          // If cartItem doesn't exist, return existing state
           if (!existingItem) {
             return state;
           }
 
-          // if quantity is less than or equal to 0, remove the item
-          if (item.quantity <= 0) {
+          // if quantity is less than or equal to 0, remove the cartItem
+          if (cartItem.quantity <= 0) {
             delete updatedItems[key];
           } else {
             // else update the quantity
-            updatedItems[key].quantity = item.quantity;
+            updatedItems[key].quantity = cartItem.quantity;
           }
 
           return {
@@ -120,28 +119,40 @@ export const useCart = create<CartStore>()(
         const newCartItems: CartStore["items"] = {};
         const fetchPromises = [];
 
-        for (const [key, item] of items) {
+        for (const [key, cartItem] of items) {
           fetchPromises.push(
             fetchProductVariant({
-              productId: item.productId,
-              variantId: item.variantId,
-              sizeId: item.variantSizeId,
-            }).then(([variant]) => {
+              productId: cartItem.productId,
+              variantId: cartItem.variantId,
+              sizeId: cartItem.variantSizeId,
+            }).then((item) => {
+              if (
+                !item?.variant ||
+                !item.variant.sizeAndStock?.length ||
+                !item.variant.images?.length
+              ) {
+                console.warn("Invalid cart item fetched:", item);
+                return; // skip this item
+              }
+
+              const sizeStock = item.variant.sizeAndStock[0];
+              const image = item.variant.images[0];
+
               newCartItems[key] = {
-                productId: variant.parentProduct._id,
-                variantId: variant._id,
-                variantSizeId: variant.sizeAndStock[0].size._id,
-                name: variant.parentProduct.name!,
-                color: variant.color.name!,
-                size: variant.sizeAndStock[0].size.name!,
+                productId: item._id,
+                variantId: item.variant._key,
+                variantSizeId: sizeStock.size._id,
+                name: item.name,
+                color: item.variant.color?.name || "Unknown",
+                size: sizeStock.size?.name || "Unknown",
                 image: {
-                  _id: variant.images![0]._key!,
-                  url: urlFor(variant.images![0]).url(),
-                  alt: variant.images![0].alt!,
+                  _id: image._key!,
+                  url: urlFor(image).url(),
+                  alt: image.alt || "Product image",
                 },
-                price: item.price,
-                quantity: item.quantity,
-                url: item.url,
+                price: cartItem.price,
+                quantity: cartItem.quantity,
+                url: cartItem.url,
               };
             })
           );

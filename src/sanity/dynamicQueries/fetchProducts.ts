@@ -1,10 +1,5 @@
 import { sanityFetch } from "../lib/client";
-import {
-  ProductColors,
-  ProductFits,
-  Products,
-  ProductVariants,
-} from "../types";
+import { ProductColors, ProductFits, Products } from "../types";
 
 export const priceFilters = [
   {
@@ -49,10 +44,12 @@ type fetchProductsProps = {
 export type fetchProductsReturnType = Array<
   Pick<Products, "_id" | "name" | "slug" | "price"> & {
     variants: {
-      images: ProductVariants["images"];
+      images: NonNullable<Products["variants"]>[number]["images"];
       color: Pick<ProductColors, "_id" | "name" | "slug">;
       sizeAndStock: {
-        stock: NonNullable<ProductVariants["sizeAndStock"]>[number]["stock"];
+        stock: NonNullable<
+          NonNullable<Products["variants"]>[number]["sizeAndStock"]
+        >[number]["stock"];
       }[];
     }[];
     fit: Pick<ProductFits, "_id" | "name" | "slug">;
@@ -92,7 +89,7 @@ export default async function fetchProducts({
       references(*[_type == "categories" && slug.current == "${parentCategorySlug}"]._id)]._id)]._id)] 
   | order(_id) [0...${limit}] {
     _id, name, slug, price, 
-    variants[]->{
+    variants[]{
       color->{_id, name, slug},
       images,
       sizeAndStock[]{stock}
