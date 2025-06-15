@@ -102,7 +102,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
 };
 
 const OrdersClientPage = ({ user }: { user: Omit<UserDTO, "password"> }) => {
-  const limit = 1;
+  const limit = 5;
   const { data, isLoading, isError, isFetching, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
       queryKey: ["orders"],

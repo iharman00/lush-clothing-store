@@ -14,6 +14,12 @@ import schemas from "./src/sanity/schemaTypes";
 import { structure } from "./src/sanity/structure";
 import { colorInput } from "@sanity/color-input";
 
+if (!dataset || !projectId) {
+  throw new Error(
+    "Sanity dataset and projectId must be defined in the environment variables."
+  );
+}
+
 export default defineConfig({
   basePath: "/studio",
   projectId,

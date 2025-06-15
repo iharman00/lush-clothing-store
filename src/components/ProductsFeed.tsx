@@ -77,7 +77,7 @@ const ProductsFeed = ({
     return (
       <div className="mt-8 px-[1rem] md:px-[2rem]">
         <p className="mt-2 text-xl font-bold text-muted-foreground">
-          Sorry, We couldn't find any results :&#40;
+          Sorry, We couldn&apos;t find any results :&#40;
         </p>
       </div>
     );

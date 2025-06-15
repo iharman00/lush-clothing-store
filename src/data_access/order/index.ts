@@ -49,6 +49,7 @@ export async function getOrdersByUserId(
   return prisma.orders.findMany({
     where: { userId },
     include: { orderItems: true },
+    orderBy: { createdAt: "desc" },
     skip,
     take: limit,
   });

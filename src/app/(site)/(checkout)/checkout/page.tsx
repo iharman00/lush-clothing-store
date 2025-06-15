@@ -10,6 +10,8 @@ import { CheckoutProduct } from "@/schemas/checkout/CheckoutProductSchema";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
+export const dynamic = "force-dynamic";
+
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
 );
