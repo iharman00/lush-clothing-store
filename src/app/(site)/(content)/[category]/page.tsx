@@ -19,11 +19,12 @@ import fetchSubCategoriesAndProductTypes, {
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { category: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ category: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const categorySlug = params.category.toLowerCase();
   const categoryName =
     categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
@@ -32,7 +33,8 @@ export async function generateMetadata({
   };
 }
 
-const Page = async ({ params }: { params: { category: string } }) => {
+const Page = async (props: { params: Promise<{ category: string }> }) => {
+  const params = await props.params;
   const categorySlug = params.category.toLowerCase();
 
   let categories: fetchCategoryDataReturnType = [];

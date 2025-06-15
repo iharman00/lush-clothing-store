@@ -68,7 +68,7 @@ export function RegisterForm() {
         });
       }
     }
-  }, [formState]);
+  }, [formState, toast, form]);
 
   return (
     <Form {...form}>

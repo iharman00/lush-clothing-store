@@ -15,8 +15,6 @@ interface CartPageProps {
 
 const CartPage = ({ user }: CartPageProps) => {
   const cartItems = Object.values(useCart((state) => state.items));
-  console.log("cartItems");
-  console.log(cartItems);
   const totalItems = cartItems.reduce(
     (total, item) => total + item.quantity,
     0

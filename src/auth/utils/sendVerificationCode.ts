@@ -12,10 +12,12 @@ export default async function sendVerificationCode(user: UserDTO) {
     user.id,
     user.email
   );
+  const verificationEmail = VerifyEmailTemplate({ verificationCode });
+
   return await resend.emails.send({
     from: `Lush <${process.env.RESEND_EMAIL}>`,
     to: user.email,
     subject: "Email Verification Code",
-    react: VerifyEmailTemplate({ verificationCode }),
+    react: verificationEmail,
   });
 }

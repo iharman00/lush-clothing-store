@@ -5,11 +5,12 @@ import ProductDetails from "@/components/ProductDetails";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { product: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ product: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const productSlug = params.product.toLowerCase();
   const productName = (
     productSlug.charAt(0).toUpperCase() + productSlug.slice(1)
@@ -20,11 +21,12 @@ export async function generateMetadata({
   };
 }
 
-const page = async ({
-  params,
-}: {
-  params: { category: string; product: string };
-}) => {
+const page = async (
+  props: {
+    params: Promise<{ category: string; product: string }>;
+  }
+) => {
+  const params = await props.params;
   let products: fetchProductDataReturnType = [];
   try {
     products = await fetchProductData({

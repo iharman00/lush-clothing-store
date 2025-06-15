@@ -16,11 +16,12 @@ import { priceFilters } from "@/sanity/dynamicQueries/fetchProducts";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { category: string; productType: string };
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ category: string; productType: string }>;
+  }
+): Promise<Metadata> {
+  const params = await props.params;
   const categorySlug = params.category.toLowerCase();
   const categoryName =
     categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1);
@@ -63,11 +64,12 @@ const createOptions = ({
     })
     .filter((option): option is FilterOption => option !== undefined);
 
-const page = async ({
-  params,
-}: {
-  params: { category: string; productType: string };
-}) => {
+const page = async (
+  props: {
+    params: Promise<{ category: string; productType: string }>;
+  }
+) => {
+  const params = await props.params;
   const categorySlug = params.category.toLowerCase();
   const productTypeSlug = params.productType.toLowerCase();
 

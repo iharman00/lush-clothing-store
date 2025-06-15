@@ -31,7 +31,9 @@ const fetchCheckoutSession = async (checkoutItems: CheckoutProduct[]) => {
 };
 
 // Transforms cartItems to the format needed by the backend
-const cartItemstoCheckoutItems = (cartItems: CartItem[]): CheckoutProduct[] =>
+const cartItemstoCheckoutItems: (cartItems: CartItem[]) => CheckoutProduct[] = (
+  cartItems
+) =>
   cartItems.map((item) => ({
     productId: item.productId,
     variantId: item.variantId,
@@ -48,7 +50,6 @@ export default function Page() {
     queryKey: ["checkoutSession", checkoutItems],
     queryFn: () => fetchCheckoutSession(checkoutItems),
     enabled: checkoutItems.length > 0, // Prevents the query from running if cart is empty
-    staleTime: 1000 * 60 * 5, // Cache response for 5 minutes
   });
 
   const clientSecret = data?.clientSecret;

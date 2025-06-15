@@ -25,7 +25,7 @@ export default async function logout(): Promise<Response> {
 
   // Create and send a blank Session cookie
   const sessionCookie = lucia.createBlankSessionCookie();
-  cookies().set(
+  (await cookies()).set(
     sessionCookie.name,
     sessionCookie.value,
     sessionCookie.attributes

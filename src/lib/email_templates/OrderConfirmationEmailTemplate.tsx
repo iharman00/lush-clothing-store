@@ -1,5 +1,6 @@
 import * as React from "react";
 import { formatPrice } from "@/lib/utils";
+import Image from "next/image";
 
 interface OrderConfirmationEmailTemplateProps {
   orderId: string;
@@ -16,9 +17,11 @@ interface OrderConfirmationEmailTemplateProps {
   }[];
 }
 
-export const OrderConfirmationEmailTemplate: React.FC<
-  Readonly<OrderConfirmationEmailTemplateProps>
-> = ({ orderId, userEmail, orderTotal, orderItems }) => (
+export const OrderConfirmationEmailTemplate = ({
+  orderId,
+  orderTotal,
+  orderItems,
+}: OrderConfirmationEmailTemplateProps) => (
   <div
     style={{
       fontFamily: "Arial, sans-serif",
@@ -46,7 +49,7 @@ export const OrderConfirmationEmailTemplate: React.FC<
         Your order has been placed successfully. We will send the shipping
         details shortly.
       </p>
-      <p style={{ fontSize: "16px" }}>Here's a summary of your order.</p>
+      <p style={{ fontSize: "16px" }}>Here&apos;s a summary of your order.</p>
 
       {/* Order Details */}
       <div
@@ -76,7 +79,7 @@ export const OrderConfirmationEmailTemplate: React.FC<
               marginBottom: "10px",
             }}
           >
-            <img
+            <Image
               src={item.imageUrl}
               alt={item.name}
               style={{

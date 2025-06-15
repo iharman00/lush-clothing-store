@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // This is required to ensure the route is not cached
+
 import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/data_access/order";
 import Stripe from "stripe";
@@ -164,17 +166,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
         const emailOrderItems = await createEmailOrderItems(order);
 
+        const confirmationEmail = OrderConfirmationEmailTemplate({
+          orderId: order.id,
+          orderItems: emailOrderItems,
+          orderTotal: order.orderTotal,
+          userEmail: order.userEmail,
+        });
+
         await resend.emails.send({
           from: `Lush <${process.env.RESEND_EMAIL}>`,
           to: order.userEmail,
           subject: "Order Confirmation",
-          react: OrderConfirmationEmailTemplate({
-            orderId: order.id,
-            orderItems: emailOrderItems,
-            orderTotal: order.orderTotal,
-            userEmail: order.userEmail,
-          }),
+          react: confirmationEmail,
         });
+
         break;
       } catch (error) {
         console.log(error);
@@ -185,9 +190,3 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({ received: true });
 }
-
-export const config = {
-  api: {
-    bodyParser: false, // Required for Stripe webhooks
-  },
-};

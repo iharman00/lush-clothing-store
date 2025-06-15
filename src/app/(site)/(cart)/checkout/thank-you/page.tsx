@@ -20,12 +20,13 @@ import { notFound } from "next/navigation";
 import ThankYouClient from "./page.client";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     [key: string]: string | string[] | undefined;
-  };
+  }>;
 }
 
-export default async function Page({ searchParams }: PageProps) {
+export default async function Page(props: PageProps) {
+  const searchParams = await props.searchParams;
   let sessionId = searchParams.session_id;
   if (!sessionId) notFound();
   sessionId = typeof sessionId === "string" ? sessionId : sessionId[0];

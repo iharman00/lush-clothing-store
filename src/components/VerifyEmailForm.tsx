@@ -72,7 +72,7 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
         });
       }
     }
-  }, [formState]);
+  }, [formState, toast, form]);
 
   return (
     <Form {...form}>
@@ -128,7 +128,7 @@ const VerifyEmailForm = ({ user }: { user: Omit<UserDTO, "password"> }) => {
             }
           }}
         >
-          Didn't receive the email? Resend
+          Didn&apos;t receive the email? Resend
         </Button>
       </form>
     </Form>

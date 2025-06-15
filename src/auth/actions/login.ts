@@ -62,7 +62,7 @@ export default async function login(data: unknown): Promise<Response> {
     const sessionCookie = lucia.createSessionCookie(session.id);
 
     // 5. Send Session cookie
-    cookies().set(
+    (await cookies()).set(
       sessionCookie.name,
       sessionCookie.value,
       sessionCookie.attributes

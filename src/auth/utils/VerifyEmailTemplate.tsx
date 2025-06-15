@@ -4,9 +4,9 @@ interface VerifyEmailTemplateProps {
   verificationCode: string;
 }
 
-export const VerifyEmailTemplate: React.FC<
-  Readonly<VerifyEmailTemplateProps>
-> = ({ verificationCode }) => (
+export const VerifyEmailTemplate = ({
+  verificationCode,
+}: VerifyEmailTemplateProps) => (
   <div
     style={{
       fontFamily: "Arial, sans-serif",
