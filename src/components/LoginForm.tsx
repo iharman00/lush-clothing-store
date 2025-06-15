@@ -22,6 +22,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "./ui/LoadingSpinner";
+import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 
 export function LoginForm() {
   const router = useRouter();
@@ -46,7 +47,12 @@ export function LoginForm() {
     setFormState(res);
     if (res.success) {
       toast({ description: res.message });
-      router.push("/");
+      if (res.emailVerified) {
+        router.push("/");
+      } else {
+        sendOTPEmail();
+        router.push("/verify-email");
+      }
     }
   };
 

@@ -20,6 +20,7 @@ type LoginFormArrayType = {
 export type Response = {
   success: boolean;
   message: string;
+  emailVerified?: boolean;
   errors?: LoginFormArrayType;
   fields?: Partial<LoginFormType>;
 };
@@ -71,6 +72,7 @@ export default async function login(data: unknown): Promise<Response> {
     // 6. Send success response
     response = {
       success: true,
+      emailVerified: user.emailVerified,
       message: "Log in successful",
     };
 

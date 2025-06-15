@@ -1,5 +1,6 @@
 "use client";
 
+import sendOTPEmail from "@/auth/actions/sendOTPEmail";
 import CartItem from "@/components/CartItem";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -82,7 +83,18 @@ const CartPage = ({ user }: CartPageProps) => {
               <span>{formatPrice(cartTotal)}</span>
             </div>
           </div>
-          {user ? (
+          {user && !user.emailVerified && (
+            <Link
+              href="/verify-email"
+              className={buttonVariants({
+                className: "w-full",
+              })}
+              onClick={() => sendOTPEmail()}
+            >
+              Continue to Verify Email
+            </Link>
+          )}
+          {user && user.emailVerified && (
             <Link
               href="/checkout"
               className={buttonVariants({
@@ -91,7 +103,8 @@ const CartPage = ({ user }: CartPageProps) => {
             >
               Continue
             </Link>
-          ) : (
+          )}
+          {!user && (
             <>
               <Link
                 href="/checkout"
