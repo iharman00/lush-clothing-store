@@ -88,29 +88,29 @@ const ProductDetails = ({ product }: ProductDetails) => {
     }
   };
 
+  const currentVariant = product.variants.find(
+    (variant) => variant._key === selectedVariantId
+  );
+
   return (
     <>
       {/* Variant Images */}
       <Carousel className="md:mx-16">
         <CarouselContent>
-          {product.variants
-            .find((variant) => variant._key === selectedVariantId)
-            ?.images?.map((i) => {
-              if (i.alt)
-                return (
-                  <CarouselItem
-                    key={selectedVariantId}
-                    className="xl:basis-1/2"
-                  >
-                    <Image
-                      src={urlFor(i).url()}
-                      alt={i.alt}
-                      width={3000}
-                      height={3000}
-                    />
-                  </CarouselItem>
-                );
-            })}
+          {currentVariant?.images?.map((i) => {
+            console.log(currentVariant);
+            if (i.alt)
+              return (
+                <CarouselItem key={i._key} className="xl:basis-1/2">
+                  <Image
+                    src={urlFor(i).url()}
+                    alt={i.alt}
+                    width={3000}
+                    height={3000}
+                  />
+                </CarouselItem>
+              );
+          })}
         </CarouselContent>
         <div className="hidden md:block">
           <CarouselPrevious />
