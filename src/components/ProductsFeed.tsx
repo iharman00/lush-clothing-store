@@ -88,14 +88,7 @@ const ProductsFeed = ({
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-8 md:gap-y-16 mt-10 mb-20">
         {products.map((product) => {
-          if (
-            product.variants[0].sizeAndStock[0].stock &&
-            product.variants[0].sizeAndStock[0].stock > 0 &&
-            product.variants[0].images &&
-            product.variants[0].images[0].alt &&
-            product.name &&
-            product.price
-          ) {
+          if (product.variants[0].images && product.name && product.price) {
             const productImages: ProductCardProps["images"] =
               product.variants[0].images.map((image) => ({
                 _id: image._key,
