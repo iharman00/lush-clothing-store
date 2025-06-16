@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Accordion,
@@ -83,7 +83,7 @@ const Header = async () => {
                               {subCategory.productTypes.map((productType) => (
                                 <Link
                                   key={productType._id}
-                                  href={`${category.slug?.current}/${productType.slug?.current}`}
+                                  href={`/${category.slug?.current}/${productType.slug?.current}`}
                                 >
                                   {productType.name}
                                 </Link>
@@ -208,10 +208,12 @@ const Header = async () => {
                                           "font-light p-0 cursor-pointer justify-start mb-[-1rem]"
                                         )}
                                       >
-                                        <NavigationMenuLink
-                                          href={`${category.slug?.current}/${productType.slug?.current}`}
-                                        >
-                                          {productType.name}
+                                        <NavigationMenuLink asChild>
+                                          <Link
+                                            href={`/${category.slug?.current}/${productType.slug?.current}`}
+                                          >
+                                            {productType.name}
+                                          </Link>
                                         </NavigationMenuLink>
                                       </li>
                                     )
