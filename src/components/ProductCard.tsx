@@ -21,11 +21,11 @@ export type ProductCardProps = {
   url: string;
 };
 
-const ProductCard = ({ _id, name, price, images, url }: ProductCardProps) => {
+const ProductCard = ({ name, price, images, url }: ProductCardProps) => {
   return (
     <div className="flex flex-col gap-3 aspect-[3/4]">
-      <Link key={_id} href={url} className="h-full flex *:w-full">
-        <Carousel className="group h-full">
+      <Carousel className="group h-full">
+        <Link href={url}>
           <div className="h-full flex *:w-full">
             <CarouselContent className="h-full">
               {images.map((image) => (
@@ -41,12 +41,12 @@ const ProductCard = ({ _id, name, price, images, url }: ProductCardProps) => {
               ))}
             </CarouselContent>
           </div>
-          <div className="hidden md:group-hover:flex absolute w-full h-full top-0 justify-between items-center p-4">
-            <CarouselPrevious className="static" />
-            <CarouselNext className="static" />
-          </div>
-        </Carousel>
-      </Link>
+        </Link>
+        <div className="hidden md:group-hover:flex absolute w-full h-max top-[50%] justify-between items-center px-4">
+          <CarouselPrevious className="static" />
+          <CarouselNext className="static" />
+        </div>
+      </Carousel>
       <div className="flex flex-col gap-2 px-2 text-sm">
         <p>{name}</p>
         <p className="text-muted-foreground">{formatPrice(price)}</p>
