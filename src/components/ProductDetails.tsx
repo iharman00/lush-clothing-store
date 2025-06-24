@@ -88,6 +88,50 @@ const ProductDetails = ({ product }: ProductDetails) => {
     }
   };
 
+  const handleAddToWishlist = (data: {
+    variantId: string;
+    variantSizeId: string;
+  }) => {
+    const key = `${product._id}-${selectedVariantId}-${selectedVariantSizeId}`;
+    const selectedVariant = product.variants.find(
+      (variant) => variant._key === data.variantId
+    );
+    const selectedSize = selectedVariant?.sizeAndStock.find(
+      (sizeStock) => sizeStock.size._id === data.variantSizeId
+    );
+
+    if (key in wishlistItems) {
+      removeWishlistItem({
+        productId: product._id,
+        variantId: selectedVariantId,
+        variantSizeId: selectedVariantSizeId,
+      });
+      toast({
+        description: `${product.name} has been removed from your wishlist`,
+      });
+      return;
+    }
+
+    addWishlistItem({
+      productId: product._id,
+      variantId: data.variantId,
+      variantSizeId: data.variantSizeId,
+      name: product.name!,
+      color: selectedVariant?.color.name!,
+      image: {
+        _id: selectedVariant?.images![0]._key!,
+        url: urlFor(selectedVariant?.images![0]!).url(),
+        alt: selectedVariant?.images![0].alt!,
+      },
+      price: product.price!,
+      size: selectedSize?.size.name!,
+      url: `/${product.productType.subCategory.category.slug.current}/${product.productType.slug.current}/${product.slug?.current}`,
+    });
+    toast({
+      description: `${product.name} has been added to the wishlist`,
+    });
+  };
+
   const currentVariant = product.variants.find(
     (variant) => variant._key === selectedVariantId
   );
@@ -95,22 +139,18 @@ const ProductDetails = ({ product }: ProductDetails) => {
   return (
     <>
       {/* Variant Images */}
-      <Carousel className="md:mx-16">
+      <Carousel key={currentVariant?._key} className="md:mx-16">
         <CarouselContent>
-          {currentVariant?.images?.map((i) => {
-            console.log(currentVariant);
-            if (i.alt)
-              return (
-                <CarouselItem key={i._key} className="xl:basis-1/2">
-                  <Image
-                    src={urlFor(i).url()}
-                    alt={i.alt}
-                    width={3000}
-                    height={3000}
-                  />
-                </CarouselItem>
-              );
-          })}
+          {currentVariant?.images?.map((i) => (
+            <CarouselItem key={i._key} className="xl:basis-1/2">
+              <Image
+                src={urlFor(i).url()}
+                alt={i.alt ?? "Product image"}
+                width={3000}
+                height={3000}
+              />
+            </CarouselItem>
+          ))}
         </CarouselContent>
         <div className="hidden md:block">
           <CarouselPrevious />
@@ -122,166 +162,115 @@ const ProductDetails = ({ product }: ProductDetails) => {
           <CarouselNext className="static" />
         </div>
       </Carousel>
-
       {/* Product Details  */}
-      <ScrollArea className="w-full h-full lg:max-w-lg px-4 md:px-12 lg:pl-0 lg:pr-10 ">
-        <div className="flex flex-col h-full justify-center">
-          <div className="flex flex-col gap-10 px-1">
-            <div className="flex justify-between ">
-              <div className="flex flex-col gap-1">
-                <h1 className="text-xl">{product.name}</h1>
-                {product.price && <p>{formatPrice(product.price)}</p>}
-              </div>
-              <Button
-                variant={"ghost"}
-                size="icon"
-                className={cn(
-                  "rounded-full",
-                  `${product._id}-${selectedVariantId}-${selectedVariantSizeId}` in
-                    wishlistItems && "text-white bg-red-400"
-                )}
-                onClick={() => {
-                  try {
-                    const key = `${product._id}-${selectedVariantId}-${selectedVariantSizeId}`;
-                    if (key in wishlistItems) {
-                      removeWishlistItem({
-                        productId: product._id,
-                        variantId: selectedVariantId,
-                        variantSizeId: selectedVariantSizeId,
-                      });
-                      toast({
-                        description: `${product.name} has been removed from your wishlist`,
-                      });
-                      return;
-                    }
-
-                    const data = watch();
-                    const selectedVariant = product.variants.find(
-                      (variant) => variant._key === data.variantId
-                    );
-                    const selectedSize = selectedVariant?.sizeAndStock.find(
-                      (sizeStock) => sizeStock.size._id === data.variantSizeId
-                    );
-
-                    addWishlistItem({
-                      productId: product._id,
-                      variantId: data.variantId,
-                      variantSizeId: data.variantSizeId,
-                      name: product.name!,
-                      color: selectedVariant?.color.name!,
-                      image: {
-                        _id: selectedVariant?.images![0]._key!,
-                        url: urlFor(selectedVariant?.images![0]!).url(),
-                        alt: selectedVariant?.images![0].alt!,
-                      },
-                      price: product.price!,
-                      size: selectedSize?.size.name!,
-                      url: `/${product.productType.subCategory.category.slug.current}/${product.productType.slug.current}/${product.slug?.current}`,
-                    });
-                    toast({
-                      description: `${product.name} has been added to your wishlist`,
-                    });
-                  } catch (error) {
-                    toast({
-                      variant: "destructive",
-                      description: "Failed to add to wishlist.",
-                    });
-                  }
-                }}
-              >
-                <Heart />
-              </Button>
+      <ScrollArea className="w-full h-full lg:max-w-lg px-4 md:px-12 lg:pl-0 lg:pr-10">
+        <div className="flex flex-col w-full gap-10 px-1">
+          <div className="flex justify-between ">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl">{product.name}</h1>
+              {product.price && <p>{formatPrice(product.price)}</p>}
             </div>
-            <div className="flex flex-col gap-8">
-              {/* Product Colors */}
-              <div className="flex flex-col gap-4">
-                <p className="text-base font-medium">Color</p>
-                <div className="flex gap-4 flex-wrap">
-                  {product.variants.map((variant) => (
-                    <Button
-                      key={variant.color._id}
-                      size={"icon"}
-                      className={cn(
-                        "rounded-full focus-visible:ring-offset-4",
-                        variant._key === selectedVariantId &&
-                          "ring-ring ring-2 ring-offset-2"
-                      )}
-                      style={{
-                        backgroundColor: variant.color.color?.hex,
-                      }}
-                      onClick={() => {
-                        setValue("variantId", variant._key);
-                        setValue(
-                          "variantSizeId",
-                          variant.sizeAndStock[0].size._id
-                        );
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Variant Sizes */}
-              <div className="flex flex-col gap-4">
-                <p className="text-base font-medium">Size</p>
-                <div className="grid grid-cols-5 gap-4">
-                  {product.variants
-                    .find((variant) => variant._key === selectedVariantId)
-                    ?.sizeAndStock.map((variant) => (
-                      <Button
-                        key={variant.size._id}
-                        disabled={!(variant.stock && variant.stock > 0)}
-                        variant={"outline"}
-                        size={"lg"}
-                        className={cn(
-                          selectedVariantSizeId === variant.size._id &&
-                            "border-2 border-solid border-black",
-                          !(variant.stock && variant.stock > 0) &&
-                            "line-through"
-                        )}
-                        onClick={() =>
-                          setValue("variantSizeId", variant.size._id)
-                        } // Update form value
-                      >
-                        {variant.size.name}
-                      </Button>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Add to Cart Button */}
-            <Button onClick={handleSubmit(handleAddToCart)}>Add to Cart</Button>
-
-            <Accordion type="single" collapsible>
-              {product.description && (
-                <AccordionItem value="description" className="border-b-0">
-                  <AccordionTrigger className="text-base">
-                    Description
-                  </AccordionTrigger>
-                  <AccordionContent className="ml-1">
-                    <PortableText
-                      value={product.description}
-                      components={customPortableTextComponents}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
+            <Button
+              variant={"ghost"}
+              size="icon"
+              className={cn(
+                "rounded-full",
+                `${product._id}-${selectedVariantId}-${selectedVariantSizeId}` in
+                  wishlistItems && "text-white bg-red-400"
               )}
-              {product.materials && (
-                <AccordionItem value="materials" className="border-b-0">
-                  <AccordionTrigger className="text-base">
-                    Materials
-                  </AccordionTrigger>
-                  <AccordionContent className="ml-1">
-                    <PortableText
-                      value={product.materials}
-                      components={customPortableTextComponents}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              )}
-            </Accordion>
+              onClick={handleSubmit(handleAddToWishlist)}
+            >
+              <Heart />
+            </Button>
           </div>
+          <div className="flex flex-col gap-8">
+            {/* Product Colors */}
+            <div className="flex flex-col gap-4">
+              <p className="text-base font-medium">Color</p>
+              <div className="flex gap-4 flex-wrap">
+                {product.variants.map((variant) => (
+                  <Button
+                    key={variant.color._id}
+                    size={"icon"}
+                    className={cn(
+                      "rounded-full focus-visible:ring-offset-4",
+                      variant._key === selectedVariantId &&
+                        "ring-ring ring-2 ring-offset-2"
+                    )}
+                    style={{
+                      backgroundColor: variant.color.color?.hex,
+                    }}
+                    onClick={() => {
+                      setValue("variantId", variant._key);
+                      setValue(
+                        "variantSizeId",
+                        variant.sizeAndStock[0].size._id
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Variant Sizes */}
+            <div className="flex flex-col gap-4">
+              <p className="text-base font-medium">Size</p>
+              <div className="grid grid-cols-5 gap-4">
+                {product.variants
+                  .find((variant) => variant._key === selectedVariantId)
+                  ?.sizeAndStock.map((variant) => (
+                    <Button
+                      key={variant.size._id}
+                      disabled={!(variant.stock && variant.stock > 0)}
+                      variant={"outline"}
+                      size={"lg"}
+                      className={cn(
+                        selectedVariantSizeId === variant.size._id &&
+                          "border-2 border-solid border-black",
+                        !(variant.stock && variant.stock > 0) && "line-through"
+                      )}
+                      onClick={() =>
+                        setValue("variantSizeId", variant.size._id)
+                      } // Update form value
+                    >
+                      {variant.size.name}
+                    </Button>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <Button onClick={handleSubmit(handleAddToCart)}>Add to Cart</Button>
+
+          <Accordion type="single" collapsible>
+            {product.description && (
+              <AccordionItem value="description" className="border-b-0">
+                <AccordionTrigger className="text-base">
+                  Description
+                </AccordionTrigger>
+                <AccordionContent>
+                  <PortableText
+                    value={product.description}
+                    components={customPortableTextComponents}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            )}
+            {product.materials && (
+              <AccordionItem value="materials" className="border-b-0">
+                <AccordionTrigger className="text-base">
+                  Materials
+                </AccordionTrigger>
+                <AccordionContent>
+                  <PortableText
+                    value={product.materials}
+                    components={customPortableTextComponents}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          </Accordion>
         </div>
       </ScrollArea>
     </>

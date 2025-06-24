@@ -1,4 +1,7 @@
-import { PortableTextReactComponents } from "next-sanity";
+import {
+  PortableTextMarkComponentProps,
+  PortableTextReactComponents,
+} from "next-sanity";
 
 export const H1 = ({ children }: any) => (
   <p className="text-base font-bold mb-2">{children}</p>
@@ -28,6 +31,20 @@ export const BulletListItem = ({ children }: any) => (
   <li className="mb-2">{children}</li>
 );
 
+export const Link = ({ value, children }: PortableTextMarkComponentProps) => {
+  const target = (value?.href || "").startsWith("http") ? "_blank" : undefined;
+  return (
+    <a
+      href={value?.href}
+      target={target}
+      className="underline text-blue-500"
+      style={{ overflowWrap: "anywhere" }}
+    >
+      {children}
+    </a>
+  );
+};
+
 // Custom components for Portable Text
 export const customPortableTextComponents: Partial<PortableTextReactComponents> =
   {
@@ -43,5 +60,9 @@ export const customPortableTextComponents: Partial<PortableTextReactComponents> 
     },
     listItem: {
       bullet: BulletListItem,
+      number: BulletListItem, // Using the same component for both bullet and number lists
+    },
+    marks: {
+      link: Link,
     },
   };
