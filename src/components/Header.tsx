@@ -2,7 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Accordion,
   AccordionContent,
@@ -81,12 +86,13 @@ const Header = async () => {
                             </AccordionTrigger>
                             <AccordionContent className="flex flex-col gap-4 ml-4">
                               {subCategory.productTypes.map((productType) => (
-                                <Link
-                                  key={productType._id}
-                                  href={`/${category.slug?.current}/${productType.slug?.current}`}
-                                >
-                                  {productType.name}
-                                </Link>
+                                <SheetClose key={productType._id} asChild>
+                                  <Link
+                                    href={`/${category.slug?.current}/${productType.slug?.current}`}
+                                  >
+                                    {productType.name}
+                                  </Link>
+                                </SheetClose>
                               ))}
                             </AccordionContent>
                           </AccordionItem>
