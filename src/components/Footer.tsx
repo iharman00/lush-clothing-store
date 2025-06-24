@@ -44,7 +44,7 @@ const Footer = async () => {
                 <li key={navCategory._id}>
                   {navCategory.slug?.current && (
                     <Link
-                      href={navCategory.slug?.current}
+                      href={`/${navCategory.slug?.current}`}
                       className={cn(
                         buttonVariants({ variant: "link" }),
                         "text-muted-foreground text-sm p-0 h-auto"
