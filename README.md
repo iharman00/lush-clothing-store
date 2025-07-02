@@ -30,7 +30,7 @@ A fully responsive, production-grade eCommerce platform with:
 | **Backend**    | Next.js API routes (TypeScript), Stripe SDK                         |
 | **CMS**        | Sanity.io (with custom schemas for product variants and categories) |
 | **Testing**    | Vitest (unit & integration testing)                                 |
-| **Deployment** | Vercel (frontend + backend), Sanity Studio (hosted on the same url) |
+| **Deployment** | Vercel (frontend + backend), Sanity Studio (hosted on the same URL) |
 
 ---
 
@@ -59,7 +59,7 @@ A fully responsive, production-grade eCommerce platform with:
 1. **Clone the repo:**
 
    ```bash
-   git clone https://github.com/yourusername/lush-clothing.git
+   git clone https://github.com/iharman00/lush-clothing-store/
    cd lush-clothing
    ```
 
