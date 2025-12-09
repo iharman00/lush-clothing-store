@@ -21,19 +21,6 @@ const Footer = async () => {
           {/* Company Information */}
           <div className="flex flex-col gap-4">
             <h3 className="text-lg font-semibold">About Us</h3>
-            <p className="text-muted-foreground text-sm">
-              We are not a real company, this is a portfolio project.
-              <Link
-                href="https://iharman.dev/"
-                target="_blank"
-                className={cn(
-                  buttonVariants({ variant: "link" }),
-                  "text-muted-foreground underline text-sm px-0 h-auto"
-                )}
-              >
-                Visit my portfolio here.
-              </Link>
-            </p>
           </div>
 
           {/* Shop Links */}
