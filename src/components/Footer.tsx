@@ -18,11 +18,6 @@ const Footer = async () => {
       <div className="container flex flex-col gap-10">
         {/* Footer Top */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:justify-items-center ">
-          {/* Company Information */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold">About Us</h3>
-          </div>
-
           {/* Shop Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Shop</h3>
