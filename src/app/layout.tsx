@@ -6,7 +6,7 @@ import Providers from "@/providers/Provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lush clothing store | iharman.dev",
+  title: "Lush clothing store",
   description: "A full-stack ecommerce store built with Next.js.",
 };
 
